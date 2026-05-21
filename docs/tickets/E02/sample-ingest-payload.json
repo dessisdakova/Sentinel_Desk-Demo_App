@@ -1,0 +1,22 @@
+{
+  "external_id": "siem-demo-20260521-001",
+  "source": "EDR",
+  "severity": "HIGH",
+  "title": "Suspicious encoded command on WORKSTATION-42",
+  "description": "EDR detected obfuscated PowerShell execution. Parent process: winword.exe",
+  "occurred_at": "2026-05-21T14:32:00Z",
+  "asset": {
+    "hostname": "WORKSTATION-42",
+    "ip": "10.0.5.42",
+    "user": "jdoe"
+  },
+  "iocs": [
+    { "type": "DOMAIN", "value": "evil.demo" },
+    { "type": "HASH", "value": "a1b2c3d4e5f6789012345678901234567890abcd" },
+    { "type": "IP", "value": "198.51.100.10" }
+  ],
+  "raw": {
+    "vendor": "MockSIEM",
+    "rule_id": "EDR-PS-ENC-001"
+  }
+}
