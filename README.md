@@ -8,7 +8,9 @@
 |------|--------|
 | E01 SENT-101 | ✅ Docker infrastructure (Postgres, Redis, MailHog) |
 | E01 SENT-101-QA | ✅ Integration tests for infra |
-| E01 SENT-102+ | Next — API, auth, frontend |
+| E01 SENT-102 | ✅ FastAPI API + `/health` on port 8000 |
+| E01 SENT-102-QA | Next — API tests for health |
+| E01 SENT-103+ | Planned — DB models, auth, frontend |
 
 ## Prerequisites
 
@@ -51,8 +53,34 @@ docker compose down -v
 |---------|-----------|--------|
 | PostgreSQL 16 | 5432 | `docker compose exec postgres pg_isready -U sentinel -d sentineldesk` |
 | Redis 7 | 6379 | `docker compose exec redis redis-cli ping` → `PONG` |
+| **API (FastAPI)** | **8000** | `curl http://localhost:8000/health` → `{"status":"ok"}` |
 | MailHog SMTP | 1025 | Used by app later |
 | MailHog UI | 8025 | Open http://localhost:8025 in a browser |
+
+## API (SENT-102)
+
+### Run with Docker (recommended)
+
+```powershell
+docker compose up -d --build
+curl http://localhost:8000/health
+```
+
+OpenAPI docs: http://localhost:8000/docs
+
+### Run locally (without API container)
+
+```powershell
+cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+# from repo root, with infra up:
+cd ..
+uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port 8000 --reload
+```
+
+Ensure `.env` is in the repo root (or export `ENVIRONMENT=local`). Logs include `request_id=` per request; responses include header `X-Request-ID`.
 
 ### Connection defaults
 
@@ -76,7 +104,7 @@ Aligned with [.env.example](.env.example):
 
 ## Tech stack
 
-- **Backend:** Python (FastAPI) — coming in SENT-102+
+- **Backend:** Python 3.12 + FastAPI + Uvicorn
 - **Database:** PostgreSQL 16 (Docker)
 - **Queue:** Redis 7 (Docker)
 - **Email (dev):** MailHog (Docker)
@@ -84,4 +112,4 @@ Aligned with [.env.example](.env.example):
 
 ## Next implementation ticket
 
-**SENT-102** — FastAPI project structure and health endpoint.
+**SENT-103** — User model and Alembic initial migration.

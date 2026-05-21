@@ -5,7 +5,7 @@
 | Implement | QA (after implement) |
 |-------------|----------------------|
 | [SENT-101](./SENT-101.md) ✅ | [SENT-101-QA](./SENT-101-QA.md) ✅ Done |
-| [SENT-102](./SENT-102.md) | [SENT-102-QA](./SENT-102-QA.md) |
+| [SENT-102](./SENT-102.md) ✅ | [SENT-102-QA](./SENT-102-QA.md) |
 | [SENT-103](./SENT-103.md) | [SENT-103-QA](./SENT-103-QA.md) |
 | [SENT-104](./SENT-104.md) | [SENT-104-QA](./SENT-104-QA.md) |
 | [SENT-105](./SENT-105.md) | [SENT-105-QA](./SENT-105-QA.md) |
