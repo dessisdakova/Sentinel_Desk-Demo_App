@@ -6,8 +6,9 @@
 
 | Epic | Status |
 |------|--------|
-| E01 SENT-101 | Docker infrastructure (Postgres, Redis, MailHog) |
-| E01 SENT-102+ | Planned — API, auth, frontend |
+| E01 SENT-101 | ✅ Docker infrastructure (Postgres, Redis, MailHog) |
+| E01 SENT-101-QA | ✅ Integration tests for infra |
+| E01 SENT-102+ | Next — API, auth, frontend |
 
 ## Prerequisites
 
