@@ -30,7 +30,6 @@ import json
 import os
 import socket
 from pathlib import Path
-from typing import Any, Generator
 from urllib.parse import urlparse
 
 import httpx
