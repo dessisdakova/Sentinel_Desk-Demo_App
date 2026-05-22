@@ -1,11 +1,3 @@
-"""
-Shared pytest fixtures for SentinelDesk QA automation.
-
-Loads .env from the repository root (copy .env.example to .env first).
-Infrastructure fixtures target SENT-101-QA (Postgres, Redis, MailHog).
-API/auth clients are added in later epics (SENT-102-QA onward).
-"""
-
 import json
 import os
 import socket
@@ -22,18 +14,53 @@ from redis.retry import Retry
 
 load_dotenv()
 
-# Seconds to wait for a TCP port before treating a service as down (Docker stopped).
 _PORT_CHECK_TIMEOUT = 0.5
 _CLIENT_TIMEOUT_SEC = 2
 _API_TIMEOUT_SEC = 5
 
 
-def _env(name: str, default: str) -> str:
+def _env(name: str, default: str | None = None) -> str:
     """Read a required env var; fail the run with a helpful message if missing."""
     value = os.getenv(name, default)
     if value is None or value == "":
         pytest.fail(f"Missing environment variable {name}. Copy .env.example to .env")
     return value
+
+
+def _postgres_connect_kwargs(**overrides) -> dict:
+    """Build psycopg2.connect kwargs from env. Overrides when needed. 
+    
+    Example: Call _postgres_connect_kwargs(dbname="another_db")
+    and get the full dict with only that one key overridden"""
+    base = {
+        "host": _env("POSTGRES_HOST", "localhost"),
+        "port": int(_env("POSTGRES_PORT", "5432")),
+        "user": _env("POSTGRES_USER", "sentinel"),
+        "password": _env("POSTGRES_PASSWORD", "sentinel"),
+        "dbname": _env("POSTGRES_DB", "sentineldesk"),
+    }
+    base.update(overrides)
+    return base
+
+
+def _redis_connect_kwargs(**overrides) -> dict:
+    """Build redis.Redis kwargs from env.
+    Overrides when needed. 
+    
+    Example: Call _redis_connect_kwargs(password="another_password")
+    and get the full dict with only that one key overridden"""
+    base = {
+        "host": _env("REDIS_HOST", "localhost"),
+        "port": int(_env("REDIS_PORT", "6379")),
+        "password": os.getenv("REDIS_PASSWORD") or None,
+        "socket_connect_timeout": _CLIENT_TIMEOUT_SEC,
+        "socket_timeout": _CLIENT_TIMEOUT_SEC,
+        "health_check_interval": 0,
+        # redis-py 6+: use Retry instead of deprecated retry_on_timeout=False
+        "retry": Retry(backoff=NoBackoff(), retries=0),
+    }
+    base.update(overrides)
+    return base
 
 
 def _port_is_open(host: str, port: int, timeout: float = _PORT_CHECK_TIMEOUT) -> bool:
@@ -53,43 +80,17 @@ def _api_host_and_port(base_url: str, fallback_port: int = 8000) -> tuple[str, i
     return host, port
 
 
-def _postgres_connect_kwargs(**overrides) -> dict:
-    """Build psycopg2.connect kwargs from env; overrides for negative tests."""
-    base = {
-        "host": _env("POSTGRES_HOST", "localhost"),
-        "port": int(_env("POSTGRES_PORT", "5432")),
-        "user": _env("POSTGRES_USER", "sentinel"),
-        "password": _env("POSTGRES_PASSWORD", "sentinel"),
-        "dbname": _env("POSTGRES_DB", "sentineldesk"),
-    }
-    base.update(overrides)
-    return base
-
-
-def _redis_client(**overrides) -> redis.Redis:
-    """Redis client with short timeouts and no connection retries (avoids pytest hang)."""
-    settings = {
-        "host": _env("REDIS_HOST", "localhost"),
-        "port": int(_env("REDIS_PORT", "6379")),
-        "password": os.getenv("REDIS_PASSWORD") or None,
-        "socket_connect_timeout": _CLIENT_TIMEOUT_SEC,
-        "socket_timeout": _CLIENT_TIMEOUT_SEC,
-        "health_check_interval": 0,
-        # redis-py 6+: use Retry instead of deprecated retry_on_timeout=False
-        "retry": Retry(backoff=NoBackoff(), retries=0),
-    }
-    settings.update(overrides)
-    return redis.Redis(decode_responses=True, **settings)
-
-
 def _can_connect_postgres() -> bool:
-    host = _env("POSTGRES_HOST", "localhost")
-    port = int(_env("POSTGRES_PORT", "5432"))
-    if not _port_is_open(host, port):
+    """
+    Check if can connect to PostgreSQL.
+    Returns True if can, False otherwise.
+    """
+    kwargs = _postgres_connect_kwargs()
+    if not _port_is_open(kwargs["host"], kwargs["port"]):
         return False
     try:
         with psycopg2.connect(
-            connect_timeout=_CLIENT_TIMEOUT_SEC, **_postgres_connect_kwargs()
+            connect_timeout=_CLIENT_TIMEOUT_SEC, **kwargs
         ) as conn:
             with conn.cursor() as cursor:
                 cursor.execute("SELECT 1")
@@ -99,11 +100,10 @@ def _can_connect_postgres() -> bool:
 
 
 def _can_ping_redis() -> bool:
-    host = _env("REDIS_HOST", "localhost")
-    port = int(_env("REDIS_PORT", "6379"))
-    if not _port_is_open(host, port):
+    kwargs = _redis_connect_kwargs()
+    if not _port_is_open(kwargs["host"], kwargs["port"]):
         return False
-    client = _redis_client()
+    client = redis.Redis(decode_responses=True, **kwargs)
     try:
         return client.ping() is True
     except redis.RedisError:
@@ -113,7 +113,7 @@ def _can_ping_redis() -> bool:
 
 
 def _can_reach_mailhog_ui() -> bool:
-    url = os.getenv("MAILHOG_UI_URL", "http://localhost:8025")
+    url = _env("MAILHOG_UI_URL", "http://localhost:8025")
     try:
         with httpx.Client(timeout=_CLIENT_TIMEOUT_SEC) as client:
             return client.get(url).status_code == 200
@@ -121,7 +121,6 @@ def _can_reach_mailhog_ui() -> bool:
         return False
 
 
-# DATABASE FIXTURES
 @pytest.fixture(scope="session")
 def require_infrastructure():
     """
@@ -147,6 +146,7 @@ def require_infrastructure():
         )
 
 
+# DATABASE FIXTURES
 @pytest.fixture(scope="session")
 def postgres_settings():
     """
@@ -156,19 +156,6 @@ def postgres_settings():
     POSTGRES_PASSWORD, POSTGRES_DB. Uses psycopg2 parameter name ``dbname``.
     """
     return _postgres_connect_kwargs()
-
-
-@pytest.fixture(scope="function")
-def postgres_connection(postgres_settings, require_infrastructure):
-    """
-    One database connection per test function.
-
-    Function scope keeps tests isolated; depends on require_infrastructure so
-    tests skip instead of blocking when Docker is down.
-    """
-    conn = psycopg2.connect(connect_timeout=_CLIENT_TIMEOUT_SEC, **postgres_settings)
-    yield conn
-    conn.close()
 
 
 @pytest.fixture(scope="session")
@@ -185,74 +172,57 @@ def invalid_postgres_settings():
     return data
 
 
+@pytest.fixture(scope="function")
+def postgres_connection(postgres_settings, require_infrastructure):
+    """
+    One database connection per test function.
+
+    Function scope keeps tests isolated; depends on require_infrastructure so
+    tests skip instead of blocking when Docker is down.
+    """
+    conn = psycopg2.connect(connect_timeout=_CLIENT_TIMEOUT_SEC, **postgres_settings)
+    yield conn
+    conn.close()
+
+
 # REDIS FIXTURES
 @pytest.fixture(scope="session")
-def redis_settings():
-    """
-    Connection parameters for Redis from environment (.env).
-
-    Local Docker Redis has no password; REDIS_PASSWORD may be empty.
-    """
-    return {
-        "host": _env("REDIS_HOST", "localhost"),
-        "port": int(_env("REDIS_PORT", "6379")),
-        "password": os.getenv("REDIS_PASSWORD") or None,
-    }
-
-
-@pytest.fixture(scope="session")
-def redis_client(redis_settings, require_infrastructure):
+def redis_client(require_infrastructure):
     """
     Shared Redis client for integration tests.
-
-    Uses short socket timeouts and no retry loop (see ``_redis_client``).
     """
-    client = _redis_client()
+    client = redis.Redis(decode_responses=True, **_redis_connect_kwargs())
     yield client
     client.close()
 
 
 # MAILHOG FIXTURES
 @pytest.fixture(scope="session")
-def mailhog_ui_url():
+def mailhog_ui_url(require_infrastructure):
     """MailHog web UI base URL for inbox inspection (default http://localhost:8025)."""
-    return os.getenv("MAILHOG_UI_URL", "http://localhost:8025")
-
-
-@pytest.fixture(scope="session")
-def documented_local_defaults():
-    """
-    Expected local connection defaults from .env.example (QA-101-3 for SENT-101).
-
-    Not TEST_DATA.md seed UUIDs — those apply after the app seed script exists (E02+).
-    """
-    return {
-        "postgres_user": "sentinel",
-        "postgres_db": "sentineldesk",
-        "postgres_host": "localhost",
-        "postgres_port": 5432,
-        "redis_host": "localhost",
-        "redis_port": 6379,
-        "mailhog_ui": "http://localhost:8025",
-        "api_base_url": "http://localhost:8000",
-    }
+    return _env("MAILHOG_UI_URL", "http://localhost:8025")
 
 
 # API FIXTURES
 @pytest.fixture(scope="session")
 def api_base_url():
-    """Base URL for HTTP tests; must match .env.example for local Docker."""
-    return os.getenv("API_BASE_URL", "http://localhost:8000").rstrip("/")
+    """Base API URL; must match .env.example for local Docker.
+    
+    This is the single source of truth for the server address.
+    Every other API fixture starts here.
+    """
+    return _env("API_BASE_URL", "http://localhost:8000").rstrip("/")
+
 
 @pytest.fixture(scope="session")
-def api_port():
-    """API port for HTTP tests; must match .env.example for local Docker."""
-    return int(os.getenv("API_PORT", "8000"))
+def require_api(api_base_url):
+    """Session gate: Parse the url, do a TCP and a health check. 
+    If either fails, skip the test.
 
-@pytest.fixture(scope="session")
-def require_api(api_base_url, api_port):
-    """Session gate: skip API tests when API is not running."""
-    host, port = _api_host_and_port(api_base_url, fallback_port=api_port)
+    Any test that depends on this fixture will be skipped rather than 
+    erroring when the API is down
+    """
+    host, port = _api_host_and_port(api_base_url, fallback_port=8000)
     if not _port_is_open(host, port):
         pytest.skip(
             f"API not available at {host}:{port} (from {api_base_url}). Run: docker compose up -d"
@@ -267,8 +237,11 @@ def require_api(api_base_url, api_port):
 
 @pytest.fixture(scope="session")
 def api_client(api_base_url, require_api):
-    """Sync HTTP client for REST API tests."""
+    """Sync HTTP client for REST API tests.
+    
+    Tests that use this fixture get URL config, gate check, 
+    and a ready-to-use client
+    """
     client = httpx.Client(base_url=api_base_url, timeout=_API_TIMEOUT_SEC)
     yield client
     client.close()
-
