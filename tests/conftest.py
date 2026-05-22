@@ -10,6 +10,7 @@ import json
 import os
 import socket
 from pathlib import Path
+from urllib.parse import urlparse
 
 import httpx
 import psycopg2
@@ -24,6 +25,7 @@ load_dotenv()
 # Seconds to wait for a TCP port before treating a service as down (Docker stopped).
 _PORT_CHECK_TIMEOUT = 0.5
 _CLIENT_TIMEOUT_SEC = 2
+_API_TIMEOUT_SEC = 5
 
 
 def _env(name: str, default: str) -> str:
@@ -41,6 +43,14 @@ def _port_is_open(host: str, port: int, timeout: float = _PORT_CHECK_TIMEOUT) ->
             return True
     except OSError:
         return False
+
+
+def _api_host_and_port(base_url: str, fallback_port: int = 8000) -> tuple[str, int]:
+    """Parse API_BASE_URL into hostname and port for socket checks (not the full URL string)."""
+    parsed = urlparse(base_url)
+    host = parsed.hostname or "localhost"
+    port = parsed.port if parsed.port is not None else fallback_port
+    return host, port
 
 
 def _postgres_connect_kwargs(**overrides) -> dict:
@@ -111,6 +121,7 @@ def _can_reach_mailhog_ui() -> bool:
         return False
 
 
+# DATABASE FIXTURES
 @pytest.fixture(scope="session")
 def require_infrastructure():
     """
@@ -174,6 +185,7 @@ def invalid_postgres_settings():
     return data
 
 
+# REDIS FIXTURES
 @pytest.fixture(scope="session")
 def redis_settings():
     """
@@ -200,6 +212,7 @@ def redis_client(redis_settings, require_infrastructure):
     client.close()
 
 
+# MAILHOG FIXTURES
 @pytest.fixture(scope="session")
 def mailhog_ui_url():
     """MailHog web UI base URL for inbox inspection (default http://localhost:8025)."""
@@ -221,4 +234,41 @@ def documented_local_defaults():
         "redis_host": "localhost",
         "redis_port": 6379,
         "mailhog_ui": "http://localhost:8025",
+        "api_base_url": "http://localhost:8000",
     }
+
+
+# API FIXTURES
+@pytest.fixture(scope="session")
+def api_base_url():
+    """Base URL for HTTP tests; must match .env.example for local Docker."""
+    return os.getenv("API_BASE_URL", "http://localhost:8000").rstrip("/")
+
+@pytest.fixture(scope="session")
+def api_port():
+    """API port for HTTP tests; must match .env.example for local Docker."""
+    return int(os.getenv("API_PORT", "8000"))
+
+@pytest.fixture(scope="session")
+def require_api(api_base_url, api_port):
+    """Session gate: skip API tests when API is not running."""
+    host, port = _api_host_and_port(api_base_url, fallback_port=api_port)
+    if not _port_is_open(host, port):
+        pytest.skip(
+            f"API not available at {host}:{port} (from {api_base_url}). Run: docker compose up -d"
+        )
+    try:
+        with httpx.Client(base_url=api_base_url, timeout=_API_TIMEOUT_SEC) as client:
+            response = client.get("/health")
+            response.raise_for_status()
+    except httpx.HTTPError:
+        pytest.skip(f"API health check failed at {api_base_url}. Run: docker compose up -d")
+
+
+@pytest.fixture(scope="session")
+def api_client(api_base_url, require_api):
+    """Sync HTTP client for REST API tests."""
+    client = httpx.Client(base_url=api_base_url, timeout=_API_TIMEOUT_SEC)
+    yield client
+    client.close()
+

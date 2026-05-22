@@ -1,5 +1,4 @@
-# SentinelDesk — local infrastructure (SENT-101)
-# API, worker, frontend, mock-siem, intel-embed added in later tickets.
+# SentinelDesk — local stack (SENT-101 infra, SENT-102 API)
 
 services:
   postgres:
@@ -43,6 +42,34 @@ services:
     ports:
       - "${MAILHOG_SMTP_PORT:-1025}:1025"
       - "${MAILHOG_UI_PORT:-8025}:8025"
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sentineldesk-api
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+      SMTP_HOST: mailhog
+      DATABASE_URL: postgresql+asyncpg://sentinel:sentinel@postgres:5432/sentineldesk
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./backend/app:/app/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
 volumes:
   postgres_data:

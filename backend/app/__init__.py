@@ -1,0 +1,1 @@
+"""SentinelDesk FastAPI application package."""
