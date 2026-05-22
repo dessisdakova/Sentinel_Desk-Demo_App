@@ -15,7 +15,8 @@
 ## Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows, macOS, or Linux)
-- **Later epics:** Python 3.12+, Node.js 20+
+- **QA tests (E01+):** Python 3.12+, `pip install -r requirements-test.txt`
+- **Later epics:** Node.js 20+ (frontend)
 
 Optional database GUI: [DBeaver](https://dbeaver.io/) or [pgAdmin](https://www.pgadmin.org/) connecting to `localhost:5432`.
 

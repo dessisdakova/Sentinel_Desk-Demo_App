@@ -9,10 +9,10 @@
 ## Acceptance criteria
 
 - [ ] `POST /api/v1/test/reset` (admin, non-prod)
-- [ ] `tests/` structure: `api/`, `integration/`, `e2e/`
-- [ ] `conftest.py` with `admin_api_client`, `clean_db` fixture
+- [x] `tests/` structure: `api/`, `integration/`, `data/` (E01); `e2e/` (E10)
+- [x] `conftest.py` with infra + API fixtures (E01); extend with `admin_api_client`, `clean_db` (E10)
 - [ ] Selenium: base page objects for Login, AlertQueue
-- [ ] `pytest.ini` markers: `e2e`, `api`, `integration`, `bug`
+- [x] `pytest.ini` at repo root with markers: `e2e`, `api`, `integ`, `bug`
 - [ ] BUG-001 through BUG-008 planted per BUG_GARDEN.md
 - [ ] Example xfail tests demonstrating failures
 - [ ] GitHub Actions optional (local-only OK)
