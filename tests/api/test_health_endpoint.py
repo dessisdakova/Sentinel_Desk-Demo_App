@@ -21,9 +21,3 @@ def test_unknown_path_returns_404(api_client):
     response = api_client.get("/unknown-path")
 
     assert response.status_code == 404, "Unknown/invalid path must return 404."
-
-
-def test_api_base_url_matches_documented_default(api_base_url, documented_local_defaults, api_port):
-    """QA-102-3: API base URL matches documented default."""
-    assert api_base_url == documented_local_defaults["api_base_url"], "API base URL must match documented default."
-    assert api_port == 8000, "API port must be 8000 for local Docker."

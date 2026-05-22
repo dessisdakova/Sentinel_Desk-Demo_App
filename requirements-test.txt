@@ -1,6 +1,5 @@
 pytest
 psycopg2-binary
 redis
-requests
 httpx
 python-dotenv
