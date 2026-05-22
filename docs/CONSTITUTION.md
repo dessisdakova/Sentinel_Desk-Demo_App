@@ -31,7 +31,7 @@ This is a **SecOps triage simulation** (not e-commerce). It uses enterprise-styl
 | Practice area | Where it lives in SentinelDesk |
 |---------------|-------------------------------|
 | E2E UI (Selenium + pytest) | Login, queue, detail tabs, modals, date filters, iframe widget |
-| REST API (pytest + requests/httpx) | OpenAPI-documented ingest, triage, cases, playbooks |
+| REST API (pytest + httpx) | OpenAPI-documented ingest, triage, cases, playbooks |
 | Integration (DB + API) | Verify API writes match DB; job completion updates rows |
 | Async / flakiness handling | Background jobs, polling UI, webhook delivery retries |
 | Non-functional (later) | Seed 10k alerts endpoint; p95 response targets documented |
@@ -141,14 +141,18 @@ sentinel-desk/
 │   └── scripts/seed.py
 ├── frontend/
 │   └── src/              # React SPA — no tests/ folder here
+├── pytest.ini            # QA test runner config (repo root)
+├── requirements-test.txt # QA Python deps (httpx, not requests)
 ├── tests/                # ALL automated tests (QA-owned)
 │   ├── conftest.py
 │   ├── api/
 │   ├── integration/
-│   └── e2e/
+│   ├── data/             # static JSON for negative tests
+│   └── e2e/              # Selenium (E10+)
 ├── docs/
 │   ├── CONSTITUTION.md
 │   ├── ARCHITECTURE.md
+│   ├── TESTING_STRATEGY.md
 │   ├── TEST_DATA.md
 │   ├── BUG_GARDEN.md
 │   ├── epics/

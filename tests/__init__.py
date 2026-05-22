@@ -17,12 +17,21 @@ How to run:
     pytest -v                   # all tests
 
 Prerequisites:
-    Copy ``.env.example`` to ``.env`` at the repository root, then start Docker::
+    1. Copy ``.env.example`` to ``.env`` at the repository root::
+
+        copy .env.example .env
+    2. Start Docker::
 
         docker compose up -d
+    3. Create a virtual environment, activate it and install dependencies::
+
+        python -m venv .venv
+        .venv\Scripts\Activate.ps1
+        pip install -r requirements-test.txt
 
 See Also:
     docs/TESTING_STRATEGY.md: Overall test pyramid and tooling.
     docs/TEST_DATA.md: Stable seed IDs (used from E02 onward).
     pytest.ini: Markers and ``testpaths``.
+    pyproject.toml: Ruff lint + pydocstyle (Google).
 """

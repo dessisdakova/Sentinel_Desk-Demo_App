@@ -17,27 +17,6 @@ Design and implement automated tests for **SENT-103** — User model and Alembic
 
 ---
 
-## Description
-
-**As a** QA engineer  
-**I want** automated coverage for this story  
-**So that** regressions are caught before later epics build on this behavior
-
----
-
-## Prerequisites
-
-- [ ] Implementation ticket **SENT-103** is complete and merged/runnable
-
----
-
-## Test scope
-
-- **api** — add cases under `tests/api/`
-- **integration** — add cases under `tests/integration/`
-
----
-
 ## Test cases (minimum)
 
 | ID | Layer | Scenario | Expected |
@@ -50,16 +29,13 @@ Extend with boundary cases from implementation acceptance criteria.
 
 ---
 
-## Test data
-
-- [TEST_DATA.md](../../TEST_DATA.md)
+## Artifacts
+To-Do
 
 ---
 
-## Out of scope
-
-- Fixing application bugs (file defects under BUG_GARDEN if found)
-- Adding tests under `backend/` or `frontend/`
+## How to run
+To-dO
 
 ---
 
@@ -69,3 +45,9 @@ Extend with boundary cases from implementation acceptance criteria.
 - [ ] No dependency on manual data unless documented in test docstring
 - [ ] Test file paths documented in this ticket (edit when created)
 
+---
+
+## Completion
+To-Do
+
+**Next:** [SENT-104-QA](./SENT-104-QA.md)

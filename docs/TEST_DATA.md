@@ -94,7 +94,7 @@ docker compose exec api python -m scripts.seed
 ## 6. Pytest fixture pattern (recommended)
 
 ```python
-# tests/conftest.py (to be created in E10)
+# tests/conftest.py — add in E10 when reset API exists (see TESTING_STRATEGY.md)
 import pytest
 
 @pytest.fixture(scope="function")

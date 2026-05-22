@@ -3,7 +3,7 @@ import pytest
 pytestmark = pytest.mark.api
 
 
-def test_health_returns_200(api_client):
+def test_health_returns_200_and_verify_response(api_client):
     """Health endpoint returns 200, correct JSON, and echoes ``X-Request-ID`` (QA-102-1, AC3)."""
     request_id = "TEST0108-999999"
 
