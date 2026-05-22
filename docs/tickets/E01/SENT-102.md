@@ -42,6 +42,9 @@ FastAPI project structure and health endpoint.
 - [x] `RequestIdMiddleware` sets `X-Request-ID` on responses
 - [x] Logs include `request_id=` per request
 
+> [!NOTE]  
+> Every HTTP request gets a correlation ID (request_id) so logs for that request can be tied together. The API returns it as the X-Request-ID header (and may reuse one you send). In production, support/SOC engineers use that ID to find all log lines for one user action across services. When something fails in the portal, grab X-Request-ID from the browser network tab or response → search logs → see request_started / request_finished with the same id. Later epics (auth, alerts) will log business events with the same id.
+
 ---
 
 ## Technical notes

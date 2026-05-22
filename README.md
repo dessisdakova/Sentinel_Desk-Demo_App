@@ -9,8 +9,8 @@
 | E01 SENT-101 | ✅ Docker infrastructure (Postgres, Redis, MailHog) |
 | E01 SENT-101-QA | ✅ Integration tests for infra |
 | E01 SENT-102 | ✅ FastAPI API + `/health` on port 8000 |
-| E01 SENT-102-QA | Next — API tests for health |
-| E01 SENT-103+ | Planned — DB models, auth, frontend |
+| E01 SENT-102-QA | ✅ API tests for health + `X-Request-ID` |
+| E01 SENT-103+ | Next — DB models, auth, frontend |
 
 ## Prerequisites
 
@@ -112,4 +112,4 @@ Aligned with [.env.example](.env.example):
 
 ## Next implementation ticket
 
-**SENT-103** — User model and Alembic initial migration.
+**SENT-103** — User model and Alembic initial migration (then **SENT-103-QA**).
