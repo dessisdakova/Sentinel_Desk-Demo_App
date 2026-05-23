@@ -56,6 +56,7 @@ services:
       REDIS_HOST: redis
       SMTP_HOST: mailhog
       DATABASE_URL: postgresql+asyncpg://sentinel:sentinel@postgres:5432/sentineldesk
+      DATABASE_URL_SYNC: postgresql://sentinel:sentinel@postgres:5432/sentineldesk
       REDIS_URL: redis://redis:6379/0
     ports:
       - "${API_PORT:-8000}:8000"

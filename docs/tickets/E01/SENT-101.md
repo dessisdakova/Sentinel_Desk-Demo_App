@@ -3,6 +3,7 @@
 | Field | Value |
 |-------|-------|
 | **Type** | Story |
+| **Status** | Done |
 | **Epic** | SENT-E01 Platform Foundation |
 | **Priority** | High |
 | **Story Points** | 5 |
@@ -29,15 +30,15 @@ Docker Compose for Postgres, Redis, MailHog.
 
 ### AC1 — Infrastructure services
 
-- [ ] `docker-compose.yml` starts `postgres:16`, `redis:7`, and `mailhog` services
+- [x] `docker-compose.yml` starts `postgres:16`, `redis:7`, and `mailhog` services
 
 ### AC2 — Environment template
 
-- [ ] `.env.example` documents all connection variables (DB URL, Redis URL, SMTP host/port)
+- [x] `.env.example` documents all connection variables (DB URL, Redis URL, SMTP host/port)
 
 ### AC3 — README prerequisites
 
-- [ ] README documents Docker Desktop as a prerequisite and includes `docker compose up / down` start/stop instructions
+- [x] README documents Docker Desktop as a prerequisite and includes `docker compose up / down` start/stop instructions
 
 ---
 
@@ -56,10 +57,10 @@ No application code beyond compose and env template.
 
 ## Definition of Done
 
-- [ ] Acceptance criteria met
-- [ ] `data-testid` hooks on new UI controls (if frontend)
-- [ ] OpenAPI updated (if API)
-- [ ] No test modules added outside `tests/`
-- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
-- [ ] `README.md` App implementation status updated for this ticket
-- [ ] Epic checklist ticked only if this was the last story in the epic
+- [x] Acceptance criteria met
+- [x] `data-testid` hooks on new UI controls (if frontend)
+- [x] OpenAPI updated (if API)
+- [x] No test modules added outside `tests/`
+- [x] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [x] `README.md` App implementation status updated for this ticket
+- [x] Epic checklist ticked only if this was the last story in the epic

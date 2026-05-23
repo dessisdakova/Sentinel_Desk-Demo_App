@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     database_url: str = (
         "postgresql+asyncpg://sentinel:sentinel@localhost:5432/sentineldesk"
     )
+    database_url_sync: str = (
+        "postgresql://sentinel:sentinel@localhost:5432/sentineldesk"
+    )
 
     redis_host: str = "localhost"
     redis_port: int = 6379
