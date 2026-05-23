@@ -41,7 +41,7 @@ This is a **SecOps triage simulation** (not e-commerce). It uses enterprise-styl
 
 ## 2. Resettable test data (product capability)
 
-**Implementation agent:** Reset **API** is delivered in **E10 / SENT-1001** only. Until then, implement `scripts/seed.py` (CLI re-seed) per tickets — do not add `POST /api/v1/test/reset` early. QA uses manual re-seed ([TEST_DATA.md](./TEST_DATA.md) §5 Option B/C) before E10.
+**Implementation agent:** Reset **API** is delivered in **E10 / SENT-1001** only. Until then, implement `backend/scripts/seed.py` (CLI re-seed) per tickets — do not add `POST /api/v1/test/reset` early. QA uses manual re-seed ([TEST_DATA.md](./TEST_DATA.md) §5 Option B/C) before E10.
 
 **QA engineer:** Full reset workflow below; API reset and `clean_db` fixture apply **after SENT-1001** (app) + **SENT-1002-QA** (fixture).
 
@@ -57,7 +57,7 @@ This is a **SecOps triage simulation** (not e-commerce). It uses enterprise-styl
 
 | Mechanism | Purpose |
 |-----------|---------|
-| **`scripts/seed.py`** | Loads fixed users, alerts, cases, playbook definitions (CLI — available from E01/E02 seed tickets) |
+| **`backend/scripts/seed.py`** | Loads fixed users, alerts, cases, playbook definitions (CLI — available from E01/E02 seed tickets) |
 | **`POST /api/v1/test/reset`** (admin-only, non-prod) | Truncates data tables and re-runs seed — **E10 / SENT-1001** |
 | **`docker compose` volume reset** (optional nuclear option) | Fresh PostgreSQL volume |
 | **Stable IDs in seed** | Fixed UUIDs + `external_id` strings — canonical table in [TEST_DATA.md](./TEST_DATA.md) §3 (e.g. `ALERT_OPEN_HIGH` ↔ `seed-edr-001`) |
@@ -137,7 +137,7 @@ flowchart LR
 ### 3.4 Repository layout (target)
 
 ```text
-sentinel-desk/
+sentinel-desk/          # repository root (this repo: DemoApp)
 ├── docker-compose.yml
 ├── .env.example
 ├── backend/

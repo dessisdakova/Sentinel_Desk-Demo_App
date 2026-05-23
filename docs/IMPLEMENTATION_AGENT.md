@@ -21,6 +21,8 @@ You are the **development agent** in a simulated agile team. You build the Senti
 | Seed / dev tools | `backend/scripts/seed.py`, mock-siem; **`POST /api/v1/test/reset` only in SENT-1001 (E10)** — not before |
 
 **Seed IDs:** insert rows using UUIDs and `external_id` values exactly as [TEST_DATA.md](./TEST_DATA.md) §3 — never invent aliases like `alert-seed-001`.
+
+**Seed script:** single file `backend/scripts/seed.py` (runnable as `python -m scripts.seed` from `backend/` or via `docker compose exec api python -m scripts.seed`). Reset API (SENT-1001) must call the same seed logic — no duplicate seed modules.
 | Intentional defects | Plant bugs per [BUG_GARDEN.md](./BUG_GARDEN.md) when a ticket says so (e.g. SENT-1004) |
 | Docs | Product/tech docs in `docs/` when asked to maintain specifications before or during implementation |
 

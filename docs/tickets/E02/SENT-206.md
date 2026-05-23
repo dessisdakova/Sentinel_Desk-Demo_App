@@ -29,7 +29,7 @@ Seed alerts per TEST_DATA.md.
 
 ### AC1 —
 
-- [ ] `seed.py` adds 12 alerts with stable UUIDs per [TEST_DATA.md](../../TEST_DATA.md) §3
+- [ ] `seed.py` adds 12 alerts with stable UUIDs per [TEST_DATA.md](../../TEST_DATA.md) §3 (extend `backend/scripts/seed.py` from SENT-108)
 ### AC2 —
 
 - [ ] Mix of statuses, severities, sources

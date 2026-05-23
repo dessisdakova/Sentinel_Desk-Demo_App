@@ -18,7 +18,7 @@
 
 - [ ] `docker compose up` starts postgres, redis, api, frontend (dev), mailhog
 - [ ] `alembic upgrade head` creates schema
-- [ ] `scripts/seed.py` creates 3 users per TEST_DATA.md
+- [ ] `backend/scripts/seed.py` creates 3 users per TEST_DATA.md
 - [ ] Login works for all roles; invalid password returns 401
 - [ ] Protected route returns 403 for wrong role
 - [ ] README documents prerequisites (Docker Desktop, Python 3.12)

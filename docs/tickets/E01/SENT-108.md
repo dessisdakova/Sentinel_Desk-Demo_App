@@ -29,7 +29,7 @@ Seed script for users.
 
 ### AC1 —
 
-- [ ] scripts/seed.py creates 3 users per TEST_DATA.md
+- [ ] `backend/scripts/seed.py` creates 3 users per TEST_DATA.md
 ### AC2 —
 
 - [ ] Idempotent: re-run does not duplicate emails
@@ -40,6 +40,10 @@ Seed script for users.
 ---
 
 ## Technical notes
+
+- Add `backend/scripts/__init__.py` so `python -m scripts.seed` works from api container (`WORKDIR /app` = `backend/`)
+- Update `backend/Dockerfile` to `COPY scripts ./scripts` when this ticket lands
+- Document run command in README (see TEST_DATA.md §3.1)
 
 ---
 

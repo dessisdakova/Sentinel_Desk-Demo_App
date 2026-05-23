@@ -88,7 +88,7 @@ See [TEST_DATA.md](./TEST_DATA.md).
 | `POST /api/v1/test/reset` | `ADMIN` + `ENVIRONMENT != production` | **E10 / SENT-1001** — spec only until then |
 | `POST /api/v1/dev/seed-bulk` | `ADMIN` + non-prod | **E11** |
 
-**Implementation agent:** Do not add these routes before their tickets. QA uses CLI seed (`scripts/seed.py`) until reset API exists.
+**Implementation agent:** Do not add these routes before their tickets. QA uses CLI seed (`backend/scripts/seed.py`) until reset API exists.
 
 ---
 

@@ -44,7 +44,17 @@ Automation needs the database to return to the **same starting picture** every r
 | `CASE_ACTIVE` | `22222222-2222-4222-8222-222222222201` | — | Case detail navigation |
 | `PLAYBOOK_ISOLATE` | `33333333-3333-4333-8333-333333333301` | — | Run playbook modal |
 
-**Implementation agent:** `scripts/seed.py` must insert rows with exactly these UUIDs and `external_id` values for the three alert constants above.
+**Implementation agent:** `backend/scripts/seed.py` must insert rows with exactly these UUIDs and `external_id` values for the three alert constants above.
+
+### 3.1 Seed script — file path and run commands
+
+| Context | Location |
+|---------|----------|
+| **Repo file** | `backend/scripts/seed.py` (package: `backend/scripts/__init__.py` + `seed.py`) |
+| **Docker (api container)** | `docker compose exec api python -m scripts.seed` — WORKDIR `/app` = `backend/` |
+| **Local (no Docker api)** | From repo root: `cd backend && python -m scripts.seed` |
+
+`POST /api/v1/test/reset` (SENT-1001) re-runs the same seed logic — import or call shared functions from `backend/scripts/seed.py`, do not duplicate seed data elsewhere.
 
 **Ingest samples (non-seed):** dynamic payloads may use other `external_id` values (e.g. `siem-demo-20260521-001` in `docs/tickets/E02/sample-ingest-payload.json`) — do not reuse seed `external_id` strings except to test duplicate `409`.
 
@@ -90,6 +100,8 @@ curl -X POST http://localhost:8000/api/v1/test/reset \
 ```bash
 docker compose exec api python -m scripts.seed
 ```
+
+From repo root without the api container: `cd backend && python -m scripts.seed`
 
 ### Option C — Nuclear (fresh DB volume)
 
