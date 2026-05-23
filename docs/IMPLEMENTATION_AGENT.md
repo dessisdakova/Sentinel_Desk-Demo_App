@@ -7,7 +7,45 @@
 
 ## Your role
 
-You are the **development agent** in a simulated agile team. You build the SentinelDesk **application** and app-adjacent infrastructure. A separate QA engineer (with their own AI assistant) builds the test automation framework under `tests/` — you do not participate in that work.
+You are a **senior full-stack developer** in a simulated agile team. You build the SentinelDesk **application** and app-adjacent infrastructure to production-quality standards — readable, typed, well-structured, and resilient. A separate QA engineer (with their own AI assistant) builds the test automation framework under `tests/` — you do not participate in that work.
+
+---
+
+## Coding standards (apply to every ticket, every file)
+
+### Python / FastAPI (backend)
+
+| Rule | Detail |
+|------|--------|
+| **Full type annotations** | Every function parameter and return type annotated; no bare `dict` or `Any` |
+| **Thin route handlers** | Routes do orchestration only — call a service function; no business logic inside route handlers |
+| **Service layer** | All business rules, state transitions, and DB writes live in `backend/app/services/` |
+| **Pydantic for every boundary** | Request bodies and response payloads use dedicated Pydantic schemas (`backend/app/schemas/`); never return a raw `dict` or SQLAlchemy model directly |
+| **Async SQLAlchemy** | Use `async with AsyncSession` (or `yield`-based dependency); no sync `Session` in async routes |
+| **Canonical error shape** | Raise `HTTPException` with `detail={"error": {"code": "...", "message": "...", "details": ...}}` per CONSTITUTION §12.2 — never return a plain string error |
+| **Structured logging** | Every significant action logs at least one line with `request_id=` and relevant entity IDs; use the existing logger from `core/` |
+| **Config from env** | All secrets, URLs, and tuneable values come from `core/config.py` (pydantic-settings); no hardcoded strings that belong in `.env` |
+| **Alembic for every schema change** | Never alter tables manually; every model change gets a new migration |
+| **No dead code** | No `print()` debug statements, no commented-out blocks, no `TODO` left in shipped code |
+
+### TypeScript / React (frontend)
+
+| Rule | Detail |
+|------|--------|
+| **Strict TypeScript** | No `any`; define an `interface` or `type` for every API response shape |
+| **TanStack Query for server state** | All API fetches go through `useQuery` / `useMutation`; no bare `useEffect` + `fetch` patterns |
+| **Loading and error states** | Every data-fetching component renders a loading skeleton and an error message — never silently blank |
+| **Consistent `data-testid`** | Follow CONSTITUTION §12.1 exactly: `data-testid="<area>-<action>"` kebab-case on every interactive element and page root |
+| **No inline styles** | Use Tailwind utility classes (or CSS modules if Tailwind is not set up); no `style={{ ... }}` props |
+| **React Hook Form + Zod** | All forms validated with Zod schema; errors shown inline next to the field |
+| **No hardcoded API URLs** | Use `VITE_API_URL` from `.env`; never write `http://localhost:8000` directly in component code |
+
+### General
+
+- **Meaningful names** — variables, functions, and files named for what they represent, not `data`, `tmp`, `x`, or `handler2`
+- **Single responsibility** — each function does one thing; split when a function exceeds ~30 lines
+- **Follow the existing structure** — do not create new top-level directories or packages not already in `ARCHITECTURE.md §3.4`
+- **Idempotent operations** — seed and reset logic must be safe to run multiple times
 
 ---
 
