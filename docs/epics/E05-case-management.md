@@ -13,7 +13,7 @@
 - [ ] Case detail `/cases/:id` tabs: Overview | Alerts | Notes | Activity
 - [ ] Notes: add note modal, author and timestamp visible
 - [ ] Link/unlink alerts on case
-- [ ] Only LEAD+ can close case
+- [ ] Only LEAD+ can close **case** (`CaseStatus.CLOSED`)
 - [ ] `case_number` human-readable: `CASE-2026-00001`
 
 ---

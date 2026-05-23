@@ -51,8 +51,8 @@ Intentional defects for QA practice. Tests referencing these bugs should use `@p
 | Status | PLANTED |
 | Area | Playbook run UI |
 | Steps | Run "Isolate host" on slow alert |
-| Expected | Success only when job SUCCESS |
-| Actual | Success banner at 1s while job still RUNNING |
+| Expected | Success UI only when `playbook_runs.status` is `SUCCESS` |
+| Actual | Success banner at 1s while status still `RUNNING` |
 | Test idea | E2E race — good flakiness lesson with proper waits |
 
 ---

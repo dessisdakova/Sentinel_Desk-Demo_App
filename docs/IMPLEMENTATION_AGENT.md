@@ -107,3 +107,5 @@ Do **not** bootstrap or extend the pytest harness — that is QA-owned. You only
 Implement **JWT Bearer only** per [ARCHITECTURE.md](./ARCHITECTURE.md) §3 — 8h access token, `sessionStorage` on SPA, **no** HttpOnly cookies, **no** refresh token unless a ticket explicitly adds it. Service ingest uses **`X-API-Key`**, not user JWT.
 
 **Async playbook UI:** poll **`GET /api/v1/playbook-runs/{id}`** only — do not add `GET /api/v1/jobs/{task_id}` unless a future ticket requires it. Alert ingest async: poll alert `enrichment_status` on `GET /api/v1/alerts/{id}`.
+
+**Status enums:** use exact strings from [CONSTITUTION.md](./CONSTITUTION.md) §5.2 — `AlertStatus`, `CaseStatus`, and `PlaybookRunStatus` are separate; map Celery `FAILURE` → `FAILED` for playbook runs only.

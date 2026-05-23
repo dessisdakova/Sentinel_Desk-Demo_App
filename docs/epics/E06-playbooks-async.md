@@ -33,5 +33,5 @@
 
 - E2E: explicit wait for success — practice flakiness (BUG-003)
 - Integration: `playbook_runs.status` transitions `PENDING` → `RUNNING` → `SUCCESS`
-- API: cannot run playbook on CLOSED alert → 400
+- API: cannot run playbook on alert in **terminal** `AlertStatus` → 400 (`ALERT_TERMINAL`)
 - Poll **`/api/v1/playbook-runs/{id}`** — not a generic jobs URL

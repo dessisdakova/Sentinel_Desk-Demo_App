@@ -33,6 +33,7 @@ Playbook and PlaybookRun models.
 ### AC2 —
 
 - [ ] Seed three playbooks per TEST_DATA
+- [ ] `playbook_runs.status` enum: `PENDING`, `RUNNING`, `SUCCESS`, `FAILED` (CONSTITUTION §5.2)
 
 ---
 

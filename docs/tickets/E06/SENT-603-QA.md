@@ -46,7 +46,7 @@ API and integration tests for playbook list, run, and **`GET /api/v1/playbook-ru
 | QA-603-1 | api | `GET /api/v1/playbooks` as analyst | 200, includes `PLAYBOOK_ISOLATE` |
 | QA-603-2 | api | `POST .../playbooks/{id}/run` on `ALERT_FOR_PLAYBOOK` | Returns `playbook_run_id`, `status: PENDING` |
 | QA-603-3 | integration | Poll `GET /api/v1/playbook-runs/{id}` until `SUCCESS` | Status transitions; no `/jobs/` URL |
-| QA-603-4 | api | Run on CLOSED alert | 400 |
+| QA-603-4 | api | Run on alert with terminal `AlertStatus` | 400 `ALERT_TERMINAL` |
 | QA-603-5 | api | `playbook-runs` response `status` values | Only `PENDING`, `RUNNING`, `SUCCESS`, `FAILED` |
 
 ---

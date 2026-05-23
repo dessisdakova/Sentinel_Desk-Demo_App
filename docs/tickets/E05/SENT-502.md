@@ -35,11 +35,13 @@ Case CRUD and link alerts API.
 - [ ] POST /api/v1/cases/{id}/alerts link and unlink
 ### AC3 —
 
-- [ ] Only LEAD+ may set status CLOSED
+- [ ] Only **LEAD+** may set **case** `CaseStatus` to `CLOSED` (not alert disposition — see CONSTITUTION §5.2)
 
 ---
 
 ## Technical notes
+
+- `cases.status` enum: `OPEN`, `IN_PROGRESS`, `CLOSED` per CONSTITUTION §5.2
 
 ---
 

@@ -33,6 +33,7 @@ Case models and migration.
 ### AC2 —
 
 - [ ] case_number format CASE-YYYY-NNNNN
+- [ ] `CaseStatus` enum on `cases.status`: `OPEN`, `IN_PROGRESS`, `CLOSED` (CONSTITUTION §5.2)
 
 ---
 

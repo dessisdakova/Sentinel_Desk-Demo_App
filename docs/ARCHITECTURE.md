@@ -150,6 +150,8 @@ Do **not** expose a generic `GET /api/v1/jobs/{task_id}` for playbooks. Use doma
 
 **Internal:** Celery `task_id` may be stored on `playbook_runs` for worker wiring — not returned to SPA and not a separate poll URL in E06.
 
+**Enum separation:** Do not reuse status strings across entities — see [CONSTITUTION.md](./CONSTITUTION.md) §5.2 (`AlertStatus`, `CaseStatus`, `PlaybookRunStatus`).
+
 **SPA playbook modal:** poll `GET /api/v1/playbook-runs/{playbook_run_id}` every 2s until terminal (see SENT-604).
 
 ### 5.3 Flakiness guidance for QA

@@ -45,7 +45,7 @@ Playbook list/run APIs and playbook-run status endpoint (single poll URL for asy
 
 ### AC4 — Negative
 
-- [ ] Run on invalid alert or CLOSED alert → `400`
+- [ ] Run on invalid alert or alert in **terminal** `AlertStatus` → `400` (`ALERT_TERMINAL`)
 
 ---
 

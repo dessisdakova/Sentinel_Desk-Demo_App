@@ -244,14 +244,45 @@ erDiagram
 ```text
 NEW → TRIAGING → [FALSE_POSITIVE | TRUE_POSITIVE | ESCALATED]
 ESCALATED → (Lead approves) → CLOSED
-Any → MERGED (into case, optional terminal)
+Any non-terminal → MERGED (linked to case; terminal)
 ```
 
-### 5.2 Severity and sources (seed enums)
+### 5.2 Domain status enums (canonical — do not mix)
+
+**AlertStatus** (`alerts.status`) — SOC disposition on the event:
+
+| Value | Terminal? | Meaning |
+|-------|-----------|---------|
+| `NEW` | no | Ingested; not yet triaged |
+| `TRIAGING` | no | Analyst actively working |
+| `FALSE_POSITIVE` | **yes** | Benign / not a threat |
+| `TRUE_POSITIVE` | **yes** | Confirmed issue; handled or tracked |
+| `ESCALATED` | no | Awaiting lead approval |
+| `CLOSED` | **yes** | Lead approved closure after escalation (or lead disposition to close) |
+| `MERGED` | **yes** | Linked into a case; no further triage on queue |
+
+**Bulk assign / playbook run:** reject alerts in **terminal** statuses (`FALSE_POSITIVE`, `TRUE_POSITIVE`, `CLOSED`, `MERGED`) with `INVALID_STATE`.
+
+**CaseStatus** (`cases.status`) — investigation container (**separate enum from AlertStatus**):
+
+| Value | Terminal? | Who may set `CLOSED` |
+|-------|-----------|----------------------|
+| `OPEN` | no | — |
+| `IN_PROGRESS` | no | — |
+| `CLOSED` | **yes** | **LEAD+ only** (see E05) |
+
+**PlaybookRunStatus** (`playbook_runs.status`) — async job UI/API:
+
+| Value | Notes |
+|-------|-------|
+| `PENDING`, `RUNNING`, `SUCCESS`, `FAILED` | Public API + OpenAPI — map Celery `FAILURE` → `FAILED` internally |
+
+**Alert.enrichment_status** (separate column, not `AlertStatus`): `PENDING` → `COMPLETE` after worker enrich (E02).
+
+### 5.3 Severity and sources (seed enums)
 
 - **Severity:** `LOW`, `MEDIUM`, `HIGH`, `CRITICAL`
 - **Source:** `EDR`, `IDS`, `PHISHING_SIM`, `USER_REPORT`, `THREAT_INTEL_FEED` — see **Glossary** for meanings
-- **Status:** as above
 
 ---
 

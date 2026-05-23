@@ -29,7 +29,7 @@ Alert and AlertEvent models and migration.
 
 ### AC1 —
 
-- [ ] alerts table per CONSTITUTION enums severity, source, status
+- [ ] alerts table per CONSTITUTION §5.2 — `AlertStatus`, severity, source; `enrichment_status` column separate
 ### AC2 —
 
 - [ ] alert_events table for timeline
