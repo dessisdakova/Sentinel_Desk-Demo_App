@@ -1,5 +1,7 @@
 # Epic Index — SentinelDesk
 
+**Implementation agent:** implement epics in order using `SENT-###` tickets only — see [IMPLEMENTATION_AGENT.md](../IMPLEMENTATION_AGENT.md).
+
 Implement in order. Each epic has acceptance criteria at epic level; break down using sample tickets as templates.
 
 | Epic | File | Depends on | Est. stories |

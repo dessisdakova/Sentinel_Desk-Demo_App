@@ -33,7 +33,10 @@ Design and implement automated tests for **SENT-106** — React app shell, route
 
 ## Test scope
 
-- **e2e** — add cases under `tests/e2e/`
+- **api** — auth-related API checks if not already covered in SENT-104-QA
+- **integration** — optional shell/route smoke via API only
+
+**No e2e** — browser scaffold starts in [SENT-107-QA](./SENT-107-QA.md) after the login page exists.
 
 ---
 

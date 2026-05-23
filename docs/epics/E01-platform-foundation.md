@@ -9,7 +9,7 @@
 ## Goals
 
 - One command starts the full local stack
-- Users authenticate with JWT and see role-appropriate navigation
+- Users authenticate with JWT Bearer (`Authorization` header) and see role-appropriate navigation
 - Database migrations run cleanly on empty DB
 
 ---

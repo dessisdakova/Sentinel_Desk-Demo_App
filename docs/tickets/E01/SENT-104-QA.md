@@ -45,6 +45,7 @@ Automate API and integration coverage for authentication endpoints.
 | QA-104-7 | api | POST /auth/logout | 204 |
 | QA-104-8 | integration | Login analyst → decode sub → DB user row email matches | Pass |
 | QA-104-9 | api | Login inactive user (seed or fixture) | 403 ACCOUNT_DISABLED |
+| QA-104-10 | api | Login success `expires_in` | 28800 (or `JWT_EXPIRE_HOURS` × 3600) |
 
 ---
 

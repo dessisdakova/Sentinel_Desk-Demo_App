@@ -5,7 +5,7 @@
 | **Type** | Test Story |
 | **Epic** | SENT-E01 Platform Foundation |
 | **Priority** | High |
-| **Labels** | `qa`, `automation` |
+| **Labels** | `qa`, `automation`, `e2e-bootstrap` |
 | **Implements after** | [SENT-107](./SENT-107.md) |
 | **Test location** | Repository root `tests/` **only** |
 
@@ -13,27 +13,35 @@
 
 ## Summary
 
-Design and implement automated tests for **SENT-107** — Login page with data-testid.
+Bootstrap the E2E test layer and cover the login page — **first Selenium work in the project** (see TESTING_STRATEGY §4.3).
 
 ---
 
 ## Description
 
 **As a** QA engineer  
-**I want** automated coverage for this story  
-**So that** regressions are caught before later epics build on this behavior
+**I want** a minimal Selenium scaffold and login tests  
+**So that** later UI epics can add feature E2E tests without re-inventing WebDriver setup  
+
+**Prerequisite:** SENT-101-QA / SENT-102-QA foundation (`tests/`, `pytest.ini`, root `conftest.py`).
 
 ---
 
-## Prerequisites
+## Deliverables (bootstrap)
 
-- [ ] Implementation ticket **SENT-107** is complete and merged/runnable
+| File | Content |
+|------|---------|
+| `tests/e2e/conftest.py` | WebDriver fixture (Chrome via WebDriver Manager), `base_url`, optional screenshot on failure |
+| `tests/e2e/pages/login_page.py` | `LoginPage` using `data-testid` selectors from SENT-107 |
+| `tests/e2e/test_login_page.py` | Login happy path, invalid password, role smoke as applicable |
+
+Add `selenium` / `webdriver-manager` to `requirements-test.txt` if not present.
 
 ---
 
 ## Test scope
 
-- **e2e** — add cases under `tests/e2e/`
+- **e2e** — creates `tests/e2e/` tree (first browser tests in project)
 
 ---
 
@@ -41,11 +49,9 @@ Design and implement automated tests for **SENT-107** — Login page with data-t
 
 | ID | Layer | Scenario | Expected |
 |----|-------|----------|----------|
-| QA-107-1 | e2e | Happy path for primary AC | Pass |
-| QA-107-2 | e2e | One negative or edge case | Correct error or UI message |
-| QA-107-3 | e2e | Data matches seed or TEST_DATA.md stable IDs where applicable | Consistent |
-
-Extend with boundary cases from implementation acceptance criteria.
+| QA-107-1 | e2e | Login analyst with valid password | Dashboard or post-login route visible |
+| QA-107-2 | e2e | Login invalid password | Error shown; stay on login |
+| QA-107-3 | e2e | `page-login` root `data-testid` present | Selector stable for POM |
 
 ---
 
@@ -57,14 +63,13 @@ Extend with boundary cases from implementation acceptance criteria.
 
 ## Out of scope
 
+- Alert queue or other pages (E03+)
 - Fixing application bugs (file defects under BUG_GARDEN if found)
-- Adding tests under `backend/` or `frontend/`
 
 ---
 
 ## Definition of Done
 
-- [ ] Tests run with `pytest tests/` (appropriate subset/markers)
-- [ ] No dependency on manual data unless documented in test docstring
+- [ ] `pytest tests/e2e -m e2e` runs login tests
+- [ ] Uses `WebDriverWait`, not fixed sleep only
 - [ ] Test file paths documented in this ticket (edit when created)
-

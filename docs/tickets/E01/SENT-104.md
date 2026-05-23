@@ -24,7 +24,7 @@ Implement JWT authentication endpoints for SentinelDesk users.
 **I want to** log in with my work email and password  
 **So that** I can access alerts and cases assigned to my role  
 
-The API must issue a short-lived access token and expose a profile endpoint for the SPA to build navigation.
+The API must issue a JWT access token (8-hour lifetime) and expose a profile endpoint for the SPA to build navigation.
 
 ---
 
@@ -34,8 +34,8 @@ The API must issue a short-lived access token and expose a profile endpoint for 
 
 - **Given** seeded user `analyst@demo.local` with password `DemoPass123!`
 - **When** `POST /api/v1/auth/login` with JSON body `{ "email", "password" }`
-- **Then** response `200` contains `access_token`, `token_type: "bearer"`, `expires_in`
-- **And** token contains claim `role=ANALYST`
+- **Then** response `200` contains `access_token`, `token_type: "bearer"`, `expires_in: 28800` (8h; from `JWT_EXPIRE_HOURS`)
+- **And** token contains claim `role=ANALYST` (and `sub` = user id)
 
 ### AC2 — Login failure
 
@@ -66,9 +66,9 @@ The API must issue a short-lived access token and expose a profile endpoint for 
 
 ## Technical notes
 
-- Use `python-jose` or PyJWT; secret from `JWT_SECRET` env
+- Use `python-jose` or PyJWT; secret from `JWT_SECRET`; expiry from `JWT_EXPIRE_HOURS` (default 8)
 - Password verify: bcrypt via `passlib`
-- Do not implement refresh token in this story (optional later)
+- **No refresh token** and **no HttpOnly cookies** in this story
 - OpenAPI tags: `auth`
 
 ---

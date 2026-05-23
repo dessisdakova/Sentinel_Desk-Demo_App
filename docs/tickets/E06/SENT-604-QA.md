@@ -15,6 +15,12 @@ E2E and integration tests for async playbook execution UI.
 
 ---
 
+## Prerequisites
+
+- [ ] **SENT-107-QA** E2E bootstrap complete (required for QA-604-2)
+
+---
+
 ## Test cases
 
 | ID | Layer | Scenario | Expected |

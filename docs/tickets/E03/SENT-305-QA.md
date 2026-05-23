@@ -15,6 +15,13 @@ E2E coverage for bulk assign from alert queue UI.
 
 ---
 
+## Prerequisites
+
+- [ ] [SENT-305](./SENT-305.md) implemented
+- [ ] **SENT-107-QA** E2E bootstrap complete; **SENT-1003-QA** recommended (`AlertQueuePage` skeleton)
+
+---
+
 ## Test cases
 
 | ID | Scenario | Expected |

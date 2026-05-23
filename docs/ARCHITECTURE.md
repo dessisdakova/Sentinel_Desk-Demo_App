@@ -1,6 +1,9 @@
 # SentinelDesk — Technical Architecture
 
-Companion to [CONSTITUTION.md](./CONSTITUTION.md). Read this before implementing or writing integration tests.
+**Audience — implementation agent:** Primary technical reference for `SENT-###` tickets. Read with [IMPLEMENTATION_AGENT.md](./IMPLEMENTATION_AGENT.md).  
+**Audience — QA engineer:** Use integration-test patterns in §4.3 when writing `-QA` tickets.
+
+Companion to [CONSTITUTION.md](./CONSTITUTION.md).
 
 ---
 
@@ -55,12 +58,24 @@ sequenceDiagram
 
 ## 3. Authentication & authorization
 
+**Auth contract (canonical — do not mix cookie sessions or refresh tokens in E01):**
+
+| Aspect | Choice |
+|--------|--------|
+| Token type | JWT **access token** only (HS256, `JWT_SECRET`) |
+| Lifetime | **8 hours** — `JWT_EXPIRE_HOURS=8` in `.env`; login returns `expires_in` seconds (28800) |
+| Transport | `Authorization: Bearer <access_token>` on API calls |
+| SPA storage | In-memory React state + `sessionStorage` key `sentinel_access_token` |
+| Refresh token | **Out of scope** until a future ticket explicitly adds it |
+| Cookies | **Not used** for auth in this project (no HttpOnly session cookie) |
+| Ingest / service | Separate **`X-API-Key`** header — not the user JWT |
+
 ### 3.1 Flow
 
-1. `POST /api/v1/auth/login` with email/password → returns JWT access token (8h) + refresh optional.
-2. SPA stores token in memory + `sessionStorage` (document security tradeoff for demo).
-3. Each request: `Authorization: Bearer <token>`.
-4. FastAPI dependency `require_roles(["ANALYST"])` enforces RBAC.
+1. `POST /api/v1/auth/login` with email/password → returns JWT access token + `expires_in` (seconds).
+2. SPA stores token in memory + `sessionStorage` (`sentinel_access_token`); clears both on logout.
+3. Each API request: `Authorization: Bearer <token>`.
+4. FastAPI dependency `require_roles(["ANALYST"])` enforces RBAC from JWT claims.
 
 ### 3.2 Test users (seed)
 
@@ -68,10 +83,12 @@ See [TEST_DATA.md](./TEST_DATA.md).
 
 ### 3.3 Test-only endpoints
 
-| Endpoint | Guard |
-|----------|-------|
-| `POST /api/v1/test/reset` | `ADMIN` + `ENVIRONMENT != production` |
-| `POST /api/v1/dev/seed-bulk` | `ADMIN` + non-prod |
+| Endpoint | Guard | When implemented |
+|----------|-------|------------------|
+| `POST /api/v1/test/reset` | `ADMIN` + `ENVIRONMENT != production` | **E10 / SENT-1001** — spec only until then |
+| `POST /api/v1/dev/seed-bulk` | `ADMIN` + non-prod | **E11** |
+
+**Implementation agent:** Do not add these routes before their tickets. QA uses CLI seed (`scripts/seed.py`) until reset API exists.
 
 ---
 
@@ -197,7 +214,8 @@ services:
 | `ENVIRONMENT` | `local` | `production` disables test reset |
 | `DATABASE_URL` | postgresql+asyncpg://... | |
 | `REDIS_URL` | redis://localhost:6379/0 | |
-| `JWT_SECRET` | change-me | |
+| `JWT_SECRET` | change-me | HS256 signing key |
+| `JWT_EXPIRE_HOURS` | `8` | Access token lifetime; `expires_in` = hours × 3600 |
 | `SMTP_HOST` | mailhog | |
 | `SMTP_PORT` | 1025 | |
 | `WEBHOOK_SIGNING_SECRET` | dev-secret | HMAC on outbound payloads |

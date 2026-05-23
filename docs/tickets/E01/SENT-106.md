@@ -35,7 +35,9 @@ React app shell, router, auth context.
 - [ ] Routes: /login, protected layout with outlet
 ### AC3 —
 
-- [ ] AuthContext stores token; redirects unauthenticated to /login
+- [ ] AuthContext stores JWT in memory and `sessionStorage` key `sentinel_access_token`
+- [ ] API client attaches `Authorization: Bearer <token>`; clears storage on logout
+- [ ] Redirects unauthenticated users to `/login`
 ### AC4 —
 
 - [ ] Role-based nav placeholders (Dashboard, Alerts disabled until later)
@@ -44,7 +46,8 @@ React app shell, router, auth context.
 
 ## Technical notes
 
-No alert pages yet.
+- Follow [ARCHITECTURE.md](../../ARCHITECTURE.md) §3 auth contract — JWT Bearer + sessionStorage only
+- No alert pages yet.
 
 ---
 

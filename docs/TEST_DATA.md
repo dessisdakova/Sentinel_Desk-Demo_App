@@ -1,5 +1,8 @@
 # SentinelDesk — Test Data & Reset Guide
 
+**Audience — QA engineer:** Primary reference for assertions, reset workflows, and stable IDs.  
+**Audience — implementation agent:** Use seed personas and entity counts when implementing `seed.py` and reset API; do not create pytest code from this doc.
+
 ## 1. What “resettable test data” means (short version)
 
 Automation needs the database to return to the **same starting picture** every run. SentinelDesk provides a **seed script** and a **reset API** so you never depend on leftover manual triage.
@@ -59,9 +62,13 @@ After seed or reset:
 
 ---
 
-## 5. How to reset (when app exists)
+## 5. How to reset (by phase)
 
-### Option A — API reset (preferred for pytest session fixture)
+### Before E10 — no reset API
+
+Use **Option B (CLI seed)** or **Option C (nuclear volume reset)** below. The reset API does not exist until the app implements **SENT-1001**.
+
+### After SENT-1001 — Option A (preferred for pytest)
 
 ```bash
 # 1. Login as admin
@@ -74,7 +81,7 @@ curl -X POST http://localhost:8000/api/v1/test/reset \
   -H "Authorization: Bearer <access_token>"
 ```
 
-### Option B — CLI seed
+### Option B — CLI seed (E01+; works before and after reset API)
 
 ```bash
 docker compose exec api python -m scripts.seed
@@ -91,10 +98,12 @@ docker compose exec api python -m scripts.seed
 
 ---
 
-## 6. Pytest fixture pattern (recommended)
+## 6. Pytest fixture pattern (after SENT-1001 + SENT-1002-QA)
+
+Not available before the reset API and `admin_api_client` fixture exist.
 
 ```python
-# tests/conftest.py — add in E10 when reset API exists (see TESTING_STRATEGY.md)
+# tests/conftest.py — add in SENT-1002-QA after SENT-1001 reset API ships
 import pytest
 
 @pytest.fixture(scope="function")

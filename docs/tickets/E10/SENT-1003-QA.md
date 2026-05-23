@@ -1,4 +1,4 @@
-# SENT-1003-QA — Test: Selenium conftest and page objects
+# SENT-1003-QA — Standardize Selenium POM and e2e conftest (QA-only)
 
 | Field | Value |
 |-------|-------|
@@ -6,41 +6,41 @@
 | **Epic** | SENT-E10 Test Harness and Bug Garden |
 | **Priority** | High |
 | **Labels** | `qa`, `e2e`, `selenium` |
-| **Implements after** | SENT-107, SENT-1002 (harness scaffolding) |
+| **Implements after** | [SENT-107-QA](../E01/SENT-107-QA.md) (e2e bootstrap); [SENT-1002-QA](./SENT-1002-QA.md) recommended |
 | **Test location** | `tests/e2e/` **only** |
+| **Note** | **Does not** first-create `tests/e2e/` — that happens in SENT-107-QA (see TESTING_STRATEGY §4.3) |
 
 ---
 
 ## Summary
 
-Add Selenium WebDriver fixtures and page objects for Login and Alert Queue.
+Enhance the existing E2E scaffold with shared page objects, conftest polish, and login smoke coverage.
 
 ---
 
 ## Description
 
 **As a** QA engineer  
-**I want** reusable E2E building blocks  
-**So that** UI tests from E01 onward stay maintainable
+**I want** reusable, consistent E2E building blocks  
+**So that** feature tests from E03 onward stay maintainable  
+
+**Prerequisite:** SENT-107-QA already created `tests/e2e/conftest.py`, `pages/login_page.py`, and basic login tests.
 
 ---
 
-## Prerequisites
+## Acceptance criteria
 
-- [ ] SENT-1002 harness exists (pytest.ini, conftest base)
-- [ ] SENT-107 login page implemented
-- [ ] E03 queue optional until E03 QA — stub POM methods OK in E10
+### AC1 — Enhance (do not recreate bootstrap)
 
----
+- [ ] Polish `tests/e2e/conftest.py` (screenshot on failure optional, shared waits/helpers)
+- [ ] Ensure `pages/login_page.py` follows POM conventions used going forward
+- [ ] Add `pages/alert_queue_page.py` (skeleton OK — expand in SENT-303-QA)
+- [ ] Add or refine `tests/e2e/test_login_smoke.py` if not complete in SENT-107-QA
 
-## Deliverables
+### AC2 — Verification
 
-| File | Content |
-|------|---------|
-| `tests/e2e/conftest.py` | webdriver fixture (Chrome), base_url, screenshot on failure optional |
-| `tests/e2e/pages/login_page.py` | LoginPage with data-testid selectors |
-| `tests/e2e/pages/alert_queue_page.py` | AlertQueuePage skeleton (expand in SENT-303-QA) |
-| `tests/e2e/test_login_smoke.py` | Login as analyst → dashboard visible |
+- [ ] `pytest tests/e2e -m e2e` runs login smoke
+- [ ] Uses `WebDriverWait`, not fixed sleep only
 
 ---
 
@@ -48,7 +48,7 @@ Add Selenium WebDriver fixtures and page objects for Login and Alert Queue.
 
 | ID | Scenario | Expected |
 |----|----------|----------|
-| QA-1003-1 | Login analyst | Lands on dashboard, page-login not visible |
+| QA-1003-1 | Login analyst | Lands on dashboard, `page-login` not visible |
 | QA-1003-2 | Login invalid password | Stays on login, error shown |
 | QA-1003-3 | Login admin | Nav shows admin entry when applicable |
 
@@ -56,7 +56,5 @@ Add Selenium WebDriver fixtures and page objects for Login and Alert Queue.
 
 ## Definition of Done
 
-- [ ] `pytest tests/e2e -m e2e` runs login smoke
-- [ ] Uses WebDriverWait, not fixed sleep only
-- [ ] No tests under frontend/
-
+- [ ] All acceptance criteria met
+- [ ] No tests under `frontend/`

@@ -3,8 +3,8 @@
 **Codename:** `SentinelDesk`  
 **Version:** 1.0  
 **Status:** Specification only (implementation follows epics in order)  
-**Primary audience:** QA engineer practicing AI-assisted test design and automation  
-**Secondary audience:** AI agents implementing features from epics/tickets  
+**Audience — implementation agent:** Product rules, domain model, testability hooks. Start with [IMPLEMENTATION_AGENT.md](./IMPLEMENTATION_AGENT.md).  
+**Audience — QA engineer:** Test automation workflow in [TESTING_STRATEGY.md](./TESTING_STRATEGY.md) and `SENT-###-QA` tickets (implementation agent: ignore).
 
 ---
 
@@ -39,7 +39,11 @@ This is a **SecOps triage simulation** (not e-commerce). It uses enterprise-styl
 
 ---
 
-## 2. Your question: resettable test data (explained)
+## 2. Resettable test data (product capability)
+
+**Implementation agent:** Reset **API** is delivered in **E10 / SENT-1001** only. Until then, implement `scripts/seed.py` (CLI re-seed) per tickets — do not add `POST /api/v1/test/reset` early. QA uses manual re-seed ([TEST_DATA.md](./TEST_DATA.md) §5 Option B/C) before E10.
+
+**QA engineer:** Full reset workflow below; API reset and `clean_db` fixture apply **after SENT-1001** (app) + **SENT-1002-QA** (fixture).
 
 **Resettable test data** means: before (or after) a test run, the application can return to a **known baseline** so automation does not break because yesterday’s manual testing created random alerts.
 
@@ -53,21 +57,29 @@ This is a **SecOps triage simulation** (not e-commerce). It uses enterprise-styl
 
 | Mechanism | Purpose |
 |-----------|---------|
-| **`scripts/seed.py`** | Loads fixed users, alerts, cases, playbook definitions |
-| **`POST /api/v1/test/reset`** (admin-only, disabled in “prod” profile) | Truncates data tables and re-runs seed |
+| **`scripts/seed.py`** | Loads fixed users, alerts, cases, playbook definitions (CLI — available from E01/E02 seed tickets) |
+| **`POST /api/v1/test/reset`** (admin-only, non-prod) | Truncates data tables and re-runs seed — **E10 / SENT-1001** |
 | **`docker compose` volume reset** (optional nuclear option) | Fresh PostgreSQL volume |
 | **Stable IDs in seed** | e.g. `alert-seed-001` always maps to same UUID for API tests |
 
-### 2.3 How you use it in practice
+### 2.3 How QA uses reset (by phase)
+
+**Before E10 (no reset API yet):**
 
 ```text
-# Typical local workflow before a pytest run:
 docker compose up -d
-curl -X POST http://localhost:8000/api/v1/test/reset -H "Authorization: Bearer <admin_token>"
-pytest tests/e2e
+docker compose exec api python -m scripts.seed   # Option B — see TEST_DATA.md
+pytest tests/api tests/integration
 ```
 
-**Rule for automation:** E2E tests should **not** depend on data created by a previous test unless that test created it in the same test and cleaned up. Prefer reset + seed or factory APIs documented in `docs/TEST_DATA.md`.
+**After SENT-1001 (reset API) + SENT-1002-QA (`clean_db` fixture):**
+
+```text
+docker compose up -d
+pytest tests/e2e   # clean_db fixture calls POST /api/v1/test/reset when configured
+```
+
+**Rule for automation:** Tests should **not** depend on data from a previous run unless created and cleaned up in the same test. Before E10, manual re-seed; after E10, prefer `clean_db` or reset API — see `docs/TEST_DATA.md`.
 
 ---
 
@@ -148,7 +160,7 @@ sentinel-desk/
 │   ├── api/
 │   ├── integration/
 │   ├── data/             # static JSON for negative tests
-│   └── e2e/              # Selenium (E10+)
+│   └── e2e/              # Selenium — bootstrapped SENT-107-QA; enhanced SENT-1003-QA
 ├── docs/
 │   ├── CONSTITUTION.md
 │   ├── ARCHITECTURE.md
@@ -166,10 +178,23 @@ sentinel-desk/
 |------|--------|
 | **Single test root** | All pytest and Selenium code lives under repository root `tests/` only |
 | **No tests in app packages** | `backend/` and `frontend/` must **not** contain `tests/` folders or test modules |
-| **Who writes tests** | **You** (QA), ticket-by-ticket, using paired `SENT-###-QA` tickets after each implementation story |
-| **Who builds the app** | AI/implementation tickets (`SENT-###`) deliver features + `data-testid` hooks only — **no test files** |
+| **Who writes tests** | **QA engineer** (human), ticket-by-ticket, via paired `SENT-###-QA` tickets — not the implementation agent |
+| **Who builds the app** | **Implementation agent** on `SENT-###` tickets only — features + `data-testid` hooks; **never** files under `tests/` |
 
-**Why the layout originally showed extra `tests/` folders:** Many Python and React repos colocate developer unit tests next to source (`backend/tests`, `frontend/tests`). That is a valid **dev** pattern, but it splits automation across the tree and blurs ownership. For this project, **you** own all automation in one place; **dev unit tests are out of scope**, so colocated folders were removed to avoid accidental test generation inside the app.
+**Why the layout originally showed extra `tests/` folders:** Many Python and React repos colocate developer unit tests next to source (`backend/tests`, `frontend/tests`). That is a valid **dev** pattern, but it splits automation across the tree and blurs ownership. For this project, the **QA engineer** owns all automation in one place; **dev unit tests are out of scope**, so colocated folders were removed to avoid accidental test generation inside the app.
+
+### 3.6 Test harness phases (QA-owned vs app-owned)
+
+The pytest harness is **never** built by the implementation agent. Do not create or edit `tests/`, `pytest.ini`, or `conftest.py` on `SENT-###` tickets.
+
+| Phase | Owner | Delivered by | Scope |
+|-------|-------|--------------|-------|
+| **Foundation** | QA engineer | E01 `-QA` tickets (e.g. SENT-101-QA, SENT-102-QA) | Root `tests/`, `pytest.ini`, `conftest.py`, `tests/api/`, `tests/integration/`, `tests/data/` |
+| **Per-epic tests** | QA engineer | E02–E09 `-QA` tickets | Add `test_*.py` (API/integration); UI epics add `tests/e2e/` cases after SENT-107-QA bootstrap |
+| **E10 app hooks** | Implementation agent | SENT-1001, SENT-1004 | Reset API; plant bug-garden defects in **app code** |
+| **E10 harness extensions** | QA engineer | SENT-1001-QA, SENT-1002-QA, SENT-1003-QA, SENT-1004-QA | `admin_api_client`, `clean_db`; **SENT-1003-QA** standardizes Selenium POM (does not first-create `tests/e2e/`) |
+
+**Rule for implementation agents:** If `tests/` exists, treat it as read-only. E10 does **not** mean “bootstrap pytest” — see [IMPLEMENTATION_AGENT.md](./IMPLEMENTATION_AGENT.md).
 
 ---
 
@@ -234,7 +259,7 @@ Any → MERGED (into case, optional terminal)
 
 | # | Module | Business capability | Primary pages/APIs |
 |---|--------|---------------------|-------------------|
-| M1 | **Identity & access** | Login, JWT/session, RBAC | `/login`, `/api/v1/auth/*` |
+| M1 | **Identity & access** | Login, JWT Bearer, RBAC | `/login`, `/api/v1/auth/*` |
 | M2 | **Alert ingestion** | Accept alerts from API/webhook | `POST /api/v1/alerts/ingest`, mock SIEM |
 | M3 | **Triage queue** | Filter, sort, paginate, bulk assign | `/alerts`, queue APIs |
 | M4 | **Alert detail** | Multi-tab view, timeline, IOCs | `/alerts/:id` (tabs) |
@@ -288,7 +313,7 @@ Not implemented day one, but architecture must **allow**:
 | NFR-01 | Alert queue API p95 latency | < 500ms with 10k alerts seeded |
 | NFR-02 | Ingest throughput | 100 alerts/min sustained (worker scale) |
 | NFR-03 | Concurrent analysts | 20 without DB deadlock on assign |
-| NFR-04 | Session security | HttpOnly cookie or JWT expiry 8h |
+| NFR-04 | Session security | JWT access token **8h** expiry; client stores in `sessionStorage` (demo — not HttpOnly cookies) |
 | NFR-05 | Audit retention | No hard delete of audit rows |
 
 Seed script will include `POST /api/v1/dev/seed-bulk?count=10000` (admin, non-prod only).
@@ -354,22 +379,28 @@ Alert detail → **Threat Intel** tab loads `http://localhost:8090/embed` (mock 
 | E07 | Webhooks | Outbound deliveries + retries |
 | E08 | Dashboard & audit | KPIs, audit export |
 | E09 | Admin & notifications | MailHog, rules, users |
-| E10 | Test harness & bug garden | reset endpoint, seed, BUG_GARDEN |
+| E10 | Test harness & bug garden | Reset API + planted bugs (app); harness extensions (QA) |
 | E11 | Portfolio scale | bulk seed, NFR hooks, perf scripts |
 
 Epic details: `docs/epics/`. Implementation and QA tickets: `docs/tickets/E01/` … `docs/tickets/E11/`.
 
 ---
 
-## 14. Next steps (step-by-step with AI)
+## 14. Next steps
 
-1. **You review** this constitution + `ARCHITECTURE.md` + epics.  
-2. **Confirm** Docker OK on your machine (or note constraints).  
-3. **Implement E01** ticket-by-ticket (`SENT-101`, `SENT-102`, …) — app code only, no tests.  
-4. **After each implementation ticket**, complete the paired `SENT-###-QA` ticket in root `tests/`.  
-5. **E10** adds reset endpoint + bug garden; **E11** adds portfolio scale.  
+### For the implementation agent
 
-When ready, say: **“Implement SENT-101”** (or **“Implement Epic E01”**) and we proceed in order.
+1. Read [IMPLEMENTATION_AGENT.md](./IMPLEMENTATION_AGENT.md) first.  
+2. Implement `SENT-###` tickets in epic order — **skip all `-QA` tickets**.  
+3. Never create or modify files under `tests/`, `pytest.ini`, or `requirements-test.txt`.  
+
+When prompted: **“Implement SENT-101”** or **“Implement SENT-104”** — app code only.
+
+### For the QA engineer (separate workflow)
+
+1. After each app story is runnable, complete the paired `SENT-###-QA` ticket using [TESTING_STRATEGY.md](./TESTING_STRATEGY.md).  
+2. **E10 QA** extends the harness (`clean_db`, Selenium POM, xfail tests); **E10 app** (implementation agent) delivers reset API + planted bugs only.  
+3. **E11** adds portfolio-scale hooks and performance practice.
 
 ---
 

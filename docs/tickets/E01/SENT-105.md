@@ -38,7 +38,7 @@ RBAC dependency require_roles.
 
 ## Technical notes
 
-Wire to JWT claims from SENT-104.
+- Wire to JWT **`role`** claim from `Authorization: Bearer` header (SENT-104) — not cookies
 
 ---
 

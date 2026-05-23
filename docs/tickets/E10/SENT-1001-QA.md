@@ -13,28 +13,30 @@
 
 ## Summary
 
-Design and implement automated tests for **SENT-1001** — Test reset endpoint.
+Automated tests for the reset API — first ticket that **uses** `POST /api/v1/test/reset` (do not require reset before testing it).
 
 ---
 
 ## Description
 
 **As a** QA engineer  
-**I want** automated coverage for this story  
-**So that** regressions are caught before later epics build on this behavior
+**I want** tests that verify the reset endpoint  
+**So that** later suites can rely on `clean_db` (SENT-1002-QA)  
 
 ---
 
 ## Prerequisites
 
-- [ ] Prefer `POST /api/v1/test/reset` before run if SENT-1001 done; else re-seed manually
+- [ ] [SENT-1001](./SENT-1001.md) implemented — reset route live
+- [ ] Admin user seeded (`admin@demo.local`); full seed data per TEST_DATA.md (manual CLI seed before first test run)
+- [ ] **Do not** call reset in a prerequisite — this ticket **tests** reset for the first time
 
 ---
 
 ## Test scope
 
-- **api** — add cases under `tests/api/`
-- **integration** — add cases under `tests/integration/`
+- **api** — auth, status codes, non-prod guard
+- **integration** — after reset, DB matches seed counts / stable IDs from TEST_DATA.md
 
 ---
 
@@ -42,11 +44,12 @@ Design and implement automated tests for **SENT-1001** — Test reset endpoint.
 
 | ID | Layer | Scenario | Expected |
 |----|-------|----------|----------|
-| QA-1001-1 | api | Happy path for primary AC | Pass |
-| QA-1001-2 | integration | One negative or edge case | Correct error or UI message |
-| QA-1001-3 | api | Data matches seed or TEST_DATA.md stable IDs where applicable | Consistent |
+| QA-1001-1 | api | Admin POST reset in local env | 200 or 204 per AC |
+| QA-1001-2 | api | Analyst token POST reset | 403 |
+| QA-1001-3 | integration | After reset, `ALERT_OPEN_HIGH` UUID present; user count = 3 |
+| QA-1001-4 | api | `ENVIRONMENT=production` (if testable) | Reset disabled |
 
-Extend with boundary cases from implementation acceptance criteria.
+Extend with boundary cases from [SENT-1001](./SENT-1001.md) acceptance criteria.
 
 ---
 
@@ -58,14 +61,12 @@ Extend with boundary cases from implementation acceptance criteria.
 
 ## Out of scope
 
-- Fixing application bugs (file defects under BUG_GARDEN if found)
-- Adding tests under `backend/` or `frontend/`
+- `clean_db` fixture (SENT-1002-QA)
+- Fixing unrelated bugs
 
 ---
 
 ## Definition of Done
 
 - [ ] Tests run with `pytest tests/` (appropriate subset/markers)
-- [ ] No dependency on manual data unless documented in test docstring
 - [ ] Test file paths documented in this ticket (edit when created)
-
