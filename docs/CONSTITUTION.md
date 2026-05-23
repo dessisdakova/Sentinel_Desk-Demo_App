@@ -296,8 +296,8 @@ Any → MERGED (into case, optional terminal)
 
 | Feature | Behavior | Tester notes |
 |---------|----------|--------------|
-| Ingest → process | API returns `202 Accepted`, worker enriches alert (tags, SLA) | Poll `GET /alerts/{id}` until `enrichment_status=COMPLETE` |
-| Playbook run | Celery task steps with 2–5s delay | UI shows spinner; use explicit wait |
+| Ingest → process | API returns `202 Accepted`, worker enriches alert (tags, SLA) | Poll `GET /api/v1/alerts/{id}` until `enrichment_status=COMPLETE` |
+| Playbook run | Celery task steps with 2–5s delay | UI polls `GET /api/v1/playbook-runs/{id}` until `SUCCESS` or `FAILED` |
 | Outbound webhook | Retries 3x with backoff on 500 from mock SIEM | Check `webhook_deliveries` table |
 | Dashboard KPIs | Cached 30s in Redis | Values may lag; document in BUG_GARDEN optional race |
 | Queue auto-refresh | Frontend polls every 10s | Stale element risk — use stable selectors |

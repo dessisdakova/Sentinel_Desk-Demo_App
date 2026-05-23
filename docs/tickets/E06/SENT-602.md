@@ -41,6 +41,9 @@ run_playbook Celery task.
 
 ## Technical notes
 
+- Updates `playbook_runs.status` using enum `PENDING`, `RUNNING`, `SUCCESS`, `FAILED` only (map from Celery internally)
+- Store `celery_task_id` on row if useful for ops — not exposed as public poll API
+
 ---
 
 ## Out of scope

@@ -137,17 +137,26 @@ def test_assign_alert_persists(client, db_session, analyst_token):
 | `deliver_webhook` | Alert status change | HTTP with retries |
 | `send_email` | Escalation, assignment | SMTP → MailHog |
 
-### 5.2 Job status API
+### 5.2 Async status — what to poll (canonical)
 
-`GET /api/v1/jobs/{task_id}` → `{ "status": "PENDING|SUCCESS|FAILURE", "result": ... }`
+Do **not** expose a generic `GET /api/v1/jobs/{task_id}` for playbooks. Use domain endpoints only:
 
-SPA polls this for playbook modal.
+| Feature | Client polls | Status field / values | Terminal |
+|---------|--------------|------------------------|----------|
+| **Playbook run** | `GET /api/v1/playbook-runs/{id}` | `status`: `PENDING` → `RUNNING` → `SUCCESS` \| `FAILED` | `SUCCESS`, `FAILED` |
+| **Alert enrichment** (ingest) | `GET /api/v1/alerts/{id}` | `enrichment_status`: `PENDING` → `COMPLETE` | `COMPLETE` |
+
+**PlaybookRun `status` enum (API + DB + UI):** `PENDING`, `RUNNING`, `SUCCESS`, `FAILED` — never use Celery’s `FAILURE` in public JSON.
+
+**Internal:** Celery `task_id` may be stored on `playbook_runs` for worker wiring — not returned to SPA and not a separate poll URL in E06.
+
+**SPA playbook modal:** poll `GET /api/v1/playbook-runs/{playbook_run_id}` every 2s until terminal (see SENT-604).
 
 ### 5.3 Flakiness guidance for QA
 
 - Prefer **explicit waits** on `data-testid="playbook-run-status-success"` with timeout 30s.
 - Do not use `time.sleep(5)` fixed; use Selenium `WebDriverWait`.
-- For API integration: poll job endpoint or query `playbook_runs.status` in DB.
+- For API integration: poll `GET /api/v1/playbook-runs/{id}` or query `playbook_runs.status` in DB.
 
 ---
 
@@ -171,7 +180,7 @@ SPA polls this for playbook modal.
 | Alert queue | `GET /api/v1/alerts?page&size&filters` |
 | Alert detail | `GET /api/v1/alerts/{id}`, `GET /api/v1/alerts/{id}/events` |
 | Cases | `GET/POST/PATCH /api/v1/cases` |
-| Playbooks | `GET /api/v1/playbooks`, `POST /api/v1/playbooks/{id}/run` |
+| Playbooks | `GET /api/v1/playbooks`, `POST /api/v1/playbooks/{id}/run`, poll `GET /api/v1/playbook-runs/{id}` |
 | Audit | `GET /api/v1/audit` |
 | Admin | `GET/POST /api/v1/admin/*` |
 
@@ -253,8 +262,10 @@ Full OpenAPI generated at runtime. Grouped below for test planning.
 ### 10.4 Playbooks
 
 - `GET /api/v1/playbooks`
-- `POST /api/v1/playbooks/{id}/run`
-- `GET /api/v1/playbook-runs/{id}`
+- `POST /api/v1/playbooks/{id}/run` → `{ "playbook_run_id", "status": "PENDING" }`
+- `GET /api/v1/playbook-runs/{id}` → `{ "status": "PENDING|RUNNING|SUCCESS|FAILED", "steps_completed", ... }`
+
+No generic `/api/v1/jobs/{task_id}` in E06 — see ARCHITECTURE §5.2.
 
 ### 10.5 Webhooks (admin)
 

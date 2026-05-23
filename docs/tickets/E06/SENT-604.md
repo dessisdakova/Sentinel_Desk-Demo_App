@@ -31,8 +31,8 @@ Run playbook from UI and show live status until Celery task completes.
 ### AC1 — Start run
 
 - **When** user clicks `data-testid="playbook-run-submit"` on alert `ALERT_FOR_PLAYBOOK`
-- **Then** API `POST /api/v1/playbooks/{id}/run` returns `playbook_run_id` and `task_id`
-- **And** modal shows status `RUNNING`
+- **Then** API `POST /api/v1/playbooks/{id}/run` returns `playbook_run_id` and `status: "PENDING"`
+- **And** modal shows status `RUNNING` once poll reflects worker start
 
 ### AC2 — Polling
 
@@ -55,7 +55,7 @@ Run playbook from UI and show live status until Celery task completes.
 
 ## Technical notes
 
-- TanStack Query `refetchInterval` while `PENDING|RUNNING`
+- TanStack Query `refetchInterval` 2s while polling `GET /api/v1/playbook-runs/{playbook_run_id}` until `SUCCESS` or `FAILED`
 - Disable double-submit while running
 - Timeout UI after 60s with friendly error
 

@@ -1,4 +1,4 @@
-# SENT-603-QA â€” Test: Playbook APIs and job status endpoint
+# SENT-603-QA — Test: Playbook APIs and playbook-run status
 
 | Field | Value |
 |-------|-------|
@@ -13,15 +13,15 @@
 
 ## Summary
 
-Design and implement automated tests for **SENT-603** â€” Playbook APIs and job status endpoint.
+API and integration tests for playbook list, run, and **`GET /api/v1/playbook-runs/{id}`** polling (not a generic jobs URL).
 
 ---
 
 ## Description
 
 **As a** QA engineer  
-**I want** automated coverage for this story  
-**So that** regressions are caught before later epics build on this behavior
+**I want** tests that verify the canonical playbook async contract  
+**So that** SENT-604 UI and integration tests poll the correct endpoint  
 
 ---
 
@@ -34,8 +34,8 @@ Design and implement automated tests for **SENT-603** â€” Playbook APIs and job 
 
 ## Test scope
 
-- **api** â€” add cases under `tests/api/`
-- **integration** â€” add cases under `tests/integration/`
+- **api** — add cases under `tests/api/`
+- **integration** — add cases under `tests/integration/`
 
 ---
 
@@ -43,24 +43,24 @@ Design and implement automated tests for **SENT-603** â€” Playbook APIs and job 
 
 | ID | Layer | Scenario | Expected |
 |----|-------|----------|----------|
-| QA-603-1 | api | Happy path for primary AC | Pass |
-| QA-603-2 | integration | One negative or edge case | Correct error or UI message |
-| QA-603-3 | api | Data matches seed or TEST_DATA.md stable IDs where applicable | Consistent |
-
-Extend with boundary cases from implementation acceptance criteria.
+| QA-603-1 | api | `GET /api/v1/playbooks` as analyst | 200, includes `PLAYBOOK_ISOLATE` |
+| QA-603-2 | api | `POST .../playbooks/{id}/run` on `ALERT_FOR_PLAYBOOK` | Returns `playbook_run_id`, `status: PENDING` |
+| QA-603-3 | integration | Poll `GET /api/v1/playbook-runs/{id}` until `SUCCESS` | Status transitions; no `/jobs/` URL |
+| QA-603-4 | api | Run on CLOSED alert | 400 |
+| QA-603-5 | api | `playbook-runs` response `status` values | Only `PENDING`, `RUNNING`, `SUCCESS`, `FAILED` |
 
 ---
 
 ## Test data
 
-- [TEST_DATA.md](../../TEST_DATA.md)
+- [TEST_DATA.md](../../TEST_DATA.md) — `ALERT_FOR_PLAYBOOK`, `PLAYBOOK_ISOLATE`
 
 ---
 
 ## Out of scope
 
 - Fixing application bugs (file defects under BUG_GARDEN if found)
-- Adding tests under `backend/` or `frontend/`
+- Testing a generic `/api/v1/jobs/{task_id}` route (not part of E06)
 
 ---
 
@@ -69,4 +69,3 @@ Extend with boundary cases from implementation acceptance criteria.
 - [ ] Tests run with `pytest tests/` (appropriate subset/markers)
 - [ ] No dependency on manual data unless documented in test docstring
 - [ ] Test file paths documented in this ticket (edit when created)
-
