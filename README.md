@@ -4,21 +4,29 @@
 
 ## Status
 
+### App implementation (implementation agent)
+
 | Epic | Status |
 |------|--------|
 | E01 SENT-101 | ✅ Docker infrastructure (Postgres, Redis, MailHog) |
-| E01 SENT-101-QA | ✅ Integration tests for infra |
 | E01 SENT-102 | ✅ FastAPI API + `/health` on port 8000 |
-| E01 SENT-102-QA | ✅ API tests for health + `X-Request-ID` |
 | E01 SENT-103+ | Next — DB models, auth, frontend |
+
+### QA automation (QA engineer — separate workflow)
+
+| Epic | Status |
+|------|--------|
+| E01 SENT-101-QA | ✅ Integration tests for infra |
+| E01 SENT-102-QA | ✅ API tests for health + `X-Request-ID` |
+| E01 SENT-103-QA+ | After matching app ticket is complete |
+
+**Implementation agents:** read [docs/IMPLEMENTATION_AGENT.md](docs/IMPLEMENTATION_AGENT.md) — do not modify `tests/` or implement `-QA` tickets.
 
 ## Prerequisites
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows, macOS, or Linux)
-- **QA tests (E01+):** Python 3.12+, `pip install -r requirements-test.txt`
+- Python 3.12+ and IDE of your choice
 - **Later epics:** Node.js 20+ (frontend)
-
-Optional database GUI: [DBeaver](https://dbeaver.io/) or [pgAdmin](https://www.pgadmin.org/) connecting to `localhost:5432`.
 
 ## Local infrastructure (SENT-101)
 
@@ -26,7 +34,6 @@ Optional database GUI: [DBeaver](https://dbeaver.io/) or [pgAdmin](https://www.p
 
 ```powershell
 # From repository root
-cd d:\Personal-Projects\DemoApp
 copy .env.example .env
 docker compose up -d
 docker compose ps
@@ -95,10 +102,11 @@ Aligned with [.env.example](.env.example):
 
 | Document | Purpose |
 |----------|---------|
+| [docs/IMPLEMENTATION_AGENT.md](docs/IMPLEMENTATION_AGENT.md) | **Implementation agent charter** — scope, boundaries, what to ignore |
 | [docs/CONSTITUTION.md](docs/CONSTITUTION.md) | Product vision, modules, pages, roles, NFRs |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Technical design, Docker, APIs, async |
-| [docs/TEST_DATA.md](docs/TEST_DATA.md) | Seed users, stable IDs, reset guide |
-| [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) | How you will test by layer |
+| [docs/TEST_DATA.md](docs/TEST_DATA.md) | Seed users, stable IDs, reset guide (QA) |
+| [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) | QA automation framework (QA engineer only) |
 | [docs/BUG_GARDEN.md](docs/BUG_GARDEN.md) | Intentional defects |
 | [docs/epics/README.md](docs/epics/README.md) | Implementation epics E01–E11 |
 | [docs/tickets/](docs/tickets/) | Implementation + QA tickets per epic |

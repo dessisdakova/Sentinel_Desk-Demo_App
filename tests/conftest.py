@@ -1,30 +1,28 @@
 """Shared pytest configuration and fixtures for SentinelDesk.
 
 Pytest automatically loads this file before running tests. Fixtures defined here
-are available to any test under ``tests/`` when you list the fixture name as a
-test function parameter (pytest **injects** the value — do not import fixtures).
+are available to any test under 'tests/' when you list the fixture name as a
+test function parameter (pytest injects the value — do not import fixtures).
 
 Quick glossary:
     Fixture:
         Reusable setup/teardown (DB connection, HTTP client, skip gates).
     Scope:
-        How long the fixture lives (``function`` = per test, ``session`` = once per run).
+        How long the fixture lives ('function' = per test, 'session' = once per run).
     pytest.skip:
         Mark a test as skipped with a message (e.g. Docker not running).
     Marker:
-        Label tests (``api``, ``integ``) so you can run subsets: ``pytest -m api``.
+        Label tests ('api', 'integ') so you can run subsets: 'pytest -m api'.
 
 Environment:
-    Variables are read from ``.env`` at the repository root (see ``.env.example``).
-    ``load_dotenv()`` runs once when this module is imported.
+    Variables are read from '.env' at the repository root (see '.env.example').
+    'load_dotenv()' runs once when this module is imported.
 
 Ticket mapping:
     SENT-101-QA: Infrastructure fixtures (Postgres, Redis, MailHog).
-    SENT-102-QA: API fixtures (``api_client``, ``require_api``).
+    SENT-102-QA: API fixtures ('api_client', 'require_api').
     Later epics: Auth tokens and DB seed reset will be added here.
 """
-
-from __future__ import annotations
 
 import json
 import os
@@ -42,23 +40,22 @@ from redis.retry import Retry
 
 load_dotenv()
 
+# Seconds to wait for a TCP port check before treating a service as down.
 PORT_CHECK_TIMEOUT = 0.5
-"""Seconds to wait for a TCP port check before treating a service as down."""
 
+# Default timeout (seconds) for Postgres, Redis, and MailHog probe clients.
 CLIENT_TIMEOUT_SEC = 2
-"""Default timeout (seconds) for Postgres, Redis, and MailHog probe clients."""
 
+# Default timeout (seconds) for HTTP calls to the FastAPI application.
 API_TIMEOUT_SEC = 5
-"""Default timeout (seconds) for HTTP calls to the FastAPI application."""
 
 
 def _env(name: str, default: str | None = None) -> str:
     """Read an environment variable or fail the test run with a clear message.
 
     Args:
-        name: Variable name as it appears in ``.env`` (e.g. ``POSTGRES_HOST``).
-        default: Value to use when the variable is unset. If the result is still
-            empty, ``pytest.fail`` is raised.
+        name: Variable name as it appears in '.env' (e.g. 'POSTGRES_HOST').
+        default: Value to use when the variable is unset.
 
     Returns:
         Non-empty string value.
@@ -73,21 +70,13 @@ def _env(name: str, default: str | None = None) -> str:
 
 
 def _postgres_connect_kwargs(**overrides: Any) -> dict[str, Any]:
-    """Build keyword arguments for ``psycopg2.connect`` from environment variables.
-
-    Uses psycopg2's parameter name ``dbname`` (not ``database``).
+    """Build keyword arguments for db connection from environment variables.
 
     Args:
-        **overrides: Any key to replace in the base dict (e.g. ``password="wrong"``
-            for negative tests).
+        **overrides: Any key to replace in the base dict (e.g. password="wrong").
 
     Returns:
-        Dict suitable for ``psycopg2.connect(**kwargs)``.
-
-    Example:
-        >>> kwargs = _postgres_connect_kwargs()
-        >>> kwargs["host"]
-        'localhost'
+        Dictionary of db keyword arguments.
     """
     base = {
         "host": _env("POSTGRES_HOST", "localhost"),
@@ -101,15 +90,15 @@ def _postgres_connect_kwargs(**overrides: Any) -> dict[str, Any]:
 
 
 def _redis_connect_kwargs(**overrides: Any) -> dict[str, Any]:
-    """Build keyword arguments for ``redis.Redis`` with safe timeouts and no retries.
+    """Build keyword arguments for redis client with safe timeouts and no retries.
 
     Disabling retries avoids long hangs when Docker is stopped (redis-py 6+).
 
     Args:
-        **overrides: Keys to merge into the connection settings.
+        **overrides: Any key to replace in the base dict.
 
     Returns:
-        Dict suitable for ``redis.Redis(**kwargs)``.
+        Dictionary of redis client keyword arguments.
     """
     base = {
         "host": _env("REDIS_HOST", "localhost"),
@@ -131,8 +120,8 @@ def _port_is_open(host: str, port: int, timeout: float = PORT_CHECK_TIMEOUT) -> 
     before heavier clients so pytest skips quickly instead of hanging.
 
     Args:
-        host: Hostname or IP (e.g. ``"localhost"``). Must **not** be a full URL.
-        port: Port number (e.g. ``5432``, ``8000``).
+        host: Hostname or IP (e.g. localhost). Must not be a full URL.
+        port: Port number (e.g. 5432, 8000).
         timeout: Maximum seconds to wait for a connection attempt.
 
     Returns:
@@ -146,18 +135,14 @@ def _port_is_open(host: str, port: int, timeout: float = PORT_CHECK_TIMEOUT) -> 
 
 
 def _api_host_and_port(base_url: str, fallback_port: int = 8000) -> tuple[str, int]:
-    """Split an HTTP base URL into hostname and port for ``_port_is_open``.
+    """Split an HTTP base URL into hostname and port.
 
     Args:
-        base_url: Full base URL (e.g. ``"http://localhost:8000"``).
+        base_url: Full base URL (e.g. 'http://localhost:8000').
         fallback_port: Port used when the URL omits an explicit port.
 
     Returns:
-        Tuple ``(hostname, port)`` suitable for socket checks.
-
-    Example:
-        >>> _api_host_and_port("http://localhost:8000")
-        ('localhost', 8000)
+        Tuple (hostname, port) suitable for socket checks.
     """
     parsed = urlparse(base_url)
     host = parsed.hostname or "localhost"
@@ -166,7 +151,7 @@ def _api_host_and_port(base_url: str, fallback_port: int = 8000) -> tuple[str, i
 
 
 def _can_connect_postgres() -> bool:
-    """Probe PostgreSQL with a real connection and ``SELECT 1``.
+    """Probe PostgreSQL with a real connection and 'SELECT 1'.
 
     Returns:
         True if Postgres is reachable and accepts a query; False otherwise.
@@ -184,7 +169,7 @@ def _can_connect_postgres() -> bool:
 
 
 def _can_ping_redis() -> bool:
-    """Probe Redis with ``PING``.
+    """Probe Redis with 'PING'.
 
     Returns:
         True if Redis responds to PING; False otherwise.
@@ -239,7 +224,7 @@ def require_infrastructure():
 
 @pytest.fixture(scope="session")
 def postgres_settings():
-    """Valid PostgreSQL connection settings from ``.env``."""
+    """Valid PostgreSQL connection settings from '.env'."""
     return _postgres_connect_kwargs()
 
 
@@ -277,12 +262,7 @@ def mailhog_ui_url(require_infrastructure):
 
 @pytest.fixture(scope="session")
 def api_base_url():
-    """Root URL of the SentinelDesk FastAPI service.
-
-    Note:
-        This is the single source of truth for API tests. Other API fixtures build
-        on this value.
-    """
+    """Root URL of the SentinelDesk FastAPI service."""
     return _env("API_BASE_URL", "http://localhost:8000").rstrip("/")
 
 

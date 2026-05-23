@@ -44,6 +44,6 @@
 
 ## QA notes
 
-- E2E: filter CRITICAL + verify row count matches API
-- E2E: bulk assign (becomes BUG-002 target in E10)
 - API: pagination boundaries, invalid filter values 422
+- E2E: filter CRITICAL + verify row count — requires SENT-107-QA bootstrap; expand `AlertQueuePage` in SENT-303-QA / SENT-1003-QA
+- E2E: bulk assign (becomes BUG-002 target in E10)

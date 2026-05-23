@@ -1,4 +1,4 @@
-# SENT-803 — Audit log API and pagination
+﻿# SENT-803 — Audit log API and pagination
 
 | Field | Value |
 |-------|-------|
@@ -19,20 +19,22 @@ Audit log API and pagination.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Dashboard and Audit
+**As a** SOC lead  
+**I want** a paginated, filterable audit log endpoint restricted to Lead+ roles  
+**So that** I can trace every action taken on alerts and cases for compliance reviews and incident post-mortems
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Audit log endpoint with role gate
 
-- [ ] GET /api/v1/audit LEAD+ only
-### AC2 —
+- [ ] `GET /api/v1/audit` requires `LEAD` or `ADMIN` role; an `ANALYST` receives `403 Forbidden`
+- [ ] Returns a paginated response: `{ "items": [...], "total": N, "page": N, "size": N }`
 
-- [ ] Filters: from, to, actor, entity_type
+### AC2 — Filter parameters
+
+- [ ] Supports query params: `from` (ISO date), `to` (ISO date), `actor` (user UUID), `entity_type` (e.g. `alert`, `case`)
 
 ---
 
@@ -53,4 +55,6 @@ Audit log API and pagination.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

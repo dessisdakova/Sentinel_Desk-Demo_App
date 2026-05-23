@@ -15,13 +15,19 @@ E2E and integration tests for async playbook execution UI.
 
 ---
 
+## Prerequisites
+
+- [ ] **SENT-107-QA** E2E bootstrap complete (required for QA-604-2)
+
+---
+
 ## Test cases
 
 | ID | Layer | Scenario | Expected |
 |----|-------|----------|----------|
 | QA-604-1 | integration | POST run → poll DB `playbook_runs.status` until SUCCESS | Pass |
 | QA-604-2 | e2e | Run Isolate playbook on `ALERT_FOR_PLAYBOOK` | Success banner within 30s (WebDriverWait) |
-| QA-604-3 | api | Run on CLOSED alert | 400 |
+| QA-604-3 | api | Run playbook on alert with terminal status (e.g. `CLOSED`) | 400 `ALERT_TERMINAL` |
 
 ---
 

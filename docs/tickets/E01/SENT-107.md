@@ -1,4 +1,4 @@
-# SENT-107 — Login page with data-testid
+﻿# SENT-107 — Login page with data-testid
 
 | Field | Value |
 |-------|-------|
@@ -19,26 +19,31 @@ Login page with data-testid.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Platform Foundation
+**As a** SOC analyst  
+**I want** a login form with stable `data-testid` attributes on every interactive element  
+**So that** I can sign in to SentinelDesk and Selenium tests can reliably locate and interact with the form without depending on CSS classes or text content
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Page root testid
 
-- [ ] page-login root data-testid=page-login
-### AC2 —
+- [ ] Login page root element has `data-testid="page-login"`
 
-- [ ] Fields: login-email, login-password, login-submit
-### AC3 —
+### AC2 — Form field testids
 
-- [ ] Shows API error toast on 401
-### AC4 —
+- [ ] Email input: `data-testid="login-email"`
+- [ ] Password input: `data-testid="login-password"`
+- [ ] Submit button: `data-testid="login-submit"`
 
-- [ ] Successful login redirects to /dashboard
+### AC3 — Error feedback
+
+- [ ] Shows an error toast or inline message when the API returns `401` (invalid credentials)
+
+### AC4 — Redirect on success
+
+- [ ] Successful login redirects the user to `/dashboard`
 
 ---
 
@@ -59,4 +64,6 @@ Login page with data-testid.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

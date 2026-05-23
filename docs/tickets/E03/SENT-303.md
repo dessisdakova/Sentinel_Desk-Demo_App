@@ -1,4 +1,4 @@
-# SENT-303 — Alert queue React page and table
+﻿# SENT-303 — Alert queue React page and table
 
 | Field | Value |
 |-------|-------|
@@ -19,23 +19,25 @@ Alert queue React page and table.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Triage Queue UI
+**As a** SOC analyst  
+**I want** a paginated data table at `/alerts` that shows all key alert fields at a glance  
+**So that** I can quickly scan and navigate to the alerts that need my attention without loading each one individually
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Page route and root testid
 
-- [ ] Route /alerts data-testid=page-alert-queue
-### AC2 —
+- [ ] Route `/alerts` renders with `data-testid="page-alert-queue"` on the root element
 
-- [ ] Columns: title, severity, status, source, assignee, sla_due_at, created_at
-### AC3 —
+### AC2 — Table columns
 
-- [ ] Server-driven pagination 25/50/100
+- [ ] Table shows columns: `title`, `severity`, `status`, `source`, `assignee`, `sla_due_at`, `created_at`
+
+### AC3 — Server-driven pagination
+
+- [ ] Page size selector with options 25, 50, 100; navigating pages calls the API with updated `page` and `size` params
 
 ---
 
@@ -56,4 +58,6 @@ Alert queue React page and table.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

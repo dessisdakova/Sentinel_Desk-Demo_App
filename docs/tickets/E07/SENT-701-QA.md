@@ -28,7 +28,7 @@ Design and implement automated tests for **SENT-701** â€” Webhook subscription m
 ## Prerequisites
 
 - [ ] Implementation ticket **SENT-701** is complete and merged/runnable
-- [ ] Prefer `POST /api/v1/test/reset` before run if SENT-1001 done; else re-seed manually
+- [ ] **Seed baseline** — before SENT-1001 (E10): manual re-seed ([TEST_DATA.md §5](../../TEST_DATA.md#5-how-to-reset-by-phase) Option B/C); after SENT-1002-QA: `clean_db` or reset API
 
 ---
 

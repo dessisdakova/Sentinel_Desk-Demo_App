@@ -1,4 +1,4 @@
-# SENT-505 — Add to case from alert detail
+﻿# SENT-505 — Add to case from alert detail
 
 | Field | Value |
 |-------|-------|
@@ -19,20 +19,26 @@ Add to case from alert detail.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Case Management
+**As a** SOC analyst  
+**I want** to link an alert to a case directly from the alert detail page  
+**So that** I can group related alerts into investigations without leaving the alert I am currently triaging
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Add-to-case modal
 
-- [ ] Modal: create new case or add to existing
-### AC2 —
+- [ ] Alert detail Summary tab has an "Add to case" button (`data-testid="add-to-case-btn"`) that opens a modal offering two options:
+  - **Create new case** — opens a form with title/priority fields
+  - **Add to existing case** — shows a searchable dropdown of open cases
+- [ ] Confirming either option calls `POST /api/v1/cases/{id}/alerts` and refreshes the alert status to `MERGED`
 
-- [ ] data-testid add-to-case-*
+### AC2 — Testids on modal controls
+
+- [ ] Modal root: `data-testid="add-to-case-modal"`
+- [ ] New case option: `data-testid="add-to-case-new"`, existing case option: `data-testid="add-to-case-existing"`
+- [ ] Confirm button: `data-testid="add-to-case-confirm"`
 
 ---
 
@@ -53,4 +59,6 @@ Add to case from alert detail.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

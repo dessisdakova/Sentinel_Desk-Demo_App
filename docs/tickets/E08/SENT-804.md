@@ -1,4 +1,4 @@
-# SENT-804 — Audit page and CSV export
+﻿# SENT-804 — Audit page and CSV export
 
 | Field | Value |
 |-------|-------|
@@ -19,20 +19,22 @@ Audit page and CSV export.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Dashboard and Audit
+**As a** SOC lead  
+**I want** an audit log page with an export-to-CSV button that downloads the currently filtered rows  
+**So that** I can share audit evidence with compliance teams or store it offline without requiring DB access
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Audit log page route
 
-- [ ] Route /audit with export button
-### AC2 —
+- [ ] Route `/audit` renders with `data-testid="page-audit"` and displays the paginated audit log table (consumes the API from SENT-803)
 
-- [ ] CSV download for current filter
+### AC2 — CSV export for current filter
+
+- [ ] An "Export CSV" button (`data-testid="audit-export-csv-btn"`) triggers a download of the audit rows matching the current filter (same `from`, `to`, `actor`, `entity_type` params)
+- [ ] The export endpoint returns a CSV file (`Content-Type: text/csv`) — implement server-side CSV generation (do **not** silently truncate; see BUG-005 which will be planted in E10)
 
 ---
 
@@ -53,4 +55,6 @@ Audit page and CSV export.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

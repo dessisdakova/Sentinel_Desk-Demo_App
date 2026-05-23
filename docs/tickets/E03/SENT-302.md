@@ -43,8 +43,8 @@ Single-alert PATCH and bulk assign / change-status API with audit logging.
 
 ### AC3 — Partial failure
 
-- **Given** one alert `CLOSED` in bulk request
-- **Then** `200` with one success and `failed` entry `INVALID_STATE`
+- **Given** one alert in a **terminal** `AlertStatus` (`CLOSED`, `FALSE_POSITIVE`, `TRUE_POSITIVE`, or `MERGED`) in bulk request
+- **Then** `200` with one success and `failed` entry `INVALID_STATE` with code `ALERT_TERMINAL`
 
 ### AC4 — Bulk change status
 
@@ -61,6 +61,7 @@ Single-alert PATCH and bulk assign / change-status API with audit logging.
 
 - Document transaction strategy in code comment
 - Error shape per CONSTITUTION §12.2
+- Alert `status` values per CONSTITUTION §5.2 (`AlertStatus`) — distinct from `CaseStatus`
 
 ---
 

@@ -32,11 +32,11 @@ API and DB integration tests for single and bulk alert updates.
 
 ## Test data
 
-- [TEST_DATA.md](../../TEST_DATA.md) — `ALERT_OPEN_HIGH`, second alert UUID
+- [TEST_DATA.md](../../TEST_DATA.md) — `ALERT_OPEN_HIGH` (`seed-edr-001`), second alert constant as needed
 
 ---
 
 ## Definition of Done
 
 - [ ] `tests/api/test_alerts_bulk.py` (or equivalent) passes
-- [ ] Uses reset when SENT-1001 available
+- [ ] Mutating tests leave DB restorable — manual re-seed before SENT-1001; `clean_db` after SENT-1002-QA

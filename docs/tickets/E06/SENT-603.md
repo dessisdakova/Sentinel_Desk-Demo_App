@@ -1,4 +1,4 @@
-# SENT-603 — Playbook APIs and job status endpoint
+﻿# SENT-603 — Playbook APIs and playbook-run status
 
 | Field | Value |
 |-------|-------|
@@ -13,50 +13,58 @@
 
 ## Summary
 
-Playbook APIs and job status endpoint.
+Playbook list/run APIs and playbook-run status endpoint (single poll URL for async UI).
 
 ---
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Playbooks and Async Execution
+**As an** analyst  
+**I want** REST endpoints to list playbooks, start a run, and poll run status  
+**So that** the UI modal can show progress until completion  
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — List playbooks
 
-- [ ] GET /api/v1/playbooks
-### AC2 —
+- [ ] `GET /api/v1/playbooks` — analyst JWT; returns seeded playbooks
 
-- [ ] POST /api/v1/playbooks/{id}/run
-### AC3 —
+### AC2 — Start run
 
-- [ ] GET /api/v1/playbook-runs/{id}
-### AC4 —
+- [ ] `POST /api/v1/playbooks/{id}/run` with body `{ "alert_id": "<uuid>" }` (analyst JWT)
+- [ ] Returns `201` or `202` with `{ "playbook_run_id", "status": "PENDING" }`
+- [ ] Enqueues Celery `run_playbook`; stores optional `celery_task_id` on row (internal — not required in response)
 
-- [ ] GET /api/v1/jobs/{task_id}
+### AC3 — Poll run status (canonical async endpoint)
+
+- [ ] `GET /api/v1/playbook-runs/{id}` — analyst JWT
+- [ ] Response includes `status` (`PENDING` \| `RUNNING` \| `SUCCESS` \| `FAILED`), `steps_completed`, `error_message` when failed
+- [ ] OpenAPI documents PlaybookRun status enum — **not** Celery `FAILURE`
+
+### AC4 — Negative
+
+- [ ] Run on invalid alert or alert in **terminal** `AlertStatus` → `400` (`ALERT_TERMINAL`)
 
 ---
 
 ## Technical notes
 
+- Follow [ARCHITECTURE.md](../../ARCHITECTURE.md) §5.2 — **no** `GET /api/v1/jobs/{task_id}` in this epic
+- Map Celery task state → `playbook_runs.status` in worker (SENT-602)
+
 ---
 
 ## Out of scope
 
+- Generic Celery job status route
 - Any files under repository root `tests/` (see paired QA ticket)
-- Developer unit tests inside `backend/` or `frontend/`
 
 ---
 
 ## Definition of Done
 
 - [ ] Acceptance criteria met
-- [ ] `data-testid` hooks on new UI controls (if frontend)
-- [ ] OpenAPI updated (if API)
+- [ ] OpenAPI updated
 - [ ] No test modules added outside `tests/`
-

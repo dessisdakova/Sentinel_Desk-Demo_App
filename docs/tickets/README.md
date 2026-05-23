@@ -1,17 +1,26 @@
 # SentinelDesk — Ticket index
 
-Jira-style tickets for **implementation** (app code only) and **QA** (your tests in root `tests/`).
+Jira-style tickets for **implementation** (app code only) and **QA** (human QA engineer + separate QA workflow).
+
+**Implementation agents:** start with [IMPLEMENTATION_AGENT.md](../IMPLEMENTATION_AGENT.md). Implement `SENT-###` only — never `-QA` tickets.
 
 ## Workflow
 
 ```text
-For each epic (E01 → E11):
-  1. Implement SENT-###     ← AI builds app; no test files
-  2. Complete SENT-###-QA   ← You write pytest/Selenium under tests/
-  3. Next ticket
+Implementation agent (per epic):
+  1. Implement SENT-###     ← app code only; never tests/
+  2. Stop — QA is a separate human workflow
+
+QA engineer (separate AI assistant):
+  1. After app story is runnable, complete SENT-###-QA under tests/
+  2. Next QA ticket
 ```
 
-**Exception:** `SENT-1003-QA` has no implementation ticket (Selenium scaffolding only).
+**QA-only tickets (no implementation story):** [SENT-1002-QA](./E10/SENT-1002-QA.md) (supersedes SENT-1002), [SENT-1003-QA](./E10/SENT-1003-QA.md) (Selenium POM polish — bootstrap is SENT-107-QA).
+
+**E2E prerequisite:** UI tickets with e2e scope require [SENT-107-QA](./E01/SENT-107-QA.md) bootstrap first (TESTING_STRATEGY §4.3).
+
+**Seed baseline (all QA tickets):** Before **SENT-1001** app (E10), use manual re-seed ([TEST_DATA.md §5 Option B/C](../TEST_DATA.md#5-how-to-reset-by-phase)). After **SENT-1002-QA**, prefer `clean_db` fixture / reset API.
 
 ## Epics
 
@@ -26,10 +35,10 @@ For each epic (E01 → E11):
 | SENT-E07 Webhooks | [E07](./E07/README.md) | 4 | 4 |
 | SENT-E08 Dashboard & Audit | [E08](./E08/README.md) | 4 | 4 |
 | SENT-E09 Admin & Notifications | [E09](./E09/README.md) | 4 | 4 |
-| SENT-E10 Test Harness & Bug Garden | [E10](./E10/README.md) | 3 + harness | 4 (incl. 1003-QA only) |
+| SENT-E10 Test Harness & Bug Garden | [E10](./E10/README.md) | 2 (1001, 1004) | 4 (incl. 1002-QA, 1003-QA QA-only) |
 | SENT-E11 Portfolio Scale | [E11](./E11/README.md) | 3 | 3 |
 
-**Total:** 53 implementation tickets + 54 QA tickets.
+**Total:** 52 implementation tickets + 54 QA tickets.
 
 ## Ticket format
 

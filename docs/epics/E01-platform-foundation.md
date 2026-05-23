@@ -8,20 +8,33 @@
 
 ## Goals
 
-- One command starts the full local stack
-- Users authenticate with JWT and see role-appropriate navigation
+- One command starts the full local stack **once E01 is complete** (services are added incrementally per story — see story breakdown below)
+- Users authenticate with JWT Bearer (`Authorization` header) and see role-appropriate navigation
 - Database migrations run cleanly on empty DB
 
 ---
 
-## Acceptance criteria (epic level)
+## Acceptance criteria (epic level — cumulative)
 
-- [ ] `docker compose up` starts postgres, redis, api, frontend (dev), mailhog
-- [ ] `alembic upgrade head` creates schema
-- [ ] `scripts/seed.py` creates 3 users per TEST_DATA.md
-- [ ] Login works for all roles; invalid password returns 401
-- [ ] Protected route returns 403 for wrong role
-- [ ] README documents prerequisites (Docker Desktop, Python 3.12)
+These criteria describe **epic completion after SENT-108**, not what any single story must deliver on its own. When implementing one ticket, follow **only that ticket’s acceptance criteria** ([IMPLEMENTATION_AGENT.md](../IMPLEMENTATION_AGENT.md): ticket beats epic summary).
+
+| Epic criterion (done when epic is complete) | Delivered by |
+|---------------------------------------------|--------------|
+| `docker compose up` starts postgres, redis, mailhog | SENT-101 |
+| `docker compose up` starts `api` on port 8000 | SENT-102 |
+| `docker compose up` starts `frontend` (dev, port 5173) | SENT-106 |
+| `alembic upgrade head` creates schema | SENT-103 |
+| `backend/scripts/seed.py` creates **3 users only** per TEST_DATA.md | SENT-108 |
+| Login works for all roles; invalid password returns 401 | SENT-104 |
+| Protected route returns 403 for wrong role | SENT-105 |
+| README documents prerequisites (Docker Desktop, Python 3.12) | SENT-101 (+ updated in later stories as needed) |
+
+**Epic checklist** (verify after SENT-108, not mid-epic):
+
+- [ ] Full stack from table above runs with one `docker compose up`
+- [ ] Schema migrated; seed users loaded
+- [ ] Auth + RBAC behave as specified
+- [ ] README prerequisites documented
 
 ---
 

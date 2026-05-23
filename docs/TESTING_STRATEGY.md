@@ -1,5 +1,7 @@
 # SentinelDesk — QA Testing Strategy
 
+**Audience — QA engineer only.** The implementation agent must **not** follow this document or create files under `tests/`. See [IMPLEMENTATION_AGENT.md](./IMPLEMENTATION_AGENT.md).
+
 ## 1. Purpose and scope
 
 This document defines the testing approach for the SentinelDesk QA automation framework.
@@ -96,11 +98,22 @@ assert audit.action == "ALERT_ASSIGNED"
 
 | Attribute | Detail |
 |-----------|--------|
-| Scope | Full browser workflows — login, queue, alert detail, modals, playbook polling, email |
+| Scope | Full browser workflows — login, queue, alert detail, modals, playbook polling, iframe |
 | Tool | Selenium 4 + WebDriver Manager + pytest; Page Object Model under `tests/e2e/pages/` |
-| Gate | `require_infrastructure` + `require_api` + browser available |
+| Gate | `require_infrastructure` + `require_api` + frontend on `:5173` + browser available |
 | Characteristics | Slowest tier; critical paths only; always use `WebDriverWait`, never `time.sleep()` |
-| Starts | SENT-303-QA (React frontend implemented) |
+
+**E2E timeline (two phases — avoids E03 vs E10 conflict):**
+
+| Phase | QA ticket | What |
+|-------|-----------|------|
+| **Bootstrap** | **SENT-107-QA** (E01, login page shipped) | First creation of `tests/e2e/`: `conftest.py` (WebDriver), `pages/login_page.py`, login smoke tests |
+| **Feature E2E** | E03+ UI `-QA` tickets (e.g. SENT-303-QA) | Add `test_*.py` per page/feature using the bootstrap scaffold |
+| **Standardize** | **SENT-1003-QA** (E10) | Enhance shared POM (`AlertQueuePage`), polish `tests/e2e/conftest.py` — **does not** first-create the e2e tree |
+
+**Before SENT-107-QA:** E01 `SENT-101-QA`–`SENT-106-QA` use **api** and **integration** only — no browser tests.
+
+**Prerequisite for any E03+ e2e work:** SENT-107-QA bootstrap complete.
 
 ### 4.4 Performance tests (`tests/performance/`) — E11+
 
@@ -137,7 +150,7 @@ assert audit.action == "ALERT_ASSIGNED"
 | redis-py | Direct Redis checks in integration tests | Active |
 | python-dotenv | Load `.env` into `os.environ` before tests | Active |
 | ruff | Linting and formatting (replaces flake8 + isort + Black) | Active |
-| Selenium 4 + WebDriver Manager | E2E browser automation | Planned (SENT-303-QA+) |
+| Selenium 4 + WebDriver Manager | E2E browser automation | From SENT-107-QA (bootstrap); POM polish in SENT-1003-QA |
 | pytest-asyncio | Async test support if async DB sessions are needed | Planned (E02+) |
 | freezegun | Freeze time for dashboard timezone bug (BUG-007) | Planned (E08-QA) |
 | Locust | Performance load testing | Planned (E11) |
@@ -160,7 +173,7 @@ tests/
 ├── integration/             # Cross-layer tests: API + DB, async jobs, email
 │   ├── __init__.py
 │   └── test_infrastructure.py
-├── e2e/                     # Browser tests — added in SENT-303-QA
+├── e2e/                     # Selenium — bootstrap SENT-107-QA; feature tests E03+; POM polish SENT-1003-QA
 │   ├── __init__.py
 │   └── pages/               # Page Object Model classes
 └── performance/             # Locust scenarios — added in E11
@@ -168,6 +181,19 @@ tests/
 
 **Policy:** No `tests/` folders under `backend/` or `frontend/`.
 All QA automation lives exclusively under the root `tests/`.
+
+### Test harness phases (QA-owned vs app-owned)
+
+The **QA engineer** builds and extends the harness; the implementation agent never touches `tests/`.
+
+| Phase | Owner | Scope |
+|-------|-------|-------|
+| **E01 foundation** | QA (`SENT-101-QA`, `SENT-102-QA`, …) | Create `tests/`, `pytest.ini`, `conftest.py`, `api/`, `integration/`, `data/` |
+| **E02–E09** | QA (each `-QA` ticket) | API/integration tests; UI epics add `tests/e2e/` **after SENT-107-QA bootstrap** |
+| **E10 app** | Implementation agent (`SENT-1001`, `SENT-1004`) | Reset API; plant bugs in app code only |
+| **E10 QA** | QA (`SENT-1001-QA` … `SENT-1004-QA`) | `admin_api_client`, `clean_db`, xfail tests; **SENT-1003-QA** enhances Selenium POM (see §4.3) |
+
+See [CONSTITUTION.md §3.6](./CONSTITUTION.md#36-test-harness-phases-qa-owned-vs-app-owned).
 
 **Naming conventions:**
 
@@ -210,21 +236,27 @@ pytest -m bug --runxfail           # Run bug tests to check if any are now fixed
 
 Full reference: `docs/TEST_DATA.md`. Summary of rules:
 
-**Stable seed IDs:**
-Fixed UUIDs written by `scripts/seed.py`. Always use these constants in assertions.
+**Stable seed IDs:** fixed UUIDs and `external_id` strings — full table in [TEST_DATA.md §3](./TEST_DATA.md#3-stable-entity-ids-canonical--do-not-change-without-updating-tests). Summary:
 
-| Constant | UUID | Used for |
-|----------|------|---------|
-| `ALERT_OPEN_HIGH` | `11111111-...01` | Default queue E2E |
-| `ALERT_ESCALATED` | `11111111-...02` | Lead approval tests |
-| `ALERT_FOR_PLAYBOOK` | `11111111-...03` | Async playbook run |
-| `CASE_ACTIVE` | `22222222-...01` | Case detail navigation |
-| `PLAYBOOK_ISOLATE` | `33333333-...01` | Run playbook modal |
+| Constant | UUID (`id`) | `external_id` |
+|----------|-------------|---------------|
+| `ALERT_OPEN_HIGH` | `11111111-1111-4111-8111-111111111101` | `seed-edr-001` |
+| `ALERT_ESCALATED` | `11111111-1111-4111-8111-111111111102` | `seed-phish-002` |
+| `ALERT_FOR_PLAYBOOK` | `11111111-1111-4111-8111-111111111103` | `seed-edr-playbook-003` |
+| `CASE_ACTIVE` | `22222222-2222-4222-8222-222222222201` | — |
+| `PLAYBOOK_ISOLATE` | `33333333-3333-4333-8333-333333333301` | — |
 
-**Reset before E2E suites** via the planned `clean_db` fixture (added in E10):
+**Reset / seed baseline (timeline):**
+
+| Phase | How QA restores baseline |
+|-------|--------------------------|
+| **E01–E09** (before SENT-1001 app) | Manual re-seed — [TEST_DATA.md §5 Option B/C](./TEST_DATA.md#5-how-to-reset-by-phase) |
+| **E10+** (after SENT-1001 app + SENT-1002-QA) | `clean_db` fixture → `POST /api/v1/test/reset` |
+
+**`clean_db` fixture** (SENT-1002-QA, requires SENT-1001 reset API):
 
 ```python
-# tests/conftest.py — added in E10 when reset API exists
+# tests/conftest.py — SENT-1002-QA only (not before reset API exists)
 @pytest.fixture(scope="function")
 def clean_db(admin_api_client):
     """Reset database to seed state before each test."""
@@ -302,7 +334,7 @@ docker compose ps      # confirm no "Exit" status
 - Implementation ticket is merged and the feature is deployed to local Docker.
 - `docker compose ps` shows no stopped containers.
 - `pytest -m smoke` passes with no failures.
-- Seed data is in place (or `POST /api/v1/test/reset` succeeds when available).
+- Seed data is in place — manual CLI seed before SENT-1001; reset API or `clean_db` after SENT-1001 + SENT-1002-QA.
 
 ### Exit criteria (before marking a QA ticket complete)
 
@@ -347,6 +379,6 @@ Run before any focused test session:
 1. `docker compose up -d` — start all containers
 2. `docker compose ps` — confirm no "Exit" status
 3. `pytest -m smoke` — baseline health check
-4. When available: `POST /api/v1/test/reset` — restore seed state
+4. Restore seed baseline — **before SENT-1001:** CLI re-seed ([TEST_DATA.md §5](./TEST_DATA.md#5-how-to-reset-by-phase)); **after SENT-1002-QA:** `clean_db` or reset API
 5. Open MailHog at http://localhost:8025 — clear inbox if email tests follow
 6. Run targeted suite: `pytest -m api -v` or `pytest tests/integration/ -v`

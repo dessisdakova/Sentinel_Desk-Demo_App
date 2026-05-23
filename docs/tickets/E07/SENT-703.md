@@ -1,4 +1,4 @@
-# SENT-703 — mock-siem callback endpoint
+﻿# SENT-703 — mock-siem callback endpoint
 
 | Field | Value |
 |-------|-------|
@@ -19,20 +19,21 @@ mock-siem callback endpoint.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Outbound Webhooks
+**As a** QA engineer  
+**I want** the mock SIEM service to expose a callback endpoint that records the last received webhook payload  
+**So that** integration tests can assert that outbound webhook deliveries reach the expected destination with the correct payload
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Callback endpoint
 
-- [ ] mock-siem exposes POST /callback
-### AC2 —
+- [ ] The `mock-siem` service exposes `POST /callback` which accepts any JSON body and returns `200`
 
-- [ ] Records last payload for tests
+### AC2 — Last payload accessible for tests
+
+- [ ] The mock SIEM stores the most recently received payload in memory and exposes it via `GET /callback/last` (returns `null` if no payload received yet)
 
 ---
 
@@ -53,4 +54,6 @@ mock-siem callback endpoint.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

@@ -1,6 +1,9 @@
 # SentinelDesk — Technical Architecture
 
-Companion to [CONSTITUTION.md](./CONSTITUTION.md). Read this before implementing or writing integration tests.
+**Audience — implementation agent:** Primary technical reference for `SENT-###` tickets. Read with [IMPLEMENTATION_AGENT.md](./IMPLEMENTATION_AGENT.md).  
+**Audience — QA engineer:** Use integration-test patterns in §4.3 when writing `-QA` tickets.
+
+Companion to [CONSTITUTION.md](./CONSTITUTION.md).
 
 ---
 
@@ -55,12 +58,24 @@ sequenceDiagram
 
 ## 3. Authentication & authorization
 
+**Auth contract (canonical — do not mix cookie sessions or refresh tokens in E01):**
+
+| Aspect | Choice |
+|--------|--------|
+| Token type | JWT **access token** only (HS256, `JWT_SECRET`) |
+| Lifetime | **8 hours** — `JWT_EXPIRE_HOURS=8` in `.env`; login returns `expires_in` seconds (28800) |
+| Transport | `Authorization: Bearer <access_token>` on API calls |
+| SPA storage | In-memory React state + `sessionStorage` key `sentinel_access_token` |
+| Refresh token | **Out of scope** until a future ticket explicitly adds it |
+| Cookies | **Not used** for auth in this project (no HttpOnly session cookie) |
+| Ingest / service | Separate **`X-API-Key`** header — not the user JWT |
+
 ### 3.1 Flow
 
-1. `POST /api/v1/auth/login` with email/password → returns JWT access token (8h) + refresh optional.
-2. SPA stores token in memory + `sessionStorage` (document security tradeoff for demo).
-3. Each request: `Authorization: Bearer <token>`.
-4. FastAPI dependency `require_roles(["ANALYST"])` enforces RBAC.
+1. `POST /api/v1/auth/login` with email/password → returns JWT access token + `expires_in` (seconds).
+2. SPA stores token in memory + `sessionStorage` (`sentinel_access_token`); clears both on logout.
+3. Each API request: `Authorization: Bearer <token>`.
+4. FastAPI dependency `require_roles(["ANALYST"])` enforces RBAC from JWT claims.
 
 ### 3.2 Test users (seed)
 
@@ -68,10 +83,12 @@ See [TEST_DATA.md](./TEST_DATA.md).
 
 ### 3.3 Test-only endpoints
 
-| Endpoint | Guard |
-|----------|-------|
-| `POST /api/v1/test/reset` | `ADMIN` + `ENVIRONMENT != production` |
-| `POST /api/v1/dev/seed-bulk` | `ADMIN` + non-prod |
+| Endpoint | Guard | When implemented |
+|----------|-------|------------------|
+| `POST /api/v1/test/reset` | `ADMIN` + `ENVIRONMENT != production` | **E10 / SENT-1001** — spec only until then |
+| `POST /api/v1/dev/seed-bulk` | `ADMIN` + non-prod | **E11** |
+
+**Implementation agent:** Do not add these routes before their tickets. QA uses CLI seed (`backend/scripts/seed.py`) until reset API exists.
 
 ---
 
@@ -120,17 +137,28 @@ def test_assign_alert_persists(client, db_session, analyst_token):
 | `deliver_webhook` | Alert status change | HTTP with retries |
 | `send_email` | Escalation, assignment | SMTP → MailHog |
 
-### 5.2 Job status API
+### 5.2 Async status — what to poll (canonical)
 
-`GET /api/v1/jobs/{task_id}` → `{ "status": "PENDING|SUCCESS|FAILURE", "result": ... }`
+Do **not** expose a generic `GET /api/v1/jobs/{task_id}` for playbooks. Use domain endpoints only:
 
-SPA polls this for playbook modal.
+| Feature | Client polls | Status field / values | Terminal |
+|---------|--------------|------------------------|----------|
+| **Playbook run** | `GET /api/v1/playbook-runs/{id}` | `status`: `PENDING` → `RUNNING` → `SUCCESS` \| `FAILED` | `SUCCESS`, `FAILED` |
+| **Alert enrichment** (ingest) | `GET /api/v1/alerts/{id}` | `enrichment_status`: `PENDING` → `COMPLETE` | `COMPLETE` |
+
+**PlaybookRun `status` enum (API + DB + UI):** `PENDING`, `RUNNING`, `SUCCESS`, `FAILED` — never use Celery’s `FAILURE` in public JSON.
+
+**Internal:** Celery `task_id` may be stored on `playbook_runs` for worker wiring — not returned to SPA and not a separate poll URL in E06.
+
+**Enum separation:** Do not reuse status strings across entities — see [CONSTITUTION.md](./CONSTITUTION.md) §5.2 (`AlertStatus`, `CaseStatus`, `PlaybookRunStatus`).
+
+**SPA playbook modal:** poll `GET /api/v1/playbook-runs/{playbook_run_id}` every 2s until terminal (see SENT-604).
 
 ### 5.3 Flakiness guidance for QA
 
 - Prefer **explicit waits** on `data-testid="playbook-run-status-success"` with timeout 30s.
 - Do not use `time.sleep(5)` fixed; use Selenium `WebDriverWait`.
-- For API integration: poll job endpoint or query `playbook_runs.status` in DB.
+- For API integration: poll `GET /api/v1/playbook-runs/{id}` or query `playbook_runs.status` in DB.
 
 ---
 
@@ -154,7 +182,7 @@ SPA polls this for playbook modal.
 | Alert queue | `GET /api/v1/alerts?page&size&filters` |
 | Alert detail | `GET /api/v1/alerts/{id}`, `GET /api/v1/alerts/{id}/events` |
 | Cases | `GET/POST/PATCH /api/v1/cases` |
-| Playbooks | `GET /api/v1/playbooks`, `POST /api/v1/playbooks/{id}/run` |
+| Playbooks | `GET /api/v1/playbooks`, `POST /api/v1/playbooks/{id}/run`, poll `GET /api/v1/playbook-runs/{id}` |
 | Audit | `GET /api/v1/audit` |
 | Admin | `GET/POST /api/v1/admin/*` |
 
@@ -197,7 +225,8 @@ services:
 | `ENVIRONMENT` | `local` | `production` disables test reset |
 | `DATABASE_URL` | postgresql+asyncpg://... | |
 | `REDIS_URL` | redis://localhost:6379/0 | |
-| `JWT_SECRET` | change-me | |
+| `JWT_SECRET` | change-me | HS256 signing key |
+| `JWT_EXPIRE_HOURS` | `8` | Access token lifetime; `expires_in` = hours × 3600 |
 | `SMTP_HOST` | mailhog | |
 | `SMTP_PORT` | 1025 | |
 | `WEBHOOK_SIGNING_SECRET` | dev-secret | HMAC on outbound payloads |
@@ -235,8 +264,10 @@ Full OpenAPI generated at runtime. Grouped below for test planning.
 ### 10.4 Playbooks
 
 - `GET /api/v1/playbooks`
-- `POST /api/v1/playbooks/{id}/run`
-- `GET /api/v1/playbook-runs/{id}`
+- `POST /api/v1/playbooks/{id}/run` → `{ "playbook_run_id", "status": "PENDING" }`
+- `GET /api/v1/playbook-runs/{id}` → `{ "status": "PENDING|RUNNING|SUCCESS|FAILED", "steps_completed", ... }`
+
+No generic `/api/v1/jobs/{task_id}` in E06 — see ARCHITECTURE §5.2.
 
 ### 10.5 Webhooks (admin)
 

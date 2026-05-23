@@ -1,4 +1,4 @@
-# SENT-903 — send_email Celery task to MailHog
+﻿# SENT-903 — send_email Celery task to MailHog
 
 | Field | Value |
 |-------|-------|
@@ -19,20 +19,22 @@ send_email Celery task to MailHog.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Admin and Notifications
+**As a** SOC platform  
+**I want** a Celery task that sends notification emails via MailHog SMTP when an alert is escalated or assigned  
+**So that** QA can verify email delivery by inspecting MailHog at http://localhost:8025 without needing a real mail server
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Email sent on escalation and assignment
 
-- [ ] On escalation and assignment send SMTP to mailhog:1025
-### AC2 —
+- [ ] When an alert transitions to `ESCALATED`, a `send_email` Celery task is enqueued that sends an SMTP message to `mailhog:1025` addressed to the lead or assigned user (`@demo.local` addresses only)
+- [ ] When an alert is assigned (`PATCH /api/v1/alerts/{id}` with `assigned_to`), a notification email is sent to the newly assigned analyst
 
-- [ ] notification row created
+### AC2 — Notification row created
+
+- [ ] Each email send attempt creates a `notifications` row with `channel=EMAIL`, `recipient`, `subject`, and `status` (`SENT` or `FAILED`)
 
 ---
 
@@ -53,4 +55,6 @@ send_email Celery task to MailHog.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

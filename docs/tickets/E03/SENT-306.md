@@ -1,4 +1,4 @@
-# SENT-306 — Queue auto-refresh polling
+﻿# SENT-306 — Queue auto-refresh polling
 
 | Field | Value |
 |-------|-------|
@@ -19,20 +19,21 @@ Queue auto-refresh polling.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Triage Queue UI
+**As a** SOC analyst  
+**I want** the alert queue to refresh automatically while I have the page open  
+**So that** newly ingested alerts from the mock SIEM appear in my queue without me manually reloading the page
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Auto-refresh when page is visible
 
-- [ ] Poll alerts list every 10s when page visible
-### AC2 —
+- [ ] The alert list re-fetches from the API every 10 seconds while the browser tab is in the foreground (use TanStack Query `refetchInterval`)
 
-- [ ] Env VITE_QUEUE_POLL_MS override
+### AC2 — Configurable interval via environment variable
+
+- [ ] Polling interval is overridable via `VITE_QUEUE_POLL_MS` environment variable (useful for speeding up E2E tests)
 
 ---
 
@@ -53,4 +54,6 @@ Queue auto-refresh polling.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

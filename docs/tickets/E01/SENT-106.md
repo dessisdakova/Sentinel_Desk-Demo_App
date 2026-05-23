@@ -1,4 +1,4 @@
-# SENT-106 — React app shell, router, auth context
+﻿# SENT-106 — React app shell, router, auth context
 
 | Field | Value |
 |-------|-------|
@@ -19,32 +19,56 @@ React app shell, router, auth context.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Platform Foundation
+**As a** SOC analyst  
+**I want** a React SPA scaffold with JWT-based auth context and role-aware navigation  
+**So that** I am redirected to login when unauthenticated and see only the nav items my role permits
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Vite + React scaffold
 
-- [ ] Vite + React + TypeScript scaffold in frontend/
-### AC2 —
+- [ ] Vite + React + TypeScript scaffold exists in `frontend/`
 
-- [ ] Routes: /login, protected layout with outlet
-### AC3 —
+### AC2 — Router with auth guard
 
-- [ ] AuthContext stores token; redirects unauthenticated to /login
-### AC4 —
+- [ ] Routes: `/login` (public), protected layout with outlet; unauthenticated users are redirected to `/login`
 
-- [ ] Role-based nav placeholders (Dashboard, Alerts disabled until later)
+### AC3 — Auth context and token handling
+
+- [ ] `AuthContext` stores JWT in React state and `sessionStorage` key `sentinel_access_token`
+- [ ] API client attaches `Authorization: Bearer <token>` on every request; clears storage on logout
+- [ ] Redirects unauthenticated users to `/login`
+
+### AC4 — Role-based navigation placeholders
+
+- [ ] Nav renders role-appropriate items; Dashboard and Alerts links are present but disabled until later epics ship
+
+### AC5 — Docker frontend service
+
+- [ ] `frontend` service in `docker-compose.yml` on port `5173` (Vite dev server)
+- [ ] `docker compose up -d --build` starts the frontend container
+- [ ] README documents the SPA at http://localhost:5173
 
 ---
 
 ## Technical notes
 
-No alert pages yet.
+- Follow [ARCHITECTURE.md](../../ARCHITECTURE.md) §3 auth contract — JWT Bearer + sessionStorage only
+- Follow [ARCHITECTURE.md](../../ARCHITECTURE.md) §8 — add `frontend` to compose (dev image with Vite on `5173`; production nginx is out of scope for E01)
+- API CORS must allow `http://localhost:5173` when the API service is updated for frontend (SENT-104 or this ticket if CORS not yet wired)
+- Set `VITE_API_URL=http://localhost:8000` (or equivalent) in `.env.example` for the SPA build/dev server
+- No alert pages yet.
+
+## Artifacts
+
+| Path | Purpose |
+|------|---------|
+| `frontend/` | Vite + React + TypeScript scaffold |
+| `frontend/Dockerfile` | Frontend dev container |
+| `docker-compose.yml` | `frontend` service |
+| `.env.example` | `VITE_API_URL` (and related frontend vars) |
 
 ---
 
@@ -61,4 +85,6 @@ No alert pages yet.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

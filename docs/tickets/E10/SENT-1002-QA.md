@@ -1,39 +1,53 @@
-# SENT-1002-QA — Test: Test harness scaffolding without test cases
+# SENT-1002-QA — Extend E10 test harness (QA-only; no implement ticket)
 
 | Field | Value |
 |-------|-------|
 | **Type** | Test Story |
 | **Epic** | SENT-E10 Test Harness and Bug Garden |
 | **Priority** | High |
-| **Labels** | `qa`, `automation` |
-| **Implements after** | [SENT-1002](./SENT-1002.md) |
+| **Labels** | `qa`, `automation`, `harness` |
+| **Implements after** | SENT-101-QA / SENT-102-QA foundation; [SENT-1001](./SENT-1001.md) for `clean_db` (optional until reset API exists) |
 | **Test location** | Repository root `tests/` **only** |
+| **Note** | Replaces superseded [SENT-1002](./SENT-1002.md) — no paired implementation ticket |
 
 ---
 
 ## Summary
 
-Design and implement automated tests for **SENT-1002** — Test harness scaffolding without test cases.
+Extend the E01 pytest harness with auth/reset fixtures and testing documentation for E10+ suites.
 
 ---
 
 ## Description
 
 **As a** QA engineer  
-**I want** automated coverage for this story  
-**So that** regressions are caught before later epics build on this behavior
+**I want** shared fixtures and docs for reset- and token-based tests  
+**So that** E10 Selenium and bug-garden suites build on the E01 foundation without the dev agent touching `tests/`  
+
+**Prerequisite:** SENT-101-QA and SENT-102-QA complete (CONSTITUTION §3.6).
 
 ---
 
-## Prerequisites
+## Acceptance criteria
 
-- [ ] Prefer `POST /api/v1/test/reset` before run if SENT-1001 done; else re-seed manually
+### AC1 — Extend `tests/conftest.py` (do not recreate E01 fixtures)
 
----
+- [ ] Add `admin_api_client` fixture (logs in as `admin@demo.local`, returns authenticated httpx client)
+- [ ] Add `clean_db` fixture calling `POST /api/v1/test/reset` when SENT-1001 is done; document fallback until then
+- [ ] Add token helper utilities (e.g. login helper returning Bearer token for analyst/lead/admin)
 
-## Test scope
+### AC2 — Documentation
 
-- **integration** — add cases under `tests/integration/`
+- [ ] README **QA automation** subsection: pytest markers, smoke run, reset workflow (when SENT-1001 exists)
+- [ ] Confirm `requirements-test.txt` lists deps for E10 work; add any missing entries
+
+### AC3 — Verification tests
+
+- [ ] Add or extend tests under `tests/api/` or `tests/integration/` per test cases below
+
+### AC4 — No duplicate bootstrap
+
+- [ ] Do **not** recreate root `tests/`, `pytest.ini`, or E01 gate fixtures
 
 ---
 
@@ -41,11 +55,15 @@ Design and implement automated tests for **SENT-1002** — Test harness scaffold
 
 | ID | Layer | Scenario | Expected |
 |----|-------|----------|----------|
-| QA-1002-1 | integration | Happy path for primary AC | Pass |
-| QA-1002-2 | integration | One negative or edge case | Correct error or UI message |
-| QA-1002-3 | integration | Data matches seed or TEST_DATA.md stable IDs where applicable | Consistent |
+| QA-1002-1 | integration | `admin_api_client` can call an admin-only route | Pass |
+| QA-1002-2 | integration | Token helper returns valid Bearer for each seeded role | Pass |
+| QA-1002-3 | api | `pytest -m smoke` still passes | No regression from E01 harness |
 
-Extend with boundary cases from implementation acceptance criteria.
+---
+
+## Prerequisites
+
+- [ ] SENT-1001 reset API for full `clean_db` behavior; until then, document manual re-seed in fixture docstring
 
 ---
 
@@ -57,14 +75,13 @@ Extend with boundary cases from implementation acceptance criteria.
 
 ## Out of scope
 
-- Fixing application bugs (file defects under BUG_GARDEN if found)
+- Fixing application bugs (file under BUG_GARDEN if found)
 - Adding tests under `backend/` or `frontend/`
 
 ---
 
 ## Definition of Done
 
+- [ ] All acceptance criteria met
 - [ ] Tests run with `pytest tests/` (appropriate subset/markers)
-- [ ] No dependency on manual data unless documented in test docstring
 - [ ] Test file paths documented in this ticket (edit when created)
-

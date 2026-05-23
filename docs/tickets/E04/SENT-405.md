@@ -1,4 +1,4 @@
-# SENT-405 — intel-embed static server and iframe tab
+﻿# SENT-405 — intel-embed static server and iframe tab
 
 | Field | Value |
 |-------|-------|
@@ -19,20 +19,21 @@ intel-embed static server and iframe tab.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Alert Detail
+**As a** SOC analyst  
+**I want** the Threat Intel tab on the alert detail page to embed a mock threat intelligence page in an iframe, pre-seeded with the alert's first domain IOC as a query parameter  
+**So that** Selenium tests can practise switching into iframes and asserting embedded content, simulating real SOC portal integrations
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — intel-embed Docker service
 
-- [ ] intel-embed service port 8090 serves /embed
-### AC2 —
+- [ ] A Docker service (`intel-embed`) on port `8090` serves a static HTML page at `GET /embed` that renders visible content (e.g. a fake VirusTotal-style report)
 
-- [ ] Iframe src includes ioc query param from first domain IOC
+### AC2 — Iframe passes IOC query param
+
+- [ ] The Threat Intel tab renders `<iframe src="http://localhost:8090/embed?ioc={value}">` where `{value}` is the `value` of the first `domain`-type IOC in `ioc_list`; if no domain IOC exists, the param is omitted
 
 ---
 
@@ -53,4 +54,6 @@ intel-embed static server and iframe tab.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic
