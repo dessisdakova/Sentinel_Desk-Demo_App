@@ -32,7 +32,7 @@ API and DB integration tests for single and bulk alert updates.
 
 ## Test data
 
-- [TEST_DATA.md](../../TEST_DATA.md) — `ALERT_OPEN_HIGH`, second alert UUID
+- [TEST_DATA.md](../../TEST_DATA.md) — `ALERT_OPEN_HIGH` (`seed-edr-001`), second alert constant as needed
 
 ---
 

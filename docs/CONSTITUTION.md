@@ -60,7 +60,7 @@ This is a **SecOps triage simulation** (not e-commerce). It uses enterprise-styl
 | **`scripts/seed.py`** | Loads fixed users, alerts, cases, playbook definitions (CLI — available from E01/E02 seed tickets) |
 | **`POST /api/v1/test/reset`** (admin-only, non-prod) | Truncates data tables and re-runs seed — **E10 / SENT-1001** |
 | **`docker compose` volume reset** (optional nuclear option) | Fresh PostgreSQL volume |
-| **Stable IDs in seed** | e.g. `alert-seed-001` always maps to same UUID for API tests |
+| **Stable IDs in seed** | Fixed UUIDs + `external_id` strings — canonical table in [TEST_DATA.md](./TEST_DATA.md) §3 (e.g. `ALERT_OPEN_HIGH` ↔ `seed-edr-001`) |
 
 ### 2.3 How QA uses reset (by phase)
 
@@ -387,9 +387,12 @@ Never use real email addresses or phone numbers in seed — only `@demo.local` a
 - OpenAPI 3.1 generated from FastAPI.
 - Error shape: `{ "error": { "code", "message", "details" } }`.
 
-### 12.3 Stable seed personas
+### 12.3 Stable seed IDs
 
-Documented in `docs/TEST_DATA.md` — do not change UUIDs without updating tests.
+All fixed **`id` (UUID)**, **`external_id`**, and QA constant names (`ALERT_OPEN_HIGH`, etc.) are defined in [TEST_DATA.md](./TEST_DATA.md) §3. Do not change without updating tests.
+
+- **API / DB tests:** use UUID constants (`ALERT_OPEN_HIGH`, …).
+- **Ingest tests:** use `external_id` values (`seed-edr-001`, …) — each maps to a fixed UUID in seed.
 
 ### 12.4 Iframe
 

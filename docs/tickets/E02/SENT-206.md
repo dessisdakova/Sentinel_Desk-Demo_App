@@ -29,19 +29,19 @@ Seed alerts per TEST_DATA.md.
 
 ### AC1 —
 
-- [ ] seed.py adds 12 alerts with stable UUIDs
+- [ ] `seed.py` adds 12 alerts with stable UUIDs per [TEST_DATA.md](../../TEST_DATA.md) §3
 ### AC2 —
 
 - [ ] Mix of statuses, severities, sources
 ### AC3 —
 
-- [ ] Includes external_ids seed-edr-001, seed-phish-002
+- [ ] Primary rows use `external_id` values: `seed-edr-001`, `seed-phish-002`, `seed-edr-playbook-003` mapped to `ALERT_OPEN_HIGH`, `ALERT_ESCALATED`, `ALERT_FOR_PLAYBOOK`
 
 ---
 
 ## Technical notes
 
----
+- UUID + `external_id` pairs must match TEST_DATA §3 exactly
 
 ## Out of scope
 

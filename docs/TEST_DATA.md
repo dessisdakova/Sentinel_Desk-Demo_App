@@ -25,24 +25,28 @@ Automation needs the database to return to the **same starting picture** every r
 
 ---
 
-## 3. Stable entity IDs (examples — assigned at seed time)
+## 3. Stable entity IDs (canonical — do not change without updating tests)
 
-These UUIDs are **written by seed.py** and must remain constant:
+**Two identifiers per seeded alert:**
 
-| Key | UUID | Purpose |
-|-----|------|---------|
-| `ALERT_OPEN_HIGH` | `11111111-1111-4111-8111-111111111101` | Default queue E2E |
-| `ALERT_ESCALATED` | `11111111-1111-4111-8111-111111111102` | Lead approval tests |
-| `ALERT_FOR_PLAYBOOK` | `11111111-1111-4111-8111-111111111103` | Async playbook run |
-| `CASE_ACTIVE` | `22222222-2222-4222-8222-222222222201` | Case detail navigation |
-| `PLAYBOOK_ISOLATE` | `33333333-3333-4333-8333-333333333301` | Run playbook modal |
+| Field | Used for | Example |
+|-------|----------|---------|
+| **`id` (UUID)** | API paths (`/alerts/{id}`), DB assertions, E2E | `11111111-1111-4111-8111-111111111101` |
+| **`external_id` (string)** | Ingest API, duplicate-key tests, SIEM correlation | `seed-edr-001` |
 
-External IDs (for ingest integration tests):
+**QA constants** name the primary seed rows (use in tests and `seed.py`):
 
-| external_id | Expected title |
-|-------------|----------------|
-| `seed-edr-001` | Suspicious PowerShell on WORKSTATION-12 |
-| `seed-phish-002` | User reported phishing URL |
+| Constant | UUID (`id`) | `external_id` | Purpose |
+|----------|-------------|---------------|---------|
+| `ALERT_OPEN_HIGH` | `11111111-1111-4111-8111-111111111101` | `seed-edr-001` | Default queue E2E; title *Suspicious PowerShell on WORKSTATION-12* |
+| `ALERT_ESCALATED` | `11111111-1111-4111-8111-111111111102` | `seed-phish-002` | Lead approval tests; title *User reported phishing URL* |
+| `ALERT_FOR_PLAYBOOK` | `11111111-1111-4111-8111-111111111103` | `seed-edr-playbook-003` | Async playbook run |
+| `CASE_ACTIVE` | `22222222-2222-4222-8222-222222222201` | — | Case detail navigation |
+| `PLAYBOOK_ISOLATE` | `33333333-3333-4333-8333-333333333301` | — | Run playbook modal |
+
+**Implementation agent:** `scripts/seed.py` must insert rows with exactly these UUIDs and `external_id` values for the three alert constants above.
+
+**Ingest samples (non-seed):** dynamic payloads may use other `external_id` values (e.g. `siem-demo-20260521-001` in `docs/tickets/E02/sample-ingest-payload.json`) — do not reuse seed `external_id` strings except to test duplicate `409`.
 
 ---
 
@@ -141,7 +145,7 @@ After escalating `ALERT_ESCALATED`:
 
 ## 9. Rules for writing tests
 
-1. Use seed UUIDs from section 3 for assertions.  
+1. Use seed UUID constants and `external_id` values from **section 3 above** — never invent ad-hoc IDs (e.g. not `alert-seed-001`).  
 2. If a test creates data, delete it or call reset in teardown.  
 3. Never use your personal email or phone in tests.  
 4. Parallel E2E: prefer separate docker stack per worker OR strict function-scoped reset.

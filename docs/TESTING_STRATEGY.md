@@ -236,16 +236,15 @@ pytest -m bug --runxfail           # Run bug tests to check if any are now fixed
 
 Full reference: `docs/TEST_DATA.md`. Summary of rules:
 
-**Stable seed IDs:**
-Fixed UUIDs written by `scripts/seed.py`. Always use these constants in assertions.
+**Stable seed IDs:** fixed UUIDs and `external_id` strings — full table in [TEST_DATA.md §3](./TEST_DATA.md#3-stable-entity-ids-canonical--do-not-change-without-updating-tests). Summary:
 
-| Constant | UUID | Used for |
-|----------|------|---------|
-| `ALERT_OPEN_HIGH` | `11111111-...01` | Default queue E2E |
-| `ALERT_ESCALATED` | `11111111-...02` | Lead approval tests |
-| `ALERT_FOR_PLAYBOOK` | `11111111-...03` | Async playbook run |
-| `CASE_ACTIVE` | `22222222-...01` | Case detail navigation |
-| `PLAYBOOK_ISOLATE` | `33333333-...01` | Run playbook modal |
+| Constant | UUID (`id`) | `external_id` |
+|----------|-------------|---------------|
+| `ALERT_OPEN_HIGH` | `11111111-1111-4111-8111-111111111101` | `seed-edr-001` |
+| `ALERT_ESCALATED` | `11111111-1111-4111-8111-111111111102` | `seed-phish-002` |
+| `ALERT_FOR_PLAYBOOK` | `11111111-1111-4111-8111-111111111103` | `seed-edr-playbook-003` |
+| `CASE_ACTIVE` | `22222222-2222-4222-8222-222222222201` | — |
+| `PLAYBOOK_ISOLATE` | `33333333-3333-4333-8333-333333333301` | — |
 
 **Reset / seed baseline (timeline):**
 
