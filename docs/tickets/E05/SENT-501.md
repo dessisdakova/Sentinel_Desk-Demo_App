@@ -1,4 +1,4 @@
-# SENT-501 — Case models and migration
+﻿# SENT-501 — Case models and migration
 
 | Field | Value |
 |-------|-------|
@@ -19,21 +19,25 @@ Case models and migration.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Case Management
+**As a** SOC investigation platform  
+**I want** `cases`, `case_alerts`, and `case_notes` tables with a human-readable case number format  
+**So that** analysts can group related alerts into named investigations and leads can track and close them through a defined status lifecycle
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Case, CaseAlert, and CaseNote tables
 
-- [ ] cases, case_alerts, case_notes tables
-### AC2 —
+- [ ] `cases` table: `id` (UUID PK), `case_number` (unique string), `status` (`CaseStatus` enum), `priority`, `lead_id` (FK users), `created_at`, `updated_at`
+- [ ] `case_alerts` join table: `case_id` (FK), `alert_id` (FK), `linked_at`
+- [ ] `case_notes` table: `id` (UUID PK), `case_id` (FK), `body` (text), `author_id` (FK users), `created_at`
+- [ ] Migration runs cleanly with `alembic upgrade head`
 
-- [ ] case_number format CASE-YYYY-NNNNN
-- [ ] `CaseStatus` enum on `cases.status`: `OPEN`, `IN_PROGRESS`, `CLOSED` (CONSTITUTION §5.2)
+### AC2 — Case number format and CaseStatus enum
+
+- [ ] `case_number` follows format `CASE-YYYY-NNNNN` (e.g. `CASE-2026-00001`) — auto-generated on insert
+- [ ] `CaseStatus` enum on `cases.status`: `OPEN`, `IN_PROGRESS`, `CLOSED` — **separate from `AlertStatus`** (CONSTITUTION §5.2)
 
 ---
 
@@ -54,4 +58,6 @@ Case models and migration.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

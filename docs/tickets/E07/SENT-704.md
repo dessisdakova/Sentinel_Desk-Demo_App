@@ -1,4 +1,4 @@
-# SENT-704 — Admin UI webhook delivery log
+﻿# SENT-704 — Admin UI webhook delivery log
 
 | Field | Value |
 |-------|-------|
@@ -19,17 +19,18 @@ Admin UI webhook delivery log.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Outbound Webhooks
+**As an** admin  
+**I want** a table in the Admin panel that shows every webhook delivery attempt with its status and HTTP response code  
+**So that** I can diagnose delivery failures and confirm that retries are working without querying the database directly
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Delivery log table in Admin UI
 
-- [ ] Admin tab shows delivery table with status and response_code
+- [ ] The Admin page (`/admin`) has a "Webhooks" tab or section that shows a paginated table of `webhook_deliveries` rows with columns: subscription URL, event type, `status`, `response_code`, `retry_count`, `attempted_at`
+- [ ] Table root: `data-testid="webhook-delivery-table"`; each row: `data-testid="webhook-delivery-row-{id}"`
 
 ---
 
@@ -50,4 +51,6 @@ Admin UI webhook delivery log.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

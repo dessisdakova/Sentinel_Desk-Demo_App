@@ -1,4 +1,4 @@
-# SENT-301 — Alerts list API with filters and pagination
+﻿# SENT-301 — Alerts list API with filters and pagination
 
 | Field | Value |
 |-------|-------|
@@ -19,23 +19,25 @@ Alerts list API with filters and pagination.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Triage Queue UI
+**As a** SOC analyst  
+**I want** the alerts list endpoint to support rich filtering by severity, status, source, assignee, and date range  
+**So that** I can focus the queue on only the alerts relevant to my current triage session without manually scanning every row
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Filter and sort query params
 
-- [ ] GET /api/v1/alerts supports page, size, severity, status, source, assigned_to, from, to, sort
-### AC2 —
+- [ ] `GET /api/v1/alerts` supports query params: `page`, `size`, `severity`, `status`, `source`, `assigned_to` (user UUID), `from` (ISO date), `to` (ISO date), `sort` (e.g. `created_at_desc`)
 
-- [ ] Returns total count for pagination
-### AC3 —
+### AC2 — Paginated response with total count
 
-- [ ] Invalid enum returns 422
+- [ ] Response shape: `{ "items": [...], "total": N, "page": N, "size": N }` — `total` must reflect the filtered count, not the unfiltered table size
+
+### AC3 — Invalid enum values rejected
+
+- [ ] Passing an unknown `severity` or `status` value returns `422 Unprocessable Entity`
 
 ---
 
@@ -56,4 +58,6 @@ Alerts list API with filters and pagination.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

@@ -1,4 +1,4 @@
-# SENT-304 — Filter bar and date pickers
+﻿# SENT-304 — Filter bar and date pickers
 
 | Field | Value |
 |-------|-------|
@@ -19,23 +19,25 @@ Filter bar and date pickers.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Triage Queue UI
+**As a** SOC analyst  
+**I want** a filter bar above the alert queue table with dropdowns for severity, status, source, assignee, and a date range picker  
+**So that** I can narrow the queue to a specific time window or alert category without writing API queries manually
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Filter controls
 
-- [ ] Filters: severity, status, source, assignee, date range
-### AC2 —
+- [ ] Filter bar includes: `severity` dropdown, `status` dropdown, `source` dropdown, `assignee` dropdown (lists analyst users), date range (from / to) using `react-day-picker`
 
-- [ ] data-testid on each filter control
-### AC3 —
+### AC2 — Testids on all filter controls
 
-- [ ] Apply resets page to 1
+- [ ] Each filter control has a `data-testid` following the naming convention `alert-queue-filter-<name>` (e.g. `alert-queue-filter-severity`)
+
+### AC3 — Apply resets pagination
+
+- [ ] Applying or clearing any filter resets the current page to 1
 
 ---
 
@@ -56,4 +58,6 @@ Filter bar and date pickers.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

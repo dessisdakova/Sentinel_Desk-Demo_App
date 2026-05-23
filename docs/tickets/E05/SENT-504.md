@@ -1,4 +1,4 @@
-# SENT-504 — Notes API and modal
+﻿# SENT-504 — Notes API and modal
 
 | Field | Value |
 |-------|-------|
@@ -19,20 +19,22 @@ Notes API and modal.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Case Management
+**As a** SOC analyst  
+**I want** to add free-text notes to a case and see all previous notes in chronological order  
+**So that** investigators can document findings, hypotheses, and handoff context directly in the case record
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Notes API
 
-- [ ] POST /api/v1/cases/{id}/notes
-### AC2 —
+- [ ] `POST /api/v1/cases/{id}/notes` with `{ "body": "..." }` (analyst JWT) creates a `case_notes` row and returns `201` with the created note
+- [ ] `GET /api/v1/cases/{id}` (or a dedicated `/notes` sub-resource) returns notes ordered by `created_at ASC`
 
-- [ ] Notes list on case detail
+### AC2 — Notes list on case detail UI
+
+- [ ] The **Notes** tab on the case detail page lists existing notes and includes an "Add note" button (`data-testid="case-add-note-btn"`) that opens a modal with a text area and submit button
 
 ---
 
@@ -53,4 +55,6 @@ Notes API and modal.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

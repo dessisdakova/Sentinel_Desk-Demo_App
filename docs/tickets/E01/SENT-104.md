@@ -1,4 +1,4 @@
-# SENT-104 — Auth API (login / logout / me)
+﻿# SENT-104 — Auth API (login / logout / me)
 
 | Field | Value |
 |-------|-------|

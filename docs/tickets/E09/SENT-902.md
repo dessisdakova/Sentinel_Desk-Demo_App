@@ -1,4 +1,4 @@
-# SENT-902 — Detection rules model and apply on enrich
+﻿# SENT-902 — Detection rules model and apply on enrich
 
 | Field | Value |
 |-------|-------|
@@ -19,20 +19,22 @@ Detection rules model and apply on enrich.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Admin and Notifications
+**As an** admin  
+**I want** configurable detection rules that automatically tag alerts during enrichment based on severity and source  
+**So that** analysts see pre-computed tags on newly ingested alerts without manual classification
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Detection rules schema and admin API
 
-- [ ] Rules: severity + source -> auto-tag
-### AC2 —
+- [ ] `detection_rules` table: `id` (UUID PK), `severity` (nullable enum filter), `source` (nullable enum filter), `tag` (string to apply), `active` (bool)
+- [ ] Admin API (e.g. `GET/POST/PATCH /api/v1/admin/rules`) — `ADMIN` role only
 
-- [ ] Applied during enrich_alert
+### AC2 — Rules applied during enrichment
+
+- [ ] `enrich_alert` Celery task (SENT-203) evaluates all active rules against the alert's `severity` and `source`; matching rules append their `tag` to the alert's `ioc_list` or a dedicated `tags` field
 
 ---
 
@@ -53,4 +55,6 @@ Detection rules model and apply on enrich.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

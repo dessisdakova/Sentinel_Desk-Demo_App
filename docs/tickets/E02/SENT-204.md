@@ -1,4 +1,4 @@
-# SENT-204 — Alert GET by id and basic list API
+﻿# SENT-204 — Alert GET by id and basic list API
 
 | Field | Value |
 |-------|-------|
@@ -19,23 +19,27 @@ Alert GET by id and basic list API.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Alert Ingestion and Async Enrichment
+**As an** API consumer (SPA or test client)  
+**I want** endpoints to fetch a single alert by UUID and list alerts with basic pagination  
+**So that** the frontend and QA tests can read alert state — including enrichment fields — before the full filter UI is built in E03
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Get alert by id with enrichment fields
 
-- [ ] GET /api/v1/alerts/{id} includes enrichment fields
-### AC2 —
+- [ ] `GET /api/v1/alerts/{id}` returns the full alert object including `enrichment_status`, `sla_due_at`, and `ioc_list`
+- [ ] Returns `404` for unknown ID
 
-- [ ] GET /api/v1/alerts basic pagination without full filters yet
-### AC3 —
+### AC2 — Basic paginated list
 
-- [ ] Requires analyst JWT
+- [ ] `GET /api/v1/alerts` accepts `page` and `size` query params; returns `{ items, total, page, size }`
+- [ ] No advanced filters required in this story (filters added in SENT-301)
+
+### AC3 — Auth required
+
+- [ ] Both endpoints require a valid analyst (or higher) JWT; returns `401` without token
 
 ---
 
@@ -56,4 +60,6 @@ Alert GET by id and basic list API.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

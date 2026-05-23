@@ -1,4 +1,4 @@
-# SENT-601 — Playbook and PlaybookRun models
+﻿# SENT-601 — Playbook and PlaybookRun models
 
 | Field | Value |
 |-------|-------|
@@ -19,21 +19,24 @@ Playbook and PlaybookRun models.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Playbooks and Async Execution
+**As a** SOC platform  
+**I want** `playbooks` and `playbook_runs` tables seeded with the three baseline playbooks  
+**So that** the async execution and polling features in later stories have a stable schema and known data to work with
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Playbook and PlaybookRun tables
 
-- [ ] playbooks and playbook_runs tables
-### AC2 —
+- [ ] `playbooks` table: `id` (UUID PK), `name`, `trigger_severity`, `steps_json` (JSONB array of step definitions), `created_at`
+- [ ] `playbook_runs` table: `id` (UUID PK), `playbook_id` (FK), `alert_id` (FK), `status` (`PlaybookRunStatus` enum), `steps_completed` (int), `error_message` (nullable), `celery_task_id` (nullable string), `created_at`, `updated_at`
+- [ ] Migration runs cleanly with `alembic upgrade head`
 
-- [ ] Seed three playbooks per TEST_DATA
-- [ ] `playbook_runs.status` enum: `PENDING`, `RUNNING`, `SUCCESS`, `FAILED` (CONSTITUTION §5.2)
+### AC2 — Seed three baseline playbooks and correct status enum
+
+- [ ] `seed.py` inserts the three playbooks from [TEST_DATA.md §3](../../TEST_DATA.md): `PLAYBOOK_ISOLATE` (UUID `33333333-3333-4333-8333-333333333301`), plus "Notify owner" and "Escalate to lead"
+- [ ] `playbook_runs.status` enum: `PENDING`, `RUNNING`, `SUCCESS`, `FAILED` — **separate from `AlertStatus` and `CaseStatus`** (CONSTITUTION §5.2); Celery `FAILURE` must be mapped to `FAILED` internally
 
 ---
 
@@ -54,4 +57,6 @@ Playbook and PlaybookRun models.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

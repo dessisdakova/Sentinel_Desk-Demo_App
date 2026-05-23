@@ -1,4 +1,4 @@
-# SENT-101 — Docker Compose for Postgres, Redis, MailHog
+﻿# SENT-101 — Docker Compose for Postgres, Redis, MailHog
 
 | Field | Value |
 |-------|-------|
@@ -19,23 +19,25 @@ Docker Compose for Postgres, Redis, MailHog.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Platform Foundation
+**As a** developer  
+**I want** a single `docker compose up` command to start the database, cache, and email capture services  
+**So that** every team member and CI run has a reproducible local environment with no manual service installation
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Infrastructure services
 
-- [ ] docker-compose.yml starts postgres:16, redis:7, mailhog
-### AC2 —
+- [ ] `docker-compose.yml` starts `postgres:16`, `redis:7`, and `mailhog` services
 
-- [ ] .env.example documents all connection vars
-### AC3 —
+### AC2 — Environment template
 
-- [ ] README: prerequisites Docker Desktop, how to start/stop
+- [ ] `.env.example` documents all connection variables (DB URL, Redis URL, SMTP host/port)
+
+### AC3 — README prerequisites
+
+- [ ] README documents Docker Desktop as a prerequisite and includes `docker compose up / down` start/stop instructions
 
 ---
 
@@ -58,4 +60,6 @@ No application code beyond compose and env template.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

@@ -1,4 +1,4 @@
-# SENT-201 — Alert and AlertEvent models and migration
+﻿# SENT-201 — Alert and AlertEvent models and migration
 
 | Field | Value |
 |-------|-------|
@@ -19,23 +19,26 @@ Alert and AlertEvent models and migration.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Alert Ingestion and Async Enrichment
+**As a** SOC platform  
+**I want** an `alerts` table with full status, severity, and IOC schema and an `alert_events` timeline table  
+**So that** ingested alerts have a versioned DB foundation that all triage, enrichment, and audit features can build on
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Alert table schema
 
-- [ ] alerts table per CONSTITUTION §5.2 — `AlertStatus`, severity, source; `enrichment_status` column separate
-### AC2 —
+- [ ] `alerts` table per CONSTITUTION §5 and §5.2: columns include `id` (UUID PK), `external_id` (unique string), `source` (enum), `severity` (enum), `status` (`AlertStatus` enum), `enrichment_status` (separate column, not `AlertStatus`), `title`, `ioc_list` (JSONB — see CONSTITUTION §5 note), `assigned_to_id` (FK users), `sla_due_at`, `created_at`, `updated_at`
 
-- [ ] alert_events table for timeline
-### AC3 —
+### AC2 — AlertEvent table schema
 
-- [ ] Foreign keys and indexes on status, created_at
+- [ ] `alert_events` table: `id` (UUID PK), `alert_id` (FK alerts), `event_type` (string), `payload` (JSONB), `created_by` (FK users nullable), `created_at`
+
+### AC3 — Indexes and foreign keys
+
+- [ ] Composite index on `(status, severity, created_at DESC)` and index on `(assigned_to_id)` per ARCHITECTURE.md §4.2
+- [ ] All foreign keys present and migration runs cleanly with `alembic upgrade head`
 
 ---
 
@@ -56,4 +59,6 @@ Alert and AlertEvent models and migration.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

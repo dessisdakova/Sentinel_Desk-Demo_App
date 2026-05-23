@@ -1,4 +1,4 @@
-# SENT-102 — FastAPI project structure and health endpoint
+﻿# SENT-102 — FastAPI project structure and health endpoint
 
 | Field | Value |
 |-------|-------|

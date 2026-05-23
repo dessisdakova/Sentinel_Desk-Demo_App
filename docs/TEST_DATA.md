@@ -44,7 +44,7 @@ Automation needs the database to return to the **same starting picture** every r
 | `CASE_ACTIVE` | `22222222-2222-4222-8222-222222222201` | — | Case detail navigation |
 | `PLAYBOOK_ISOLATE` | `33333333-3333-4333-8333-333333333301` | — | Run playbook modal |
 
-**Implementation agent:** `backend/scripts/seed.py` must insert rows with exactly these UUIDs and `external_id` values for the three alert constants above.
+**Implementation agent:** When the active seed ticket includes alerts (E02/SENT-206+), `backend/scripts/seed.py` must insert rows with exactly these UUIDs and `external_id` values for the three alert constants above. Before SENT-206, seed **users only** (SENT-108).
 
 ### 3.1 Seed script — file path and run commands
 
@@ -62,7 +62,7 @@ Automation needs the database to return to the **same starting picture** every r
 
 ## 4. Seed dataset summary
 
-After seed or reset:
+**Full baseline** — after all seed-related implementation tickets through E06+ are complete and `seed.py` has been extended per each ticket:
 
 | Entity | Count | Notes |
 |--------|-------|-------|
@@ -73,6 +73,14 @@ After seed or reset:
 | Webhook subscriptions | 1 | Points to mock SIEM callback |
 | Audit log rows | ≥20 | Historical seed entries |
 | Notifications | 2 | Sample email rows (not sent until triggered) |
+
+**Per-ticket seed scope (implementation agent):**
+
+| After ticket | `seed.py` loads |
+|--------------|-----------------|
+| SENT-108 (E01) | 3 users only |
+| SENT-206 (E02) | users + 12 alerts |
+| Later epics | extend per ticket AC — do not skip ahead to full §4 counts |
 
 ---
 

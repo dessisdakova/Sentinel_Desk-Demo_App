@@ -1,4 +1,4 @@
-# SENT-108 — Seed script for users
+﻿# SENT-108 — Seed script for users
 
 | Field | Value |
 |-------|-------|
@@ -19,23 +19,25 @@ Seed script for users.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Platform Foundation
+**As a** developer and QA engineer  
+**I want** a repeatable seed script that creates the three baseline users with known credentials and fixed UUIDs  
+**So that** integration tests and manual exploration always start from a known auth state without manual DB setup
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Seed creates baseline users
 
-- [ ] `backend/scripts/seed.py` creates 3 users per TEST_DATA.md
-### AC2 —
+- [ ] `backend/scripts/seed.py` inserts the 3 users from [TEST_DATA.md §2](../../TEST_DATA.md) (`analyst@demo.local`, `lead@demo.local`, `admin@demo.local`) with passwords hashed via bcrypt and roles from CONSTITUTION §4
 
-- [ ] Idempotent: re-run does not duplicate emails
-### AC3 —
+### AC2 — Idempotent
 
-- [ ] Document command in README
+- [ ] Re-running `python -m scripts.seed` does not duplicate users (upsert or skip-on-conflict by email)
+
+### AC3 — Run command documented
+
+- [ ] README documents `docker compose exec api python -m scripts.seed` (and the local equivalent `cd backend && python -m scripts.seed`)
 
 ---
 
@@ -60,4 +62,6 @@ Seed script for users.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

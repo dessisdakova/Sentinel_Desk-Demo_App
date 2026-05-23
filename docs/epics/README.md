@@ -2,7 +2,7 @@
 
 **Implementation agent:** implement epics in order using `SENT-###` tickets only — see [IMPLEMENTATION_AGENT.md](../IMPLEMENTATION_AGENT.md).
 
-Implement in order. Each epic has acceptance criteria at epic level; break down using sample tickets as templates.
+Implement in order. Epic-level acceptance criteria are **cumulative** (epic done when all its stories are done) — never treat them as gates for an early story; follow each `SENT-###` ticket’s own AC.
 
 | Epic | File | Depends on | Est. stories |
 |------|------|------------|--------------|

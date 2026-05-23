@@ -1,4 +1,4 @@
-# SentinelDesk — Implementation Agent Charter
+﻿# SentinelDesk — Implementation Agent Charter
 
 **Audience:** AI agent that implements application code from `SENT-###` tickets only.  
 **Not for you:** QA automation, test framework design, or `-QA` tickets — see [TESTING_STRATEGY.md](./TESTING_STRATEGY.md) (human QA workflow).
@@ -22,7 +22,7 @@ You are the **development agent** in a simulated agile team. You build the Senti
 
 **Seed IDs:** insert rows using UUIDs and `external_id` values exactly as [TEST_DATA.md](./TEST_DATA.md) §3 — never invent aliases like `alert-seed-001`.
 
-**Seed script:** single file `backend/scripts/seed.py` (runnable as `python -m scripts.seed` from `backend/` or via `docker compose exec api python -m scripts.seed`). Reset API (SENT-1001) must call the same seed logic — no duplicate seed modules.
+**Seed script:** single file `backend/scripts/seed.py` (runnable as `python -m scripts.seed` from `backend/` or via `docker compose exec api python -m scripts.seed`). **Extend incrementally per ticket** (e.g. SENT-108 users only; SENT-206 adds alerts) — do not implement the full TEST_DATA §4 dataset in one story. Reset API (SENT-1001) must call the same seed logic — no duplicate seed modules.
 | Intentional defects | Plant bugs per [BUG_GARDEN.md](./BUG_GARDEN.md) when a ticket says so (e.g. SENT-1004) |
 | Docs | Product/tech docs in `docs/` when asked to maintain specifications before or during implementation |
 
@@ -49,7 +49,7 @@ You are the **development agent** in a simulated agile team. You build the Senti
 | 1 | Active `SENT-###` ticket | Acceptance criteria for the current story |
 | 2 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Technical patterns, API paths, Docker, async |
 | 3 | [CONSTITUTION.md](./CONSTITUTION.md) | Product rules, roles, domain model, testability hooks (`data-testid`) |
-| 4 | Epic file under `docs/epics/` | Epic-level scope and story list |
+| 4 | Epic file under `docs/epics/` | Epic-level scope and story list — epic AC is **cumulative** (after all stories), not per-ticket gates |
 
 **Ignore for implementation decisions:** [TESTING_STRATEGY.md](./TESTING_STRATEGY.md), [TEST_DATA.md](./TEST_DATA.md) reset/fixture sections (QA concerns), and all `-QA` ticket files.
 
@@ -100,9 +100,34 @@ Do **not** bootstrap or extend the pytest harness — that is QA-owned. You only
 
 ## Starting a session
 
-1. Read this file and the requested `SENT-###` ticket.
+1. Read this file, [ARCHITECTURE.md](./ARCHITECTURE.md), and the requested `SENT-###` ticket — in that order.
 2. Check [README.md](../README.md) **App implementation status** for what is already done.
 3. Implement only the ticket scope; do not add pytest files or “helpful” test scaffolding.
+
+---
+
+## After implementing (mandatory — do this before closing every ticket)
+
+Once all acceptance criteria are met, update these three documents in order:
+
+### 1. The ticket file (`docs/tickets/E##/SENT-###.md`)
+
+- Change `- [ ]` to `- [x]` for every AC bullet that is now satisfied.
+- Change `- [ ]` to `- [x]` for every Definition of Done checkbox.
+- Add `| **Status** | Done |` to the metadata table at the top of the file (insert it after the `**Story Points**` row).
+
+### 2. Root `README.md` — App implementation status table
+
+- Find the row for this ticket and change its status cell to a checkmark and short description.
+- If the row does not exist yet, add it in epic order.
+- Update the **Next implementation ticket** line at the bottom to the next `SENT-###` in sequence.
+
+### 3. Epic file (`docs/epics/E##-*.md`) — only when the entire epic is done
+
+- When **all** stories in an epic are implemented (check the epic's Stories table), tick the epic checklist items.
+- Do **not** tick the epic checklist mid-epic — it is a cumulative completion gate, not a per-ticket marker.
+
+**Do not update any other documentation** (CONSTITUTION.md, ARCHITECTURE.md, TEST_DATA.md, or QA tickets) unless the ticket explicitly requires it.
 
 ---
 

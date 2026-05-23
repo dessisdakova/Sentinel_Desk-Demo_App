@@ -1,4 +1,4 @@
-# SENT-203 — Celery worker and enrich_alert task
+﻿# SENT-203 — Celery worker and enrich_alert task
 
 | Field | Value |
 |-------|-------|
@@ -19,26 +19,29 @@ Celery worker and enrich_alert task.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Alert Ingestion and Async Enrichment
+**As a** SOC platform  
+**I want** a Celery worker that asynchronously enriches newly ingested alerts with SLA deadlines and tags  
+**So that** analysts see complete, prioritised data without waiting for synchronous processing to block the ingest API response
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Worker service in Docker Compose
 
-- [ ] Celery worker service in docker-compose
-### AC2 —
+- [ ] A `worker` service running Celery is added to `docker-compose.yml` alongside the existing `api` service
 
-- [ ] enrich_alert sets enrichment_status PENDING then COMPLETE
-### AC3 —
+### AC2 — Enrichment status transitions
 
-- [ ] Sets sla_due_at based on severity
-### AC4 —
+- [ ] `enrich_alert` task sets `enrichment_status=PENDING` immediately on enqueue, then updates to `COMPLETE` after finishing — observable by polling `GET /api/v1/alerts/{id}`
 
-- [ ] Creates alert_event ENRICHMENT_COMPLETE
+### AC3 — SLA calculation
+
+- [ ] `sla_due_at` is set based on alert `severity` (e.g. CRITICAL: +1h, HIGH: +4h, MEDIUM: +24h, LOW: +72h from `created_at`)
+
+### AC4 — Timeline event
+
+- [ ] Creates an `alert_events` row with `event_type=ENRICHMENT_COMPLETE` when the task finishes
 
 ---
 
@@ -59,4 +62,6 @@ Celery worker and enrich_alert task.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

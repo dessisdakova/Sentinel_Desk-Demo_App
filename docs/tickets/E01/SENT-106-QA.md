@@ -44,11 +44,11 @@ Design and implement automated tests for **SENT-106** — React app shell, route
 
 | ID | Layer | Scenario | Expected |
 |----|-------|----------|----------|
-| QA-106-1 | e2e | Happy path for primary AC | Pass |
-| QA-106-2 | e2e | One negative or edge case | Correct error or UI message |
-| QA-106-3 | e2e | Data matches seed or TEST_DATA.md stable IDs where applicable | Consistent |
+| QA-106-1 | api | Unauthenticated request to a protected route returns 401 | `401` with error body; no data leaked |
+| QA-106-2 | api | Request with expired or malformed JWT returns 401 | `401 INVALID_TOKEN` |
+| QA-106-3 | api | Valid analyst token calls `GET /api/v1/auth/me`; role claim matches seeded user | `200` with `role=ANALYST` |
 
-Extend with boundary cases from implementation acceptance criteria.
+Extend with boundary cases from implementation acceptance criteria (e.g. CORS preflight from `http://localhost:5173`).
 
 ---
 

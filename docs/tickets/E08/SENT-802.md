@@ -1,4 +1,4 @@
-# SENT-802 — Dashboard React and date picker
+﻿# SENT-802 — Dashboard React and date picker
 
 | Field | Value |
 |-------|-------|
@@ -19,20 +19,22 @@ Dashboard React and date picker.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Dashboard and Audit
+**As a** SOC lead  
+**I want** a dashboard page with KPI cards and a date range picker  
+**So that** I can quickly assess the current state of the queue and tune the time window to compare performance across different shifts or days
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Dashboard route with KPI cards
 
-- [ ] Route /dashboard with KPI cards
-### AC2 —
+- [ ] Route `/dashboard` renders with `data-testid="page-dashboard"`
+- [ ] KPI cards for each metric returned by `GET /api/v1/metrics/summary`: open alerts, MTTT, pending escalations, open cases — each with a `data-testid="kpi-<name>"` attribute
 
-- [ ] Date range picker affects metrics
+### AC2 — Date range picker affects metrics
+
+- [ ] A date range picker (`data-testid="dashboard-date-range"`) lets the user select from/to dates; changing the range re-fetches `GET /api/v1/metrics/summary` with updated params and re-renders the cards
 
 ---
 
@@ -53,4 +55,6 @@ Dashboard React and date picker.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

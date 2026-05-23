@@ -1,4 +1,4 @@
-# SENT-406 — Escalation UI on Summary tab
+﻿# SENT-406 — Escalation UI on Summary tab
 
 | Field | Value |
 |-------|-------|
@@ -19,20 +19,23 @@ Escalation UI on Summary tab.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Alert Detail
+**As a** SOC analyst or lead  
+**I want** the Summary tab to show role-appropriate escalation action buttons  
+**So that** analysts can request escalation without accessing lead-only actions, and leads can approve or reject without additional navigation
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Escalate button for analysts
 
-- [ ] Escalate button for analyst
-### AC2 —
+- [ ] When the alert status is `NEW`, `TRIAGING`, or `TRUE_POSITIVE` and the logged-in user is `ANALYST`, an "Escalate" button is visible with `data-testid="alert-escalate-btn"`
+- [ ] Clicking it calls `PATCH /api/v1/alerts/{id}` with `{ "status": "ESCALATED" }` and refreshes the alert
 
-- [ ] Approve/Reject visible only for LEAD
+### AC2 — Approve / Reject visible for Lead+ only
+
+- [ ] When the alert status is `ESCALATED`, an `ANALYST` user sees no Approve or Reject buttons
+- [ ] A `LEAD` or `ADMIN` user sees "Approve" (`data-testid="alert-approve-btn"`) and "Reject" (`data-testid="alert-reject-btn"`) buttons
 
 ---
 
@@ -53,4 +56,6 @@ Escalation UI on Summary tab.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

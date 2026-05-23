@@ -1,4 +1,4 @@
-# SENT-503 — Case list and detail UI
+﻿# SENT-503 — Case list and detail UI
 
 | Field | Value |
 |-------|-------|
@@ -19,17 +19,18 @@ Case list and detail UI.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Case Management
+**As a** SOC analyst  
+**I want** a case list page and a tabbed case detail page  
+**So that** I can navigate between open investigations, review linked alerts, and read or add notes from a single UI
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Case list and detail routes with tabs
 
-- [ ] Routes /cases and /cases/:id with tabs Overview, Alerts, Notes, Activity
+- [ ] Route `/cases` renders a paginated table of cases with `data-testid="page-case-list"`
+- [ ] Route `/cases/:id` renders a detail view with `data-testid="page-case-detail"` and four tabs: **Overview** (`data-testid="tab-overview"`), **Alerts** (`tab-alerts`), **Notes** (`tab-notes`), **Activity** (`tab-activity`)
 
 ---
 
@@ -50,4 +51,6 @@ Case list and detail UI.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

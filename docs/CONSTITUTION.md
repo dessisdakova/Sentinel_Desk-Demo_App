@@ -1,4 +1,4 @@
-# SecOps Alert Triage Portal — Project Constitution
+﻿# SecOps Alert Triage Portal — Project Constitution
 
 **Codename:** `SentinelDesk`  
 **Version:** 1.0  
@@ -41,7 +41,7 @@ This is a **SecOps triage simulation** (not e-commerce). It uses enterprise-styl
 
 ## 2. Resettable test data (product capability)
 
-**Implementation agent:** Reset **API** is delivered in **E10 / SENT-1001** only. Until then, implement `backend/scripts/seed.py` (CLI re-seed) per tickets — do not add `POST /api/v1/test/reset` early. QA uses manual re-seed ([TEST_DATA.md](./TEST_DATA.md) §5 Option B/C) before E10.
+**Implementation agent:** Extend `backend/scripts/seed.py` only as far as the **active ticket** requires — follow that ticket’s AC, not the full [TEST_DATA.md](./TEST_DATA.md) §4 table, until later seed tickets land. Reset **API** is delivered in **E10 / SENT-1001** only; do not add `POST /api/v1/test/reset` early. QA uses manual re-seed (TEST_DATA §5 Option B/C) before E10.
 
 **QA engineer:** Full reset workflow below; API reset and `clean_db` fixture apply **after SENT-1001** (app) + **SENT-1002-QA** (fixture).
 
@@ -57,7 +57,7 @@ This is a **SecOps triage simulation** (not e-commerce). It uses enterprise-styl
 
 | Mechanism | Purpose |
 |-----------|---------|
-| **`backend/scripts/seed.py`** | Loads fixed users, alerts, cases, playbook definitions (CLI — available from E01/E02 seed tickets) |
+| **`backend/scripts/seed.py`** | Single CLI module, **extended incrementally per ticket** — do not load the full dataset until all seed tickets are done. E01/SENT-108: **3 users only**; E02/SENT-206: add alerts; later tickets add cases, playbooks, etc. (full baseline in [TEST_DATA.md](./TEST_DATA.md) §4) |
 | **`POST /api/v1/test/reset`** (admin-only, non-prod) | Truncates data tables and re-runs seed — **E10 / SENT-1001** |
 | **`docker compose` volume reset** (optional nuclear option) | Fresh PostgreSQL volume |
 | **Stable IDs in seed** | Fixed UUIDs + `external_id` strings — canonical table in [TEST_DATA.md](./TEST_DATA.md) §3 (e.g. `ALERT_OPEN_HIGH` ↔ `seed-edr-001`) |
@@ -92,7 +92,7 @@ pytest tests/e2e   # clean_db fixture calls POST /api/v1/test/reset when configu
 | Backend | **Python 3.12+**, **FastAPI** | OpenAPI for API tests; async support; familiar to pytest users |
 | ORM / migrations | **SQLAlchemy 2**, **Alembic** | Integration tests can query DB; migrations versioned |
 | Database | **PostgreSQL 16** (Docker) | Reliable, realistic, good for integration tests; not SQL Server |
-| Job queue | **Redis 7** + **Celery** (or ARQ if simpler) | Background playbooks, webhook retries |
+| Job queue | **Redis 7** + **Celery** | Background playbooks, webhook retries |
 | Frontend | **React 18** + **Vite** + **TypeScript** | Rich UI patterns (tabs, modals, tables); iframe page for “Threat Intel” |
 | Email simulation | **MailHog** (Docker, free) | Capture outbound mail; no real SMTP |
 | SMS | **UI mock only** (no Twilio) | Show “SMS sent” toast + DB notification row |
@@ -123,7 +123,7 @@ flowchart LR
     WK[Celery Worker]
     MH[MailHog :8025 UI :1025 SMTP]
   end
-  EXT[Mock External SIEM]
+  EXT[Mock External SIEM :8088]
   UI --> API
   API --> PG
   API --> RD
@@ -137,7 +137,7 @@ flowchart LR
 ### 3.4 Repository layout (target)
 
 ```text
-sentinel-desk/          # repository root (this repo: DemoApp)
+sentinel-desk/          # repository root
 ├── docker-compose.yml
 ├── .env.example
 ├── backend/
@@ -227,7 +227,7 @@ erDiagram
 | Entity | Description | Key fields |
 |--------|-------------|------------|
 | `User` | Portal account | email, role, active |
-| `Alert` | Single ingested event | external_id, source, severity, status, title, ioc_list, assigned_to, sla_due_at |
+| `Alert` | Single ingested event | external_id, source, severity, status, title, `ioc_list` (see note), assigned_to, sla_due_at |
 | `AlertEvent` | Timeline entry | alert_id, event_type, payload, created_by |
 | `Case` | Container for investigation | case_number, status, priority, lead_id |
 | `CaseAlert` | M2M link | case_id, alert_id |
@@ -239,13 +239,22 @@ erDiagram
 | `WebhookDelivery` | Attempt log | status, response_code, retry_count |
 | `Notification` | Email/SMS record | channel, recipient, subject, status |
 
+**`ioc_list` column (Alert):** PostgreSQL `JSONB`. Stores an array of IOC objects; each object has two required keys: `type` (`"ip"`, `"hash"`, `"domain"`, or `"url"`) and `value` (string). Example: `[{"type": "domain", "value": "evil.demo"}, {"type": "ip", "value": "10.0.0.1"}]`. Defaults to `[]` (empty array). The implementation agent must declare this as a `JSONB` column in the SQLAlchemy model and Alembic migration — not a text field or a separate table.
+
 ### 5.1 Alert lifecycle (state machine)
 
 ```text
 NEW → TRIAGING → [FALSE_POSITIVE | TRUE_POSITIVE | ESCALATED]
-ESCALATED → (Lead approves) → CLOSED
-Any non-terminal → MERGED (linked to case; terminal)
+ESCALATED → (Lead+ approves) → CLOSED
+Any non-terminal + Lead+ direct action → CLOSED  (no escalation required)
+Any non-terminal → MERGED (linked to a case; terminal — alert may belong to ONE case only)
 ```
+
+**Closure rules:**
+- `ESCALATED → CLOSED` requires explicit Lead+ approval action (approval endpoint).
+- `NEW | TRIAGING | TRUE_POSITIVE → CLOSED` is a direct Lead+ disposition (no escalation step needed).
+- `FALSE_POSITIVE` and `MERGED` are already terminal — they cannot be closed again.
+- Attempts by `ANALYST` to close any alert must return `403 Forbidden`.
 
 ### 5.2 Domain status enums (canonical — do not mix)
 
@@ -258,8 +267,8 @@ Any non-terminal → MERGED (linked to case; terminal)
 | `FALSE_POSITIVE` | **yes** | Benign / not a threat |
 | `TRUE_POSITIVE` | **yes** | Confirmed issue; handled or tracked |
 | `ESCALATED` | no | Awaiting lead approval |
-| `CLOSED` | **yes** | Lead approved closure after escalation (or lead disposition to close) |
-| `MERGED` | **yes** | Linked into a case; no further triage on queue |
+| `CLOSED` | **yes** | Lead+ closed the alert — either by approving an `ESCALATED` alert **or** by directly closing any non-terminal alert (`NEW`, `TRIAGING`, `TRUE_POSITIVE`). Analysts cannot set this status. |
+| `MERGED` | **yes** | Linked into exactly **one** case; no further triage on queue. Attempting to link a `MERGED` alert to a second case must return `INVALID_STATE`. |
 
 **Bulk assign / playbook run:** reject alerts in **terminal** statuses (`FALSE_POSITIVE`, `TRUE_POSITIVE`, `CLOSED`, `MERGED`) with `INVALID_STATE`.
 
@@ -420,22 +429,20 @@ Epic details: `docs/epics/`. Implementation and QA tickets: `docs/tickets/E01/` 
 
 ---
 
-## 14. Next steps
+## 14. Operating procedures (permanent — applies every session)
 
-### For the implementation agent
+### Implementation agent — always follow
 
-1. Read [IMPLEMENTATION_AGENT.md](./IMPLEMENTATION_AGENT.md) first.  
-2. Implement `SENT-###` tickets in epic order — **skip all `-QA` tickets**.  
-3. Never create or modify files under `tests/`, `pytest.ini`, or `requirements-test.txt`.  
+1. Read [IMPLEMENTATION_AGENT.md](./IMPLEMENTATION_AGENT.md) and [ARCHITECTURE.md](./ARCHITECTURE.md) before starting any ticket.
+2. Implement `SENT-###` tickets in epic order — **skip all `-QA` tickets**.
+3. Never create or modify files under `tests/`, `pytest.ini`, or `requirements-test.txt`.
+4. When prompted **"Implement SENT-101"** or **"Implement SENT-104"** — deliver app code only; do not add test scaffolding.
 
-When prompted: **“Implement SENT-101”** or **“Implement SENT-104”** — app code only.
+### QA engineer — always follow
 
-### For the QA engineer (separate workflow)
-
-1. After each app story is runnable, complete the paired `SENT-###-QA` ticket using [TESTING_STRATEGY.md](./TESTING_STRATEGY.md).  
-2. **E10 QA** extends the harness (`clean_db`, Selenium POM, xfail tests); **E10 app** (implementation agent) delivers reset API + planted bugs only.  
+1. After each app story is runnable, complete the paired `SENT-###-QA` ticket using [TESTING_STRATEGY.md](./TESTING_STRATEGY.md).
+2. **E10 QA** extends the harness (`clean_db`, Selenium POM, xfail tests); **E10 app** (implementation agent) delivers reset API + planted bugs only.
 3. **E11** adds portfolio-scale hooks and performance practice.
-
 ---
 
 ## 15. Glossary

@@ -1,4 +1,4 @@
-# SENT-305 — Bulk assign modal
+﻿# SENT-305 — Bulk assign modal
 
 | Field | Value |
 |-------|-------|
@@ -19,23 +19,25 @@ Bulk assign modal.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Triage Queue UI
+**As a** SOC lead  
+**I want** to select multiple alerts in the queue and assign them all to an analyst in one action  
+**So that** I can distribute incoming workloads quickly without opening each alert individually
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Row selection checkboxes
 
-- [ ] Row selection checkboxes
-### AC2 —
+- [ ] Each table row has a checkbox (`data-testid="alert-row-checkbox-{id}"`); a "select all on page" header checkbox is also present
 
-- [ ] bulk-assign modal with analyst dropdown and confirm
-### AC3 —
+### AC2 — Bulk assign modal
 
-- [ ] Toast on success and error
+- [ ] Selecting one or more rows reveals a "Bulk assign" action that opens a modal (`data-testid="bulk-assign-modal"`) with an analyst dropdown (`data-testid="bulk-assign-analyst-select"`) and a confirm button (`data-testid="bulk-assign-confirm"`)
+
+### AC3 — Success and error feedback
+
+- [ ] On success, a toast confirms the number of alerts assigned; on partial failure, the toast reports how many succeeded and how many failed
 
 ---
 
@@ -56,4 +58,6 @@ Bulk assign modal.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

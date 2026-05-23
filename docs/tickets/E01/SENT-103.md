@@ -1,4 +1,4 @@
-# SENT-103 — User model and Alembic initial migration
+﻿# SENT-103 — User model and Alembic initial migration
 
 | Field | Value |
 |-------|-------|
@@ -19,29 +19,31 @@ User model and Alembic initial migration.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Platform Foundation
+**As an** authentication and RBAC system  
+**I want** a `users` table with email, hashed password, role, and active flag  
+**So that** login, role enforcement, and audit attribution have a stable, versioned schema from day one
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — User table schema
 
-- [ ] users table: id, email, password_hash, role, display_name, active, timestamps
-### AC2 —
+- [ ] `users` table columns: `id` (UUID PK), `email` (unique), `password_hash`, `role`, `display_name`, `active` (bool), `created_at`, `updated_at`
 
-- [ ] alembic upgrade head succeeds on empty DB
-### AC3 —
+### AC2 — Alembic migration
 
-- [ ] Role enum: ANALYST, LEAD, ADMIN
+- [ ] `alembic upgrade head` succeeds on an empty PostgreSQL database with no errors
+
+### AC3 — Role enum
+
+- [ ] `role` column uses a PostgreSQL enum: `ANALYST`, `LEAD`, `ADMIN` (matches CONSTITUTION §4)
 
 ---
 
 ## Technical notes
 
-No auth routes yet.
+No auth routes yet — routes are added in SENT-104.
 
 ---
 
@@ -58,4 +60,6 @@ No auth routes yet.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

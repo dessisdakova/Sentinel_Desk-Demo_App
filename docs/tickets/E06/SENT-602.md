@@ -1,4 +1,4 @@
-# SENT-602 — run_playbook Celery task
+﻿# SENT-602 — run_playbook Celery task
 
 | Field | Value |
 |-------|-------|
@@ -19,23 +19,26 @@ run_playbook Celery task.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Playbooks and Async Execution
+**As a** SOC platform  
+**I want** a Celery task that executes playbook steps sequentially with realistic delays and writes timeline events per step  
+**So that** the async polling UI can show live progress and QA can practise handling flaky timing without `time.sleep`
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Multi-step execution with delays
 
-- [ ] Multi-step task with 2-5s delay per step
-### AC2 —
+- [ ] `run_playbook` Celery task iterates over `playbook.steps_json` with a simulated 2–5s delay per step
 
-- [ ] Statuses PENDING, RUNNING, SUCCESS, FAILED
-### AC3 —
+### AC2 — Status transitions
 
-- [ ] Writes alert_events per step
+- [ ] Task updates `playbook_runs.status`: `PENDING` (at creation) → `RUNNING` (when first step starts) → `SUCCESS` (all steps done) or `FAILED` (exception or deliberate failure step)
+- [ ] Celery's internal `FAILURE` state is **never** written to `playbook_runs.status` — always map to `FAILED`
+
+### AC3 — Per-step alert timeline events
+
+- [ ] An `alert_events` row is written for each completed step containing the step name and result in `payload`
 
 ---
 
@@ -59,4 +62,6 @@ run_playbook Celery task.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic

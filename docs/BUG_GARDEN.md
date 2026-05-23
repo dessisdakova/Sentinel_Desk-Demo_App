@@ -57,16 +57,19 @@ Intentional defects for QA practice. Tests referencing these bugs should use `@p
 
 ---
 
-### BUG-004 — Analyst can approve own escalation (RBAC bypass)
+### BUG-004 — Analyst can call the approval endpoint (missing role check)
 
 | Field | Value |
 |-------|-------|
 | Status | PLANTED |
-| Area | Alert detail → Escalation tab |
-| Steps | Analyst escalates, same analyst clicks Approve |
-| Expected | 403 Forbidden |
-| Actual | 200 OK |
-| Test idea | API negative test + E2E |
+| Area | Alert detail → Escalation — `POST /api/v1/alerts/{id}/approve` |
+| Root cause | `require_roles` guard is missing or misconfigured on the approve/reject endpoints — **any** analyst with a valid JWT can call them and receive `200` |
+| Steps | Authenticate as `analyst@demo.local`; escalate any alert; call `POST /api/v1/alerts/{id}/approve` with the analyst's token |
+| Expected | `403 Forbidden` — only `LEAD` and `ADMIN` may approve (CONSTITUTION §4 and SENT-402 AC2) |
+| Actual | `200 OK` — RBAC check is absent, so the role is never verified |
+| Test idea | API negative test: assert `403` when analyst token calls approve; also assert lead token returns `200` (regression guard) |
+
+**Note:** This is a **general RBAC failure** — any analyst can approve any escalation, not just their own. The title "own escalation" in some earlier docs was misleading. The planted bug is the missing `require_roles(["LEAD", "ADMIN"])` dependency on the approve/reject route.
 
 ---
 

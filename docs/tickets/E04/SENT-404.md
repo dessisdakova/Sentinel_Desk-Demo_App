@@ -1,4 +1,4 @@
-# SENT-404 — IOC list component
+﻿# SENT-404 — IOC list component
 
 | Field | Value |
 |-------|-------|
@@ -19,20 +19,21 @@ IOC list component.
 
 ## Description
 
-**As a** SentinelDesk user or operator  
-**I want** this capability built in the application  
-**So that** the platform meets the epic goal for Alert Detail
+**As a** SOC analyst  
+**I want** the IOCs tab to list each indicator of compromise with its type and a copy-to-clipboard button  
+**So that** I can quickly extract IPs, domains, hashes, and URLs for pivoting into external threat intelligence tools
 
 ---
 
 ## Acceptance criteria
 
-### AC1 —
+### AC1 — Render IOC types
 
-- [ ] Render IOC types IP, DOMAIN, HASH, URL
-### AC2 —
+- [ ] Each IOC in `ioc_list` is displayed with its `type` badge (`IP`, `DOMAIN`, `HASH`, `URL`) and `value` string
 
-- [ ] Copy button data-testid=ioc-copy-{index}
+### AC2 — Copy button with testid
+
+- [ ] Each IOC row has a copy-to-clipboard button with `data-testid="ioc-copy-{index}"` (zero-based index)
 
 ---
 
@@ -53,4 +54,6 @@ IOC list component.
 - [ ] `data-testid` hooks on new UI controls (if frontend)
 - [ ] OpenAPI updated (if API)
 - [ ] No test modules added outside `tests/`
-
+- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [ ] `README.md` App implementation status updated for this ticket
+- [ ] Epic checklist ticked only if this was the last story in the epic
