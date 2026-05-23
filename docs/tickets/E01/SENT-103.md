@@ -3,6 +3,7 @@
 | Field | Value |
 |-------|-------|
 | **Type** | Story |
+| **Status** | Done |
 | **Epic** | SENT-E01 Platform Foundation |
 | **Priority** | High |
 | **Story Points** | 5 |
@@ -29,21 +30,33 @@ User model and Alembic initial migration.
 
 ### AC1 — User table schema
 
-- [ ] `users` table columns: `id` (UUID PK), `email` (unique), `password_hash`, `role`, `display_name`, `active` (bool), `created_at`, `updated_at`
+- [x] `users` table columns: `id` (UUID PK), `email` (unique), `password_hash`, `role`, `display_name`, `active` (bool), `created_at`, `updated_at`
 
 ### AC2 — Alembic migration
 
-- [ ] `alembic upgrade head` succeeds on an empty PostgreSQL database with no errors
+- [x] `alembic upgrade head` succeeds on an empty PostgreSQL database with no errors
 
 ### AC3 — Role enum
 
-- [ ] `role` column uses a PostgreSQL enum: `ANALYST`, `LEAD`, `ADMIN` (matches CONSTITUTION §4)
+- [x] `role` column uses a PostgreSQL enum: `ANALYST`, `LEAD`, `ADMIN` (matches CONSTITUTION §4)
 
 ---
 
 ## Technical notes
 
 No auth routes yet — routes are added in SENT-104.
+
+---
+
+## Artifacts
+
+| Path | Purpose |
+|------|---------|
+| `backend/app/models/user.py` | `User` ORM model, `UserRole` enum |
+| `backend/app/models/base.py` | SQLAlchemy `Base` |
+| `backend/app/core/database.py` | Async engine + session factory |
+| `backend/alembic/` | Migration environment |
+| `backend/alembic/versions/20260523_0001_initial_users_table.py` | Initial migration |
 
 ---
 
@@ -56,10 +69,10 @@ No auth routes yet — routes are added in SENT-104.
 
 ## Definition of Done
 
-- [ ] Acceptance criteria met
-- [ ] `data-testid` hooks on new UI controls (if frontend)
-- [ ] OpenAPI updated (if API)
-- [ ] No test modules added outside `tests/`
-- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
-- [ ] `README.md` App implementation status updated for this ticket
-- [ ] Epic checklist ticked only if this was the last story in the epic
+- [x] Acceptance criteria met
+- [x] `data-testid` hooks on new UI controls (if frontend)
+- [x] OpenAPI updated (if API)
+- [x] No test modules added outside `tests/`
+- [x] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [x] `README.md` App implementation status updated for this ticket
+- [x] Epic checklist ticked only if this was the last story in the epic

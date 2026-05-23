@@ -10,7 +10,8 @@
 |------|--------|
 | E01 SENT-101 | ✅ Docker infrastructure (Postgres, Redis, MailHog) |
 | E01 SENT-102 | ✅ FastAPI API + `/health` on port 8000 |
-| E01 SENT-103+ | Next — DB models, auth, frontend |
+| E01 SENT-103 | ✅ User model + Alembic (`users` table, `user_role` enum) |
+| E01 SENT-104+ | Next — auth API, RBAC, frontend |
 
 ### QA automation (QA engineer — separate workflow)
 
@@ -90,6 +91,24 @@ uvicorn app.main:app --app-dir backend --host 0.0.0.0 --port 8000 --reload
 
 Ensure `.env` is in the repo root (or export `ENVIRONMENT=local`). Logs include `request_id=` per request; responses include header `X-Request-ID`.
 
+## Database (SENT-103)
+
+After Postgres is up, apply migrations (from repo root):
+
+```powershell
+docker compose exec api alembic upgrade head
+```
+
+Fresh database volume:
+
+```powershell
+docker compose down -v
+docker compose up -d
+docker compose exec api alembic upgrade head
+```
+
+Schema: `users` table with `user_role` enum (`ANALYST`, `LEAD`, `ADMIN`). Seed users arrive in **SENT-108**.
+
 ### Connection defaults
 
 Aligned with [.env.example](.env.example):
@@ -121,4 +140,4 @@ Aligned with [.env.example](.env.example):
 
 ## Next implementation ticket
 
-**SENT-103** — User model and Alembic initial migration (then **SENT-103-QA**).
+**SENT-104** — Auth API login/logout/me (then **SENT-104-QA**).
