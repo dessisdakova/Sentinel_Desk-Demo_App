@@ -1,9 +1,12 @@
 """SentinelDesk FastAPI application entry point."""
 
 import logging
+from typing import Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api.router import api_router
 from app.core.config import get_settings
@@ -22,6 +25,26 @@ app = FastAPI(
     docs_url="/docs",
     openapi_url="/openapi.json",
 )
+
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(
+    _request: Request,
+    exc: HTTPException,
+) -> JSONResponse:
+    """Return CONSTITUTION §12.2 error envelope at the top level."""
+    if isinstance(exc.detail, dict) and "error" in exc.detail:
+        content: dict[str, Any] = exc.detail
+    else:
+        content = {
+            "error": {
+                "code": "HTTP_ERROR",
+                "message": str(exc.detail),
+                "details": None,
+            }
+        }
+    return JSONResponse(status_code=exc.status_code, content=content)
+
 
 app.add_middleware(
     CORSMiddleware,
