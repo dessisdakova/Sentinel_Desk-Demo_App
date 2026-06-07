@@ -30,7 +30,7 @@ This is a **SecOps triage simulation** (not e-commerce). It uses enterprise-styl
 
 | Practice area | Where it lives in SentinelDesk |
 |---------------|-------------------------------|
-| E2E UI (Selenium + pytest) | Login, queue, detail tabs, modals, date filters, iframe widget |
+| E2E UI (Playwright + pytest) | Login, queue, detail tabs, modals, date filters, iframe widget |
 | REST API (pytest + httpx) | OpenAPI-documented ingest, triage, cases, playbooks |
 | Integration (DB + API) | Verify API writes match DB; job completion updates rows |
 | Async / flakiness handling | Background jobs, polling UI, webhook delivery retries |
@@ -97,7 +97,7 @@ pytest tests/e2e   # clean_db fixture calls POST /api/v1/test/reset when configu
 | Email simulation | **MailHog** (Docker, free) | Capture outbound mail; no real SMTP |
 | SMS | **UI mock only** (no Twilio) | Show “SMS sent” toast + DB notification row |
 | API docs | Swagger at `/docs` | Contract testing reference |
-| Test hooks | `data-testid` on all interactive elements | Selenium stability |
+| Test hooks | `data-testid` on all interactive elements | Playwright selector stability |
 
 ### 3.2 Why PostgreSQL in Docker (not SQL Server Management Studio)
 
@@ -113,7 +113,7 @@ pytest tests/e2e   # clean_db fixture calls POST /api/v1/test/reset when configu
 
 ```mermaid
 flowchart LR
-  subgraph client [Browser / Selenium]
+  subgraph client [Browser / Playwright]
     UI[React SPA :5173]
   end
   subgraph docker [Docker Compose]
@@ -160,7 +160,7 @@ sentinel-desk/          # repository root
 │   ├── api/
 │   ├── integration/
 │   ├── data/             # static JSON for negative tests
-│   └── e2e/              # Selenium — bootstrapped SENT-107-QA; enhanced SENT-1003-QA
+│   └── e2e/              # Playwright — bootstrapped SENT-107-QA; enhanced SENT-1003-QA
 ├── docs/
 │   ├── CONSTITUTION.md
 │   ├── ARCHITECTURE.md
@@ -176,7 +176,7 @@ sentinel-desk/          # repository root
 
 | Rule | Detail |
 |------|--------|
-| **Single test root** | All pytest and Selenium code lives under repository root `tests/` only |
+| **Single test root** | All pytest and Playwright code lives under repository root `tests/` only |
 | **No tests in app packages** | `backend/` and `frontend/` must **not** contain `tests/` folders or test modules |
 | **Who writes tests** | **QA engineer** (human), ticket-by-ticket, via paired `SENT-###-QA` tickets — not the implementation agent |
 | **Who builds the app** | **Implementation agent** on `SENT-###` tickets only — features + `data-testid` hooks; **never** files under `tests/` |
@@ -192,7 +192,7 @@ The pytest harness is **never** built by the implementation agent. Do not create
 | **Foundation** | QA engineer | E01 `-QA` tickets (e.g. SENT-101-QA, SENT-102-QA) | Root `tests/`, `pytest.ini`, `conftest.py`, `tests/api/`, `tests/integration/`, `tests/data/` |
 | **Per-epic tests** | QA engineer | E02–E09 `-QA` tickets | Add `test_*.py` (API/integration); UI epics add `tests/e2e/` cases after SENT-107-QA bootstrap |
 | **E10 app hooks** | Implementation agent | SENT-1001, SENT-1004 | Reset API; plant bug-garden defects in **app code** |
-| **E10 harness extensions** | QA engineer | SENT-1001-QA, SENT-1002-QA, SENT-1003-QA, SENT-1004-QA | `admin_api_client`, `clean_db`; **SENT-1003-QA** standardizes Selenium POM (does not first-create `tests/e2e/`) |
+| **E10 harness extensions** | QA engineer | SENT-1001-QA, SENT-1002-QA, SENT-1003-QA, SENT-1004-QA | `admin_api_client`, `clean_db`; **SENT-1003-QA** standardizes Playwright POM (does not first-create `tests/e2e/`) |
 
 **Rule for implementation agents:** If `tests/` exists, treat it as read-only. E10 does **not** mean “bootstrap pytest” — see [IMPLEMENTATION_AGENT.md](./IMPLEMENTATION_AGENT.md).
 
@@ -328,7 +328,7 @@ Any non-terminal → MERGED (linked to a case; terminal — alert may belong to 
 | P8 Audit log | `/audit` | lead+ | table, export CSV, date filter |
 | P9 Admin | `/admin` | admin | users CRUD, rules, webhook subscriptions |
 
-**Selenium convention:** every page exposes `data-testid="page-<name>"`.
+**Playwright convention:** every page exposes `data-testid="page-<name>"`. Use `page.get_by_test_id("page-<name>")` as the root locator to confirm page load.
 
 ---
 
@@ -405,7 +405,7 @@ All fixed **`id` (UUID)**, **`external_id`**, and QA constant names (`ALERT_OPEN
 
 ### 12.4 Iframe
 
-Alert detail → **Threat Intel** tab loads `http://localhost:8090/embed` (mock static server). Tests must `driver.switch_to.frame(...)`.
+Alert detail → **Threat Intel** tab loads `http://localhost:8090/embed` (mock static server). Tests must use `page.frame_locator("iframe")` to scope locators inside the frame.
 
 ---
 
@@ -441,7 +441,7 @@ Epic details: `docs/epics/`. Implementation and QA tickets: `docs/tickets/E01/` 
 ### QA engineer — always follow
 
 1. After each app story is runnable, complete the paired `SENT-###-QA` ticket using [TESTING_STRATEGY.md](./TESTING_STRATEGY.md).
-2. **E10 QA** extends the harness (`clean_db`, Selenium POM, xfail tests); **E10 app** (implementation agent) delivers reset API + planted bugs only.
+2. **E10 QA** extends the harness (`clean_db`, Playwright POM, xfail tests); **E10 app** (implementation agent) delivers reset API + planted bugs only.
 3. **E11** adds portfolio-scale hooks and performance practice.
 ---
 
