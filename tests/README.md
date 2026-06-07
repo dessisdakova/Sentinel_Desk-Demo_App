@@ -28,11 +28,29 @@ playwright install chromium             # first time only
 pytest -m api -v                # API tests only
 pytest -m integ -v              # integration tests only
 pytest -m e2e -v                # Playwright tests only
+pytest -m smoke -v              # quick sanity (infra + health + core schema)
+pytest -m reg -v                # full regression suite
 pytest -m "api or integ" -v     # everything except browser
 pytest -v                       # all tests
 ```
 
 Tests skip automatically with a clear message if the required service is not running — no configuration needed to run a subset.
+
+## Markers
+
+Each test file sets **layer + regression** at the top:
+
+```python
+pytestmark = [pytest.mark.integ, pytest.mark.reg]  # or api / e2e
+```
+
+Add `@pytest.mark.smoke` only on individual tests that belong in the quick sanity subset. Smoke tests inherit `reg` from the module — no need to repeat it.
+
+| Marker | Where to apply | Purpose |
+|--------|----------------|---------|
+| `api` / `integ` / `e2e` | Module `pytestmark` | Layer (which stack the test needs) |
+| `reg` | Module `pytestmark` | Every test in the file is regression |
+| `smoke` | Function decorator | Fast subset only |
 
 ## Shared fixtures
 

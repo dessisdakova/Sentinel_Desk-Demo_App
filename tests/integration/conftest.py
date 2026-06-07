@@ -50,6 +50,21 @@ def postgres_connection(postgres_settings: dict, require_infrastructure: None):
     conn.close()
 
 
+@pytest.fixture(scope="function")
+def postgres_write_connection(postgres_connection):
+    """PostgreSQL connection for tests that INSERT or UPDATE data.
+
+    psycopg2 does not auto-commit, so uncommitted rows are invisible to other
+    connections. This fixture always rolls back after the test so no test data
+    is left in the database.
+
+    :param postgres_connection: Base connection from ``postgres_connection``.
+    :yield: Same connection; transaction rolled back in teardown.
+    """
+    yield postgres_connection
+    postgres_connection.rollback()
+
+
 @pytest.fixture(scope="session")
 def redis_client(require_infrastructure: None) -> redis.Redis:
     """Shared Redis client for the test session.
