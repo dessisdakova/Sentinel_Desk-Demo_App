@@ -11,7 +11,7 @@ It is a living document: each epic updates the relevant sections as new function
 **In scope:**
 - API layer (FastAPI REST endpoints)
 - Integration layer (API ↔ PostgreSQL, API ↔ Redis, API ↔ Celery, email via MailHog)
-- E2E UI layer (React SPA via Selenium)
+- E2E UI layer (React SPA via Playwright)
 - Non-functional: performance practice (Locust, E11+) and security-adjacent (bug garden)
 
 **Out of scope:**
@@ -39,7 +39,7 @@ Following ISTQB principles, testing in this project aims to:
 ```text
                ┌──────────────┐
                │    E2E UI    │  Few — critical user paths only
-               │   Selenium   │
+               │  Playwright  │
           ┌────┴──────────────┴────┐
           │    Integration tests   │  Medium — API + DB assertions,
           │  API + DB + Celery     │  async job completion, email
@@ -99,15 +99,15 @@ assert audit.action == "ALERT_ASSIGNED"
 | Attribute | Detail |
 |-----------|--------|
 | Scope | Full browser workflows — login, queue, alert detail, modals, playbook polling, iframe |
-| Tool | Selenium 4 + WebDriver Manager + pytest; Page Object Model under `tests/e2e/pages/` |
-| Gate | `require_infrastructure` + `require_api` + frontend on `:5173` + browser available |
-| Characteristics | Slowest tier; critical paths only; always use `WebDriverWait`, never `time.sleep()` |
+| Tool | Playwright + pytest-playwright; Page Object Model under `tests/e2e/pages/` |
+| Gate | `require_infrastructure` + `require_api` + `require_frontend` (`:5173`) + Chromium installed |
+| Characteristics | Slowest tier; critical paths only; Playwright auto-waits on every action — never use `time.sleep()` |
 
 **E2E timeline (two phases — avoids E03 vs E10 conflict):**
 
 | Phase | QA ticket | What |
 |-------|-----------|------|
-| **Bootstrap** | **SENT-107-QA** (E01, login page shipped) | First creation of `tests/e2e/`: `conftest.py` (WebDriver), `pages/login_page.py`, login smoke tests |
+| **Bootstrap** | **SENT-107-QA** (E01, login page shipped) | First creation of `tests/e2e/`: `conftest.py` (Playwright fixtures), `pages/login_page.py`, login smoke tests |
 | **Feature E2E** | E03+ UI `-QA` tickets (e.g. SENT-303-QA) | Add `test_*.py` per page/feature using the bootstrap scaffold |
 | **Standardize** | **SENT-1003-QA** (E10) | Enhance shared POM (`AlertQueuePage`), polish `tests/e2e/conftest.py` — **does not** first-create the e2e tree |
 
@@ -150,7 +150,7 @@ assert audit.action == "ALERT_ASSIGNED"
 | redis-py | Direct Redis checks in integration tests | Active |
 | python-dotenv | Load `.env` into `os.environ` before tests | Active |
 | ruff | Linting and formatting (replaces flake8 + isort + Black) | Active |
-| Selenium 4 + WebDriver Manager | E2E browser automation | From SENT-107-QA (bootstrap); POM polish in SENT-1003-QA |
+| Playwright + pytest-playwright | E2E browser automation; also used for API-level tests via `APIRequestContext` | From SENT-107-QA (bootstrap); POM polish in SENT-1003-QA. Install browsers: `playwright install chromium` |
 | pytest-asyncio | Async test support if async DB sessions are needed | Planned (E02+) |
 | freezegun | Freeze time for dashboard timezone bug (BUG-007) | Planned (E08-QA) |
 | Locust | Performance load testing | Planned (E11) |
@@ -173,7 +173,7 @@ tests/
 ├── integration/             # Cross-layer tests: API + DB, async jobs, email
 │   ├── __init__.py
 │   └── test_infrastructure.py
-├── e2e/                     # Selenium — bootstrap SENT-107-QA; feature tests E03+; POM polish SENT-1003-QA
+├── e2e/                     # Playwright — bootstrap SENT-107-QA; feature tests E03+; POM polish SENT-1003-QA
 │   ├── __init__.py
 │   └── pages/               # Page Object Model classes
 └── performance/             # Locust scenarios — added in E11
@@ -214,7 +214,7 @@ Markers are declared in `pytest.ini`. Use them to run subsets without modifying 
 |--------|-------|------------|
 | `api` | `tests/api/` | REST API tests requiring the live API service |
 | `integ` | `tests/integration/` | Tests requiring the live Docker infrastructure stack |
-| `e2e` | `tests/e2e/` | Browser tests requiring full stack + Selenium |
+| `e2e` | `tests/e2e/` | Browser tests requiring full stack + Playwright (Chromium) |
 | `smoke` | Subset of api + integ | Minimal sanity check — health, connectivity, login |
 | `reg` | All layers | Full regression suite — run before closing an epic |
 | `bug` | Any layer | Tests targeting bug garden defects (paired with `xfail`) |
@@ -364,8 +364,11 @@ jobs:
 
   e2e:
     steps:
+      - pip install -r requirements-test.txt
+      - playwright install chromium --with-deps   # download Chromium + system libs
       - docker compose up -d
-      - pytest -m e2e --tb=short  # headless Chrome
+      - npm run dev &                              # start Vite dev server (frontend/)
+      - pytest -m e2e --tb=short                  # headless Chromium
 ```
 
 **Not in CI:** Performance tests (Locust), bug garden xfail tests (run on demand with `--runxfail`).

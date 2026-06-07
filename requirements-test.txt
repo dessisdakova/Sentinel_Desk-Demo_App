@@ -4,3 +4,4 @@ redis
 httpx
 python-dotenv
 ruff
+pytest-playwright

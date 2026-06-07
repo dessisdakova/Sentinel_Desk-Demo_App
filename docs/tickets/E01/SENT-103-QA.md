@@ -21,9 +21,10 @@ Design and implement automated tests for **SENT-103** — User model and Alembic
 
 | ID | Layer | Scenario | Expected |
 |----|-------|----------|----------|
-| QA-103-1 | api | Happy path for primary AC | Pass |
-| QA-103-2 | integration | One negative or edge case | Correct error or UI message |
-| QA-103-3 | api | Data matches seed or TEST_DATA.md stable IDs where applicable | Consistent |
+| QA-103-1 | integration | Schema/columns/constraints | Present |
+| QA-103-2 | integration | Migrations applied | ? |
+| QA-103-3 | integration | role column uses a PostgreSQL enum | Pass |
+| QA-103-4 | integration | bad role insert fails | ? |
 
 Extend with boundary cases from implementation acceptance criteria.
 
