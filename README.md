@@ -11,7 +11,8 @@
 | E01 SENT-101 | ✅ Docker infrastructure (Postgres, Redis, MailHog) |
 | E01 SENT-102 | ✅ FastAPI API + `/health` on port 8000 |
 | E01 SENT-103 | ✅ User model + Alembic (`users` table, `user_role` enum) |
-| E01 SENT-104+ | Next — auth API, RBAC, frontend |
+| E01 SENT-104 | ✅ JWT auth API (`/api/v1/auth/login`, `/me`, `/logout`) |
+| E01 SENT-105+ | Next — RBAC, frontend |
 
 ### QA automation (QA engineer — separate workflow)
 
@@ -110,6 +111,18 @@ docker compose exec api alembic upgrade head
 
 Schema: `users` table with `user_role` enum (`ANALYST`, `LEAD`, `ADMIN`). Seed users arrive in **SENT-108**.
 
+## Auth API (SENT-104)
+
+Requires seeded users (SENT-108) or manual rows in `users`. Example login:
+
+```powershell
+curl -s -X POST http://localhost:8000/api/v1/auth/login `
+  -H "Content-Type: application/json" `
+  -d '{\"email\":\"analyst@demo.local\",\"password\":\"DemoPass123!\"}'
+```
+
+Use the returned `access_token` as `Authorization: Bearer <token>` on `GET /api/v1/auth/me` and `POST /api/v1/auth/logout` (204). Token lifetime: `JWT_EXPIRE_HOURS` × 3600 seconds (default 28800).
+
 ### Connection defaults
 
 Aligned with [.env.example](.env.example):
@@ -141,4 +154,4 @@ Aligned with [.env.example](.env.example):
 
 ## Next implementation ticket
 
-**SENT-104** — Auth API login/logout/me (then **SENT-104-QA**).
+**SENT-105** — RBAC dependency `require_roles` (then **SENT-105-QA**).

@@ -3,6 +3,7 @@
 | Field | Value |
 |-------|-------|
 | **Type** | Story |
+| **Status** | Done |
 | **Epic** | SENT-E01 Platform Foundation |
 | **Priority** | Highest |
 | **Story Points** | 5 |
@@ -73,6 +74,18 @@ The API must issue a JWT access token (8-hour lifetime) and expose a profile end
 
 ---
 
+## Artifacts
+
+| Path | Purpose |
+|------|---------|
+| `backend/app/api/routes/auth.py` | Login, logout, me routes |
+| `backend/app/services/auth_service.py` | Login business logic |
+| `backend/app/core/security.py` | bcrypt + JWT helpers |
+| `backend/app/core/deps.py` | `get_current_user` Bearer dependency |
+| `backend/app/schemas/auth.py` | Request/response Pydantic models |
+
+---
+
 ## Out of scope
 
 - OAuth / SSO
@@ -84,6 +97,9 @@ The API must issue a JWT access token (8-hour lifetime) and expose a profile end
 
 ## Definition of Done
 
-- [ ] Acceptance criteria met
-- [ ] Documented in OpenAPI `/docs`
-- [ ] No test modules added outside `tests/`
+- [x] Acceptance criteria met
+- [x] Documented in OpenAPI `/docs`
+- [x] No test modules added outside `tests/`
+- [x] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [x] `README.md` App implementation status updated for this ticket
+- [x] Epic checklist ticked only if this was the last story in the epic

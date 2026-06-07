@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     redis_port: int = 6379
     redis_url: str = "redis://localhost:6379/0"
 
+    jwt_secret: str = "change-me-use-long-random-string-in-real-env"
+    jwt_expire_hours: int = 8
+
 
 @lru_cache
 def get_settings() -> Settings:
