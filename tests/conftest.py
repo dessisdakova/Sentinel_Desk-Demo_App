@@ -25,7 +25,7 @@ API_TIMEOUT_SEC = 5
 
 def _env(name: str, default: str | None = None) -> str:
     """Read an environment variable or fail the test run with a clear message.
-    
+
     :param name: Variable name as it appears in '.env' (e.g. 'POSTGRES_HOST').
     :param default: Value to use when the variable is unset.
     :return: Non-empty string value.
@@ -152,7 +152,7 @@ def _can_reach_mailhog_ui() -> bool:
 @pytest.fixture(scope="session")
 def require_infrastructure():
     """Skip integration tests when the Docker infrastructure stack is not running.
-    Runs once per pytest session the first time a test needs this fixture. 
+    Runs once per pytest session the first time a test needs this fixture.
     Checks Postgres, Redis, and MailHog using short timeouts.
 
     :return: None
@@ -184,12 +184,12 @@ def api_base_url() -> str:
 
 
 @pytest.fixture(scope="session")
-def require_api(api_base_url: str) -> None:
+def require_api(api_base_url):
     """Skip tests when the FastAPI application is not running or unhealthy.
     Used by both ``tests/api/`` and ``tests/e2e/``. Performs a TCP probe
     first (fast), then an HTTP health check (confirms the app is up and
     responding correctly).
-    
+
     :param api_base_url: Root URL of the FastAPI service.
     :return: None
     """
@@ -207,3 +207,16 @@ def require_api(api_base_url: str) -> None:
         pytest.skip(
             f"API health check failed at {api_base_url}. Run: docker compose up -d"
         )
+
+
+@pytest.fixture(scope="session")
+def api_client(api_base_url, require_api) -> httpx.Client:
+    """Synchronous HTTP client pointed at the SentinelDesk API.
+
+    :param api_base_url: Root URL of the FastAPI service (from root conftest).
+    :param require_api: Gate fixture — skips if the API is down or unhealthy.
+    :yield: Configured ``httpx.Client`` with ``base_url`` and timeout set.
+    """
+    client = httpx.Client(base_url=api_base_url, timeout=API_TIMEOUT_SEC)
+    yield client
+    client.close()

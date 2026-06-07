@@ -5,22 +5,23 @@ import pytest
 
 pytestmark = [pytest.mark.integ, pytest.mark.reg]
 
-EXPECTED_COLUMNS = (
-    "id",
-    "email",
-    "password_hash",
-    "role",
-    "display_name",
-    "active",
-    "created_at",
-    "updated_at",
-)
 EXPECTED_ROLES = ("ANALYST", "LEAD", "ADMIN")
 
 
 @pytest.mark.smoke
 def test_users_table_has_expected_columns(postgres_connection):
     """QA-103-1: Users table exists with the correct column names and types."""
+    expected_columns = (
+        "id",
+        "email",
+        "password_hash",
+        "role",
+        "display_name",
+        "active",
+        "created_at",
+        "updated_at",
+    )
+
     # Ask database which columns exist on public.users and how each is defined.
     with postgres_connection.cursor() as cur:
         cur.execute(
@@ -35,8 +36,8 @@ def test_users_table_has_expected_columns(postgres_connection):
         cols = {row[0]: (row[1], row[2], row[3]) for row in cur.fetchall()}
 
     # No missing or extra columns compared to the schema.
-    assert set(cols) == set(EXPECTED_COLUMNS), (
-        f"Users table columns mismatch. expected={set(EXPECTED_COLUMNS)!r}, actual={set(cols)!r}"
+    assert set(cols) == set(expected_columns), (
+        f"Users table columns mismatch. expected={set(expected_columns)!r}, actual={set(cols)!r}"
     )
 
     # Each column must have the expected type and must not allow NULL.
@@ -113,7 +114,7 @@ def test_user_role_enum_has_expected_values(postgres_connection):
             """
         )
         roles = tuple(row[0] for row in cur.fetchall())
-    
+
     assert roles == EXPECTED_ROLES
 
 
@@ -142,7 +143,7 @@ def test_invalid_role_insert_fails(postgres_write_connection):
 def test_valid_role_insert_succeeds(postgres_write_connection, role):
     """QA-103-5: Postgres accepts each valid user_role enum value."""
     email = f"test103-valid-{role.lower()}@example.com"
-    
+
     with postgres_write_connection.cursor() as cur:
         # Insert one row using a valid enum value (ANALYST, LEAD, or ADMIN).
         cur.execute(

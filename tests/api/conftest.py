@@ -1,17 +1,25 @@
+from typing import Literal
+
 import httpx
 import pytest
 
 from tests.conftest import API_TIMEOUT_SEC
+from tests.data.auth_seed import SEED_USERS, SEED_PASSWORD
 
 
 @pytest.fixture(scope="session")
-def api_client(api_base_url: str, require_api: None) -> httpx.Client:
-    """Synchronous HTTP client pointed at the SentinelDesk API.
+def analyst_token(api_client) -> str:
+    """Logs in as an analyst and returns the token, email, and role."""
+    user = next((u for u in SEED_USERS if u["role"] == "ANALYST"), None)
+    if user is None:
+        raise ValueError("No seeded analyst user.")
 
-    :param api_base_url: Root URL of the FastAPI service (from root conftest).
-    :param require_api: Gate fixture — skips if the API is down or unhealthy.
-    :yield: Configured ``httpx.Client`` with ``base_url`` and timeout set.
-    """
-    client = httpx.Client(base_url=api_base_url, timeout=API_TIMEOUT_SEC)
-    yield client
-    client.close()
+    response = api_client.post(
+        "/api/v1/auth/login",
+        json={"email": user["email"], "password": SEED_PASSWORD},
+        timeout=API_TIMEOUT_SEC,
+    )
+
+    if response.status_code != 200:
+        raise ValueError(f"Failed to login as analyst: {response.json()}")
+    return response.json()["access_token"]

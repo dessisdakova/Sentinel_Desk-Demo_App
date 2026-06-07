@@ -10,7 +10,7 @@ class BasePage:
 
     def navigate(self, path: str = "") -> None:
         """Navigate to ``base_url + path``.
-        
+
         :param path: URL path relative to ``base_url`` (e.g. ``"/login"``).
             Pass an empty string to navigate to the root URL.
         """

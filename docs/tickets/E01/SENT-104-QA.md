@@ -46,6 +46,10 @@ Automate API and integration coverage for authentication endpoints.
 | QA-104-8 | integration | Login analyst → decode sub → DB user row email matches | Pass |
 | QA-104-9 | api | Login inactive user (seed or fixture) | 403 ACCOUNT_DISABLED |
 | QA-104-10 | api | Login success `expires_in` | 28800 (or `JWT_EXPIRE_HOURS` × 3600) |
+| QA-104-11 | api | Login with wrong email (unknown user) | 401 INVALID_CREDENTIALS |
+| QA-104-12 | api | Login with malformed JSON body | 422 |
+| QA-104-13 | api | Analyst token on /auth/me | returns role ANALYST |
+| QA-104-14 | api | After logout 204 | /auth/me still works with same token |
 
 ---
 

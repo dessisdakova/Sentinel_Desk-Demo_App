@@ -38,7 +38,10 @@ def invalid_postgres_settings() -> dict:
 
 
 @pytest.fixture(scope="function")
-def postgres_connection(postgres_settings: dict, require_infrastructure: None):
+def postgres_connection(
+    postgres_settings,
+    require_infrastructure,
+) -> psycopg2.extensions.connection:
     """Open one PostgreSQL connection for a single test function.
 
     :param postgres_settings: Valid connection kwargs from ``.env``.
@@ -51,7 +54,9 @@ def postgres_connection(postgres_settings: dict, require_infrastructure: None):
 
 
 @pytest.fixture(scope="function")
-def postgres_write_connection(postgres_connection):
+def postgres_write_connection(
+    postgres_connection
+) -> psycopg2.extensions.connection:
     """PostgreSQL connection for tests that INSERT or UPDATE data.
 
     psycopg2 does not auto-commit, so uncommitted rows are invisible to other
@@ -66,7 +71,7 @@ def postgres_write_connection(postgres_connection):
 
 
 @pytest.fixture(scope="session")
-def redis_client(require_infrastructure: None) -> redis.Redis:
+def redis_client(require_infrastructure) -> redis.Redis:
     """Shared Redis client for the test session.
 
     :param require_infrastructure: Gate fixture — skips if Docker is down.
@@ -78,7 +83,7 @@ def redis_client(require_infrastructure: None) -> redis.Redis:
 
 
 @pytest.fixture(scope="session")
-def mailhog_ui_url(require_infrastructure: None) -> str:
+def mailhog_ui_url(require_infrastructure) -> str:
     """Base URL of the MailHog web inbox.
 
     :param require_infrastructure: Gate fixture — skips if Docker is down.

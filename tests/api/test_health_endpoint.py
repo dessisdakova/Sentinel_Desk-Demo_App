@@ -12,12 +12,8 @@ def test_health_returns_200_and_verify_response(api_client):
     response = api_client.get("/health", headers={"X-Request-ID": request_id})
 
     assert response.status_code == 200, "Health endpoint must return 200."
-    assert response.json() == {"status": "ok"}, (
-        "Health response must return {'status': 'ok'}."
-    )
-    assert "X-Request-ID" in response.headers, (
-        "X-Request-ID header must be present."
-    )
+    assert response.json() == {"status": "ok"}, "Health response must return {'status': 'ok'}."
+    assert "X-Request-ID" in response.headers, "X-Request-ID header must be present."
     assert request_id == response.headers["X-Request-ID"], (
         "Response must echo the X-Request-ID sent in the request."
     )
