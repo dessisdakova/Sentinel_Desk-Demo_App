@@ -21,7 +21,7 @@
 | E01 SENT-101-QA | ✅ Integration tests for infra |
 | E01 SENT-102-QA | ✅ API tests for health + `X-Request-ID` |
 | E01 SENT-103-QA | ✅ Integration tests for `users` schema, Alembic, enum constraints |
-| E01 SENT-104-QA+ | After matching app ticket is complete |
+| E01 SENT-104-QA | ✅ API + integration auth tests (21 tests) |
 
 **Implementation agents:** read [docs/IMPLEMENTATION_AGENT.md](docs/IMPLEMENTATION_AGENT.md) — do not modify `tests/` or implement `-QA` tickets.
 

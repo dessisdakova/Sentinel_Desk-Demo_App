@@ -10,6 +10,7 @@ from tests.api.constants import (
 pytestmark = [pytest.mark.api, pytest.mark.reg]
 
 
+@pytest.mark.smoke
 def test_valid_login_returns_auth_token(api_client):
     """QA-104-1: Successful login returns auth token."""
     active_users = [user for user in SEED_USERS if user["status"] == "active"]

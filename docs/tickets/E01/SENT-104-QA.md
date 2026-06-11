@@ -3,11 +3,12 @@
 | Field | Value |
 |-------|-------|
 | **Type** | Test Story |
+| **Status** | Done |
 | **Epic** | SENT-E01 Platform Foundation |
 | **Priority** | Highest |
 | **Labels** | `qa`, `api`, `integration` |
 | **Implements after** | [SENT-104](./SENT-104.md) |
-| **Test location** | `tests/api/`, `tests/integration/` |
+| **Test location** | `tests/api/auth/`, `tests/api/health/`, `tests/integration/auth/` |
 
 ---
 
@@ -27,8 +28,8 @@ Automate API and integration coverage for authentication endpoints.
 
 ## Prerequisites
 
-- [ ] SENT-104 implemented
-- [ ] SENT-108 seed users available (or manual seed)
+- [x] SENT-104 implemented
+- [x] SENT-108 seed users available (or manual seed)
 
 ---
 
@@ -43,9 +44,9 @@ Automate API and integration coverage for authentication endpoints.
 | QA-104-5 | api | GET /auth/me without Authorization | 401 |
 | QA-104-6 | api | GET /auth/me malformed token | 401 |
 | QA-104-7 | api | POST /auth/logout | 204 |
-| QA-104-8 | integration | Login analyst → decode sub → DB user row email matches | Pass |
+| QA-104-8 | integration | Login analyst, lead, admin → decode sub → DB user row email matches | Pass (parametrized × 3 roles) |
 | QA-104-9 | api | Login inactive user (seed or fixture) | 403 ACCOUNT_DISABLED |
-| QA-104-10 | api | Login success `expires_in` | 28800 (or `JWT_EXPIRE_HOURS` × 3600) |
+| QA-104-10 | api | Login success `expires_in`, covered in QA-104-1 | 28800 (or `JWT_EXPIRE_HOURS` × 3600) |
 | QA-104-11 | api | Login with wrong email (unknown user) | 401 INVALID_CREDENTIALS |
 | QA-104-12 | api | Login with malformed JSON body | 422 |
 | QA-104-13 | api | Analyst token on /auth/me | returns role ANALYST |
@@ -53,10 +54,17 @@ Automate API and integration coverage for authentication endpoints.
 
 ---
 
-## Suggested files
+## Actual files
 
-- `tests/api/test_auth.py`
-- `tests/conftest.py` — add `analyst_token`, `lead_token`, `admin_token` fixtures (extend in E10)
+| File | Contents |
+|------|----------|
+| `tests/api/auth/test_login.py` | QA-104-1, 2, 3, 9, 11, 12 |
+| `tests/api/auth/test_me.py` | QA-104-4, 5, 6, 13 |
+| `tests/api/auth/test_logout.py` | QA-104-7, 14 |
+| `tests/api/auth/test_jwt_token.py` | QA-104-10 |
+| `tests/integration/auth/test_login_token.py` | QA-104-8 |
+| `tests/api/conftest.py` | `analyst_token`, `lead_token`, `admin_token`, `token` (indirect) fixtures |
+| `tests/api/constants.py` | `SEED_USERS`, `SEED_INACTIVE_USER`, `SEED_PASSWORD`, `TOKEN_EXPIRES_IN` |
 
 ---
 
@@ -68,5 +76,5 @@ Automate API and integration coverage for authentication endpoints.
 
 ## Definition of Done
 
-- [ ] `pytest tests/api/test_auth.py -v` passes
-- [ ] No tests under `backend/`
+- [x] `pytest tests/api/ tests/integration/auth/ -v` passes (21 tests)
+- [x] No tests under `backend/`
