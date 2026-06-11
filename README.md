@@ -12,7 +12,8 @@
 | E01 SENT-102 | ✅ FastAPI API + `/health` on port 8000 |
 | E01 SENT-103 | ✅ User model + Alembic (`users` table, `user_role` enum) |
 | E01 SENT-104 | ✅ JWT auth API (`/api/v1/auth/login`, `/me`, `/logout`) |
-| E01 SENT-105+ | Next — RBAC, frontend |
+| E01 SENT-105 | ✅ RBAC `require_roles` dependency + `GET /api/v1/admin/ping` |
+| E01 SENT-106+ | Next — frontend |
 
 ### QA automation (QA engineer — separate workflow)
 
@@ -154,4 +155,4 @@ Aligned with [.env.example](.env.example):
 
 ## Next implementation ticket
 
-**SENT-105** — RBAC dependency `require_roles` (then **SENT-105-QA**).
+**SENT-106** — Frontend scaffold (then **SENT-105-QA** paired QA).
