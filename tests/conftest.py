@@ -77,7 +77,7 @@ def _port_is_open(host: str, port: int, timeout: float = PORT_CHECK_TIMEOUT) -> 
     :param host: Hostname or IP (e.g. localhost). Must not be a full URL.
     :param port: Port number (e.g. 5432, 8000).
     :param timeout: Maximum seconds to wait for a connection attempt.
-    :return: True if the port accepted a connection; False on timeout or connection refused.
+    :return: True if port accepted a connection; False on timeout or connection refused.
     """
     try:
         with socket.create_connection((host, port), timeout=timeout):
@@ -136,7 +136,7 @@ def _can_ping_redis() -> bool:
 def _can_reach_mailhog_ui() -> bool:
     """Probe MailHog web UI with an HTTP GET.
 
-    :return: True if MailHog UI returns HTTP 200; False on network errors or other statuses.
+    :return: True if MailHog UI returns 200; False on network errors or other statuses.
     """
     url = _env("MAILHOG_UI_URL", "http://localhost:8025")
     try:

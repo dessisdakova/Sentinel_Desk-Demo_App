@@ -5,7 +5,7 @@ class BasePage:
     """Shared base for all Page Object Models."""
 
     def __init__(self, page: Page) -> None:
-        """Store the Playwright Page instance for use by subclass locators and actions."""
+        """Store Page instance for use by subclass locators and actions."""
         self._page = page
 
     def navigate(self, path: str = "") -> None:

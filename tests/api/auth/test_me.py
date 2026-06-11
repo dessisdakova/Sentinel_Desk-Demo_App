@@ -10,7 +10,7 @@ def test_auth_with_valid_token_returns_correct_user_profile(api_client, analyst_
     token = analyst_token
 
     response = api_client.get(
-        "/api/v1/auth/me", 
+        "/api/v1/auth/me",
         headers={"Authorization": f"Bearer {token}"})
 
     assert response.status_code == 200, "Valid token should return 200."
@@ -34,7 +34,7 @@ def test_auth_with_missing_authorization_header_returns_401(api_client):
 def test_auth_with_malformed_token_returns_401(api_client):
     """QA-104-6: Auth with malformed token returns 401."""
     response = api_client.get(
-        "/api/v1/auth/me", 
+        "/api/v1/auth/me",
         headers={"Authorization": "Bearer malformed_token"}
     )
 

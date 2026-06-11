@@ -37,8 +37,8 @@ def test_users_table_has_expected_columns(postgres_connection):
 
     # No missing or extra columns compared to the schema.
     assert set(cols) == set(expected_columns), (
-        f"Users table columns mismatch. expected={set(expected_columns)!r}, actual={set(cols)!r}"
-    )
+        "Users table columns mismatch." /
+        f"expected={set(expected_columns)!r}, actual={set(cols)!r}")
 
     # Each column must have the expected type and must not allow NULL.
     assert cols["id"] == ("uuid", "uuid", "NO"), "id must be uuid NOT NULL"
@@ -72,7 +72,8 @@ def test_users_table_has_primary_key_on_id(postgres_connection):
         pk_columns = {row[0] for row in cur.fetchall()}
 
     # Exactly one primary key column: id.
-    assert pk_columns == {"id"}, f"Users table primary key must be on id, got {pk_columns!r}"
+    assert pk_columns == {"id"}, (
+        f"Users table primary key must be on id, got {pk_columns!r}")
 
 
 def test_users_email_has_unique_index(postgres_connection):

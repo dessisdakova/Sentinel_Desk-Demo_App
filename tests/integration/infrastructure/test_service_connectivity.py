@@ -50,4 +50,6 @@ def test_postgres_rejects_invalid_credentials(invalid_postgres_settings):
             "PostgreSQL not running; start Docker to test invalid credentials."
         )
     with pytest.raises(psycopg2.OperationalError):
-        psycopg2.connect(connect_timeout=CLIENT_TIMEOUT_SEC, **invalid_postgres_settings)
+        psycopg2.connect(
+            connect_timeout=CLIENT_TIMEOUT_SEC,
+            **invalid_postgres_settings)

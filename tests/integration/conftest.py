@@ -10,7 +10,6 @@ from tests.conftest import (
     _postgres_connect_kwargs,
     _redis_connect_kwargs,
 )
-
 from tests.constants import CLIENT_TIMEOUT_SEC
 
 
