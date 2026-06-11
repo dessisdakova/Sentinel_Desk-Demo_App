@@ -11,21 +11,17 @@ from dotenv import load_dotenv
 from redis.backoff import NoBackoff
 from redis.retry import Retry
 
+from tests.constants import (
+    API_TIMEOUT_SEC,
+    CLIENT_TIMEOUT_SEC,
+    PORT_CHECK_TIMEOUT,
+)
+
 load_dotenv()
-
-# Seconds to wait for a TCP port check before treating a service as down.
-PORT_CHECK_TIMEOUT = 0.5
-
-# Default timeout (seconds) for Postgres, Redis, and MailHog probe clients.
-CLIENT_TIMEOUT_SEC = 2
-
-# Default timeout (seconds) for HTTP calls to the FastAPI application.
-API_TIMEOUT_SEC = 5
-
 
 def _env(name: str, default: str | None = None) -> str:
     """Read an environment variable or fail the test run with a clear message.
-    
+
     :param name: Variable name as it appears in '.env' (e.g. 'POSTGRES_HOST').
     :param default: Value to use when the variable is unset.
     :return: Non-empty string value.
@@ -56,6 +52,7 @@ def _postgres_connect_kwargs(**overrides: Any) -> dict[str, Any]:
 
 def _redis_connect_kwargs(**overrides: Any) -> dict[str, Any]:
     """Build keyword arguments for redis client with safe timeouts and no retries.
+
     Disabling retries avoids long hangs when Docker is stopped (redis-py 6+).
 
     :param **overrides: Any key to replace in the base dict.
@@ -80,7 +77,7 @@ def _port_is_open(host: str, port: int, timeout: float = PORT_CHECK_TIMEOUT) -> 
     :param host: Hostname or IP (e.g. localhost). Must not be a full URL.
     :param port: Port number (e.g. 5432, 8000).
     :param timeout: Maximum seconds to wait for a connection attempt.
-    :return: True if the port accepted a connection; False on timeout or connection refused.
+    :return: True if port accepted a connection; False on timeout or connection refused.
     """
     try:
         with socket.create_connection((host, port), timeout=timeout):
@@ -139,7 +136,7 @@ def _can_ping_redis() -> bool:
 def _can_reach_mailhog_ui() -> bool:
     """Probe MailHog web UI with an HTTP GET.
 
-    :return: True if MailHog UI returns HTTP 200; False on network errors or other statuses.
+    :return: True if MailHog UI returns 200; False on network errors or other statuses.
     """
     url = _env("MAILHOG_UI_URL", "http://localhost:8025")
     try:
@@ -152,7 +149,8 @@ def _can_reach_mailhog_ui() -> bool:
 @pytest.fixture(scope="session")
 def require_infrastructure():
     """Skip integration tests when the Docker infrastructure stack is not running.
-    Runs once per pytest session the first time a test needs this fixture. 
+
+    Runs once per pytest session the first time a test needs this fixture.
     Checks Postgres, Redis, and MailHog using short timeouts.
 
     :return: None
@@ -175,6 +173,7 @@ def require_infrastructure():
 @pytest.fixture(scope="session")
 def api_base_url() -> str:
     """Root URL of the FastAPI service.
+
     Shared between API tests (via ``api_client``) and E2E tests (via
     ``playwright_api_context``).
 
@@ -184,12 +183,13 @@ def api_base_url() -> str:
 
 
 @pytest.fixture(scope="session")
-def require_api(api_base_url: str) -> None:
+def require_api(api_base_url):
     """Skip tests when the FastAPI application is not running or unhealthy.
+
     Used by both ``tests/api/`` and ``tests/e2e/``. Performs a TCP probe
     first (fast), then an HTTP health check (confirms the app is up and
     responding correctly).
-    
+
     :param api_base_url: Root URL of the FastAPI service.
     :return: None
     """
@@ -207,3 +207,16 @@ def require_api(api_base_url: str) -> None:
         pytest.skip(
             f"API health check failed at {api_base_url}. Run: docker compose up -d"
         )
+
+
+@pytest.fixture(scope="session")
+def api_client(api_base_url, require_api) -> httpx.Client:
+    """Synchronous HTTP client pointed at the SentinelDesk API.
+
+    :param api_base_url: Root URL of the FastAPI service (from root conftest).
+    :param require_api: Gate fixture — skips if the API is down or unhealthy.
+    :yield: Configured ``httpx.Client`` with ``base_url`` and timeout set.
+    """
+    client = httpx.Client(base_url=api_base_url, timeout=API_TIMEOUT_SEC)
+    yield client
+    client.close()

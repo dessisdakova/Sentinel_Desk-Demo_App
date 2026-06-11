@@ -1,4 +1,4 @@
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Page
 
 from tests.e2e.pages.base_page import BasePage
 
@@ -9,7 +9,7 @@ class LoginPage(BasePage):
     URL = "/login"
 
     def __init__(self, page: Page) -> None:
-        """Declare all login-page locators using ``data-testid`` selectors from SENT-107."""
+        """Declare all login-page locators."""
         super().__init__(page)
         self.page_root = page.get_by_test_id("page-login")
         self.email_input = page.get_by_test_id("login-email")

@@ -1,3 +1,4 @@
+import base64
 import json
 from pathlib import Path
 
@@ -6,11 +7,24 @@ import pytest
 import redis
 
 from tests.conftest import (
-    CLIENT_TIMEOUT_SEC,
     _env,
     _postgres_connect_kwargs,
     _redis_connect_kwargs,
 )
+from tests.constants import CLIENT_TIMEOUT_SEC
+
+
+def _decode_jwt_payload(token: str) -> dict:
+    """Decode the payload segment of a JWT without verifying the signature.
+
+    :param token: Raw JWT string (three base64url segments joined by '.').
+    :return: Deserialized payload dictionary.
+    """
+    payload_segment = token.split(".")[1]
+    # base64url uses '-' and '_'; standard base64 uses '+' and '/'.
+    # Add '==' padding — base64.b64decode ignores extra padding.
+    padded = payload_segment.replace("-", "+").replace("_", "/") + "=="
+    return json.loads(base64.b64decode(padded).decode())
 
 
 @pytest.fixture(scope="session")
@@ -25,6 +39,7 @@ def postgres_settings() -> dict:
 @pytest.fixture(scope="session")
 def invalid_postgres_settings() -> dict:
     """Intentionally wrong PostgreSQL credentials for negative testing.
+
     Loaded from ``tests/data/invalid_postgres.json`` so the bad credentials
     are never hardcoded in the test itself.
 
@@ -38,7 +53,10 @@ def invalid_postgres_settings() -> dict:
 
 
 @pytest.fixture(scope="function")
-def postgres_connection(postgres_settings: dict, require_infrastructure: None):
+def postgres_connection(
+    postgres_settings,
+    require_infrastructure,
+) -> psycopg2.extensions.connection:
     """Open one PostgreSQL connection for a single test function.
 
     :param postgres_settings: Valid connection kwargs from ``.env``.
@@ -51,7 +69,9 @@ def postgres_connection(postgres_settings: dict, require_infrastructure: None):
 
 
 @pytest.fixture(scope="function")
-def postgres_write_connection(postgres_connection):
+def postgres_write_connection(
+    postgres_connection
+) -> psycopg2.extensions.connection:
     """PostgreSQL connection for tests that INSERT or UPDATE data.
 
     psycopg2 does not auto-commit, so uncommitted rows are invisible to other
@@ -66,7 +86,7 @@ def postgres_write_connection(postgres_connection):
 
 
 @pytest.fixture(scope="session")
-def redis_client(require_infrastructure: None) -> redis.Redis:
+def redis_client(require_infrastructure) -> redis.Redis:
     """Shared Redis client for the test session.
 
     :param require_infrastructure: Gate fixture — skips if Docker is down.
@@ -78,7 +98,7 @@ def redis_client(require_infrastructure: None) -> redis.Redis:
 
 
 @pytest.fixture(scope="session")
-def mailhog_ui_url(require_infrastructure: None) -> str:
+def mailhog_ui_url(require_infrastructure) -> str:
     """Base URL of the MailHog web inbox.
 
     :param require_infrastructure: Gate fixture — skips if Docker is down.

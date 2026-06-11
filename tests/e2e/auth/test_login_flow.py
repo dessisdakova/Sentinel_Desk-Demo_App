@@ -16,7 +16,7 @@ def test_health_returns_200_and_correct_body(playwright_api_context):
 
 
 def test_health_echoes_request_id_header(playwright_api_context):
-    """QA-107-PW-2: Health endpoint echoes the ``X-Request-ID`` header back to the caller."""
+    """QA-107-PW-2: Health endpoint echoes the X-Request-ID back to the caller."""
     request_id = "PWTEST-001"
 
     # Send a known request ID and check the API echoes it in the response.
