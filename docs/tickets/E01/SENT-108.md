@@ -20,7 +20,7 @@ Seed script for users.
 ## Description
 
 **As a** developer and QA engineer  
-**I want** a repeatable seed script that creates the three baseline users with known credentials and fixed UUIDs  
+**I want** a repeatable seed script that creates the four baseline users with known credentials and fixed UUIDs  
 **So that** integration tests and manual exploration always start from a known auth state without manual DB setup
 
 ---
@@ -29,7 +29,7 @@ Seed script for users.
 
 ### AC1 — Seed creates baseline users
 
-- [ ] `backend/scripts/seed.py` inserts the 3 users from [TEST_DATA.md §2](../../TEST_DATA.md) (`analyst@demo.local`, `lead@demo.local`, `admin@demo.local`) with passwords hashed via bcrypt and roles from CONSTITUTION §4
+- [ ] `backend/scripts/seed.py` inserts the 4 users from [TEST_DATA.md §2](../../TEST_DATA.md) (`analyst@demo.local`, `lead@demo.local`, `admin@demo.local`, `inactive@demo.local`) with passwords hashed via bcrypt, roles from CONSTITUTION §4, and `inactive@demo.local` seeded with `active = False`
 
 ### AC2 — Idempotent
 
