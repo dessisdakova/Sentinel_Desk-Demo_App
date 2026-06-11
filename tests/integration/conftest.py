@@ -6,11 +6,12 @@ import pytest
 import redis
 
 from tests.conftest import (
-    CLIENT_TIMEOUT_SEC,
     _env,
     _postgres_connect_kwargs,
     _redis_connect_kwargs,
 )
+
+from tests.constants import CLIENT_TIMEOUT_SEC
 
 
 @pytest.fixture(scope="session")
@@ -25,6 +26,7 @@ def postgres_settings() -> dict:
 @pytest.fixture(scope="session")
 def invalid_postgres_settings() -> dict:
     """Intentionally wrong PostgreSQL credentials for negative testing.
+
     Loaded from ``tests/data/invalid_postgres.json`` so the bad credentials
     are never hardcoded in the test itself.
 

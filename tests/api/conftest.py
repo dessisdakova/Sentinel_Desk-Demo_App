@@ -1,10 +1,8 @@
-from typing import Literal
 
-import httpx
 import pytest
 
-from tests.conftest import API_TIMEOUT_SEC
-from tests.data.auth_seed import SEED_USERS, SEED_PASSWORD
+from tests.constants import API_TIMEOUT_SEC
+from tests.data.auth_seed import SEED_PASSWORD, SEED_USERS
 
 
 @pytest.fixture(scope="session")
