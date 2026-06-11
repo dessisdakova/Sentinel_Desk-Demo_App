@@ -110,6 +110,22 @@ docker compose up -d
 docker compose exec api alembic upgrade head
 ```
 
+Access databade:
+
+```powershell
+docker compose exec postgres psql -U sentinel -d sentineldesk
+```
+
+Once you’re in the psql prompt, useful commands:
+
+```powershell
+\dt                                 # List tables
+\d users                            # Describe users table
+SELECT * FROM users;                # Select all users
+SELECT id, email, role FROM users;  # Select id, email, role from users table
+\q                                  # Quit psql
+```
+
 Schema: `users` table with `user_role` enum (`ANALYST`, `LEAD`, `ADMIN`). Seed users arrive in **SENT-108**.
 
 ## Auth API (SENT-104)
