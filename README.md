@@ -12,7 +12,8 @@
 | E01 SENT-102 | ✅ FastAPI API + `/health` on port 8000 |
 | E01 SENT-103 | ✅ User model + Alembic (`users` table, `user_role` enum) |
 | E01 SENT-104 | ✅ JWT auth API (`/api/v1/auth/login`, `/me`, `/logout`) |
-| E01 SENT-105+ | Next — RBAC, frontend |
+| E01 SENT-105 | ✅ RBAC `require_roles` dependency + `GET /api/v1/admin/ping` |
+| E01 SENT-106+ | Next — frontend |
 
 ### QA automation (QA engineer — separate workflow)
 
@@ -109,6 +110,22 @@ docker compose up -d
 docker compose exec api alembic upgrade head
 ```
 
+Access databade:
+
+```powershell
+docker compose exec postgres psql -U sentinel -d sentineldesk
+```
+
+Once you’re in the psql prompt, useful commands:
+
+```powershell
+\dt                                 # List tables
+\d users                            # Describe users table
+SELECT * FROM users;                # Select all users
+SELECT id, email, role FROM users;  # Select id, email, role from users table
+\q                                  # Quit psql
+```
+
 Schema: `users` table with `user_role` enum (`ANALYST`, `LEAD`, `ADMIN`). Seed users arrive in **SENT-108**.
 
 ## Auth API (SENT-104)
@@ -154,4 +171,4 @@ Aligned with [.env.example](.env.example):
 
 ## Next implementation ticket
 
-**SENT-105** — RBAC dependency `require_roles` (then **SENT-105-QA**).
+**SENT-106** — Frontend scaffold (then **SENT-105-QA** paired QA).

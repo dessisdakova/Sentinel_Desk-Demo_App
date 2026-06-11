@@ -6,6 +6,7 @@
 | **Epic** | SENT-E01 Platform Foundation |
 | **Priority** | High |
 | **Story Points** | 5 |
+| **Status** | Done |
 | **Labels** | `backend`, `implementation` |
 | **Paired QA ticket** | [SENT-105-QA](./SENT-105-QA.md) |
 
@@ -29,11 +30,11 @@ RBAC dependency require_roles.
 
 ### AC1 — Role enforcement dependency
 
-- [ ] `require_roles([...])` FastAPI dependency returns `403` with error code `FORBIDDEN` if the caller's JWT role is not in the allowed list
+- [x] `require_roles([...])` FastAPI dependency returns `403` with error code `FORBIDDEN` if the caller's JWT role is not in the allowed list
 
 ### AC2 — Sample protected route
 
-- [ ] `GET /api/v1/admin/ping` is gated with `require_roles(["ADMIN"])` and returns `200` for admin, `403` for analyst and lead
+- [x] `GET /api/v1/admin/ping` is gated with `require_roles(["ADMIN"])` and returns `200` for admin, `403` for analyst and lead
 
 ---
 
@@ -52,10 +53,10 @@ RBAC dependency require_roles.
 
 ## Definition of Done
 
-- [ ] Acceptance criteria met
-- [ ] `data-testid` hooks on new UI controls (if frontend)
-- [ ] OpenAPI updated (if API)
-- [ ] No test modules added outside `tests/`
-- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
-- [ ] `README.md` App implementation status updated for this ticket
+- [x] Acceptance criteria met
+- [x] `data-testid` hooks on new UI controls (if frontend)
+- [x] OpenAPI updated (if API)
+- [x] No test modules added outside `tests/`
+- [x] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [x] `README.md` App implementation status updated for this ticket
 - [ ] Epic checklist ticked only if this was the last story in the epic
