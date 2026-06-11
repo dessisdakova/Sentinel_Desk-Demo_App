@@ -15,13 +15,13 @@ def test_postgres_accepts_connection(postgres_connection):
     # Run the simplest possible query to prove the database is alive.
     with postgres_connection.cursor() as cur:
         cur.execute("SELECT 1")
-        assert cur.fetchone()[0] == 1, "Postgres connection must accept queries."
+        assert cur.fetchone()[0] == 1
 
 
 @pytest.mark.smoke
 def test_redis_responds_to_ping(redis_client):
     """QA-101-2: Redis responds to PING."""
-    assert redis_client.ping() is True, "Redis must answer PING."
+    assert redis_client.ping() is True
 
 
 @pytest.mark.smoke
@@ -30,10 +30,8 @@ def test_mailhog_ui_is_reachable(mailhog_ui_url):
     # Open the MailHog inbox page in the browser (HTTP GET).
     response = httpx.get(mailhog_ui_url, timeout=API_TIMEOUT_SEC)
 
-    assert response.status_code == 200, "MailHog UI must return HTTP 200."
-    assert "MailHog" in response.text, (
-        "MailHog UI must contain 'MailHog' in the response text."
-    )
+    assert response.status_code == 200
+    assert "MailHog" in response.text
 
 
 def test_postgres_rejects_invalid_credentials(invalid_postgres_settings):

@@ -1,45 +1,29 @@
-import base64
-import json
-
 import pytest
 
-from tests.data.auth_seed import SEED_PASSWORD, SEED_USERS
+from tests.api.constants import SEED_ADMIN_USER, SEED_ANALYST_USER, SEED_LEAD_USER
+from tests.integration.conftest import _decode_jwt_payload
 
 pytestmark = [pytest.mark.integ, pytest.mark.reg]
 
-ANALYST = next(u for u in SEED_USERS if u["role"] == "ANALYST")
 
-
-def _decode_jwt_payload(token: str) -> dict:
-    """Decode the payload segment of a JWT without verifying the signature.
-
-    :param token: Raw JWT string (three base64url segments joined by '.').
-    :return: Deserialized payload dictionary.
-    """
-    payload_segment = token.split(".")[1]
-    # base64url uses '-' and '_'; standard base64 uses '+' and '/'.
-    # Add '==' padding — base64.b64decode ignores extra padding.
-    padded = payload_segment.replace("-", "+").replace("_", "/") + "=="
-    return json.loads(base64.b64decode(padded).decode())
-
-
-def test_login_token_sub_matches_db_user_email(api_client, postgres_connection):
-    """QA-104-8: JWT sub claim from analyst login matches the users table email."""
+@pytest.mark.parametrize("user", [
+    pytest.param(SEED_ANALYST_USER, id="analyst"),
+    pytest.param(SEED_LEAD_USER, id="lead"),
+    pytest.param(SEED_ADMIN_USER, id="admin"),
+])
+def test_login_token_sub_matches_db_user_email(api_client, postgres_connection, user):
+    """QA-104-8: JWT sub claim matches the users table email for each role."""
     response = api_client.post(
         "/api/v1/auth/login",
-        json={"email": ANALYST["email"], "password": SEED_PASSWORD},
+        json={"email": user["email"], "password": user["password"]},
     )
-    assert response.status_code == 200, "Analyst login must return 200."
-
-    token = response.json()["access_token"]
-    payload = _decode_jwt_payload(token)
+    assert response.status_code == 200, f"Login must succeed for {user['email']}."
+    payload = _decode_jwt_payload(response.json()["access_token"])
     user_id = payload["sub"]
-
     with postgres_connection.cursor() as cur:
         cur.execute("SELECT email FROM users WHERE id = %s", (user_id,))
         row = cur.fetchone()
-
     assert row is not None, f"No user row found for sub={user_id!r}."
-    assert row[0] == ANALYST["email"], (
-        f"DB email {row[0]!r} does not match login email {ANALYST['email']!r}."
+    assert row[0] == user["email"], (
+        f"DB email {row[0]!r} does not match login email {user['email']!r}."
     )

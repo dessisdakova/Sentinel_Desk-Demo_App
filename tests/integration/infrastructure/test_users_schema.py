@@ -143,7 +143,7 @@ def test_invalid_role_insert_fails(postgres_write_connection):
 @pytest.mark.parametrize("role", EXPECTED_ROLES)
 def test_valid_role_insert_succeeds(postgres_write_connection, role):
     """QA-103-5: Postgres accepts each valid user_role enum value."""
-    email = f"test103-valid-{role.lower()}@example.com"
+    email = f"test103-valid-{role}@example.com"
 
     with postgres_write_connection.cursor() as cur:
         # Insert one row using a valid enum value (ANALYST, LEAD, or ADMIN).

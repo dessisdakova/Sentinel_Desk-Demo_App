@@ -1,3 +1,4 @@
+import base64
 import json
 from pathlib import Path
 
@@ -11,6 +12,19 @@ from tests.conftest import (
     _redis_connect_kwargs,
 )
 from tests.constants import CLIENT_TIMEOUT_SEC
+
+
+def _decode_jwt_payload(token: str) -> dict:
+    """Decode the payload segment of a JWT without verifying the signature.
+
+    :param token: Raw JWT string (three base64url segments joined by '.').
+    :return: Deserialized payload dictionary.
+    """
+    payload_segment = token.split(".")[1]
+    # base64url uses '-' and '_'; standard base64 uses '+' and '/'.
+    # Add '==' padding — base64.b64decode ignores extra padding.
+    padded = payload_segment.replace("-", "+").replace("_", "/") + "=="
+    return json.loads(base64.b64decode(padded).decode())
 
 
 @pytest.fixture(scope="session")

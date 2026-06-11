@@ -11,13 +11,10 @@ def test_health_returns_200_and_verify_response(api_client):
     # Call GET /health and send a custom request ID header.
     response = api_client.get("/health", headers={"X-Request-ID": request_id})
 
-    assert response.status_code == 200, "Health endpoint must return 200."
-    assert response.json() == {"status": "ok"}, (
-        "Health response must return {'status': 'ok'}.")
-    assert "X-Request-ID" in response.headers, "X-Request-ID header must be present."
-    assert request_id == response.headers["X-Request-ID"], (
-        "Response must echo the X-Request-ID sent in the request."
-    )
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+    assert "X-Request-ID" in response.headers
+    assert request_id == response.headers["X-Request-ID"]
 
 
 def test_unknown_path_returns_404(api_client):
@@ -25,4 +22,4 @@ def test_unknown_path_returns_404(api_client):
     # Request a route that does not exist in the API.
     response = api_client.get("/unknown-path")
 
-    assert response.status_code == 404, "Unknown/invalid path must return 404."
+    assert response.status_code == 404

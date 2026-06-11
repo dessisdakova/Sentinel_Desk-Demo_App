@@ -1,37 +1,46 @@
 import pytest
 
-from tests.data.auth_seed import SEED_PASSWORD, SEED_USERS, TOKEN_EXPIRES_IN
+from tests.api.constants import (
+    SEED_INACTIVE_USER,
+    SEED_PASSWORD,
+    SEED_USERS,
+    TOKEN_EXPIRES_IN,
+)
 
 pytestmark = [pytest.mark.api, pytest.mark.reg]
 
 
 def test_valid_login_returns_auth_token(api_client):
     """QA-104-1: Successful login returns auth token."""
-    for user in SEED_USERS:
+    active_users = [user for user in SEED_USERS if user["status"] == "active"]
+
+    for user in active_users:
         response = api_client.post(
             "/api/v1/auth/login",
             json={"email": user["email"], "password": user["password"]}
         )
 
-        assert response.status_code == 200, f"Failed to login as {user['email']}"
+        assert response.status_code == 200
         body = response.json()
-        assert body["access_token"] is not None, "No access token returned."
-        assert body["token_type"] == "bearer", "Invalid token type."
-        assert body["expires_in"] == TOKEN_EXPIRES_IN, "Invalid expiration period."
+        assert body["access_token"] is not None
+        assert body["token_type"] == "bearer"
+        assert body["expires_in"] == TOKEN_EXPIRES_IN
 
 
-def test_login_with_invalid_password_returns_401(api_client):
-    """QA-104-2: Login with invalid password returns 401."""
-    invalid_user = {"email": SEED_USERS[0]["email"], "password": "wrong_password"}
+@pytest.mark.parametrize("email,password", [
+    pytest.param(SEED_USERS[0]["email"], "wrong_password", id="wrong-password"),
+    pytest.param("unknown@demo.local", SEED_PASSWORD, id="unknown-email"),
+])
+def test_login_with_invalid_credentials_return_401(api_client, email, password):
+    """QA-104-2/QA-104-11: Login with invalid password/unknown email returns 401."""
+    invalid_user = {"email": email, "password": password}
 
     response = api_client.post("/api/v1/auth/login", json=invalid_user)
 
-    assert response.status_code == 401, (
-        "Invalid password should return 401 Unauthorized.")
+    assert response.status_code == 401
     body = response.json()
-    assert body["error"]["code"] == "INVALID_CREDENTIALS", "Incorrect error code."
-    assert body["error"]["message"] == "Invalid email or password", (
-        "Incorrect error message.")
+    assert body["error"]["code"] == "INVALID_CREDENTIALS"
+    assert body["error"]["message"] == "Invalid email or password"
 
 
 def test_login_with_missing_email_field_returns_422(api_client):
@@ -40,9 +49,33 @@ def test_login_with_missing_email_field_returns_422(api_client):
 
     response = api_client.post("/api/v1/auth/login", json=missing_email_user)
 
-    assert response.status_code == 422, (
-        "Missing email field should return 422 Unprocessable Content." )
+    assert response.status_code == 422
     body = response.json()
-    assert body["detail"][0]["msg"] == "Field required", (
-        "Incorrect error message.")
-    assert body["detail"][0]["type"] == "missing", "Incorrect error type."
+    assert body["detail"][0]["msg"] == "Field required"
+    assert body["detail"][0]["type"] == "missing"
+
+
+def test_login_with_inactive_user_returns_403(api_client):
+    """QA-104-9: Login with inactive user returns 403."""
+    inactive_user = {"email": SEED_INACTIVE_USER["email"], "password": SEED_PASSWORD}
+
+    response = api_client.post("/api/v1/auth/login", json=inactive_user)
+
+    assert response.status_code == 403
+    body = response.json()
+    assert body["error"]["code"] == "ACCOUNT_DISABLED"
+    assert body["error"]["message"] == "This account has been disabled"
+
+
+def test_login_with_malformed_json_body_returns_422(api_client):
+    """QA-104-12: Login with malformed JSON body returns 422."""
+    response = api_client.post(
+        "/api/v1/auth/login",
+        content=b"{not valid json}",
+        headers={"Content-Type": "application/json"}
+        )
+
+    assert response.status_code == 422
+    body = response.json()
+    assert body["detail"][0]["msg"] == "JSON decode error"
+    assert body["detail"][0]["type"] == "json_invalid"
