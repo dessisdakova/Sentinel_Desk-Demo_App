@@ -152,7 +152,7 @@ def _can_reach_mailhog_ui() -> bool:
 
 def _login_as(role: str, api_client) -> str:
     """Logs in as the specified role and returns the token."""
-    user = next(u for u in SEED_USERS if u["role"] == role)
+    user = next(u for u in SEED_USERS if u["role"] == role.upper())
     response = api_client.post(
         "/api/v1/auth/login",
         json={"email": user["email"], "password": SEED_PASSWORD},
