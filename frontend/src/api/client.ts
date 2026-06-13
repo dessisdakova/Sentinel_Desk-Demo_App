@@ -74,7 +74,7 @@ export async function apiRequest<T>(
     headers,
   });
 
-  if (response.status === 401) {
+  if (response.status === 401 && !path.endsWith("/auth/login")) {
     unauthorizedHandler();
   }
 
