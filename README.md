@@ -23,6 +23,7 @@
 | E01 SENT-102-QA | ✅ API tests for health + `X-Request-ID` |
 | E01 SENT-103-QA | ✅ Integration tests for `users` schema, Alembic, enum constraints |
 | E01 SENT-104-QA | ✅ API + integration auth tests (21 tests) |
+| E01 SENT-105-QA | ✅ API + integration RBAC tests (5 tests) |
 
 **Implementation agents:** read [docs/IMPLEMENTATION_AGENT.md](docs/IMPLEMENTATION_AGENT.md) — do not modify `tests/` or implement `-QA` tickets.
 
@@ -171,4 +172,4 @@ Aligned with [.env.example](.env.example):
 
 ## Next implementation ticket
 
-**SENT-106** — Frontend scaffold (then **SENT-105-QA** paired QA).
+**SENT-106** — Frontend scaffold.
