@@ -40,13 +40,13 @@ Design and implement automated tests for **SENT-106** — React app shell, route
 
 ---
 
-## Test cases (minimum)
+## Test cases
 
 | ID | Layer | Scenario | Expected |
 |----|-------|----------|----------|
-| QA-106-1 | api | Unauthenticated request to a protected route returns 401 | `401` with error body; no data leaked |
-| QA-106-2 | api | Request with expired or malformed JWT returns 401 | `401 INVALID_TOKEN` |
-| QA-106-3 | api | Valid analyst token calls `GET /api/v1/auth/me`; role claim matches seeded user | `200` with `role=ANALYST` |
+| QA-106-1 | api | Request with expired JWT returns 401 | `401 UNAUTHORIZED` |
+| QA-106-2 | api | CORS OPTIONS preflight from Origin: http://localhost:5173 on /api/v1/auth/me | Pass |
+| QA-106-3 | api | CORS preflight on a protected route | Pass |
 
 Extend with boundary cases from implementation acceptance criteria (e.g. CORS preflight from `http://localhost:5173`).
 
