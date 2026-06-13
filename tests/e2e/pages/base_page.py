@@ -1,5 +1,6 @@
 from playwright.sync_api import Page
 
+from tests.constants import SPA_ORIGIN
 
 class BasePage:
     """Shared base for all Page Object Models."""
@@ -9,9 +10,9 @@ class BasePage:
         self._page = page
 
     def navigate(self, path: str = "") -> None:
-        """Navigate to ``base_url + path``.
+        """Navigate to page URL.
 
-        :param path: URL path relative to ``base_url`` (e.g. ``"/login"``).
+        :param path: URL path (e.g. /login).
             Pass an empty string to navigate to the root URL.
         """
-        self._page.goto(path)
+        self._page.goto(f"{SPA_ORIGIN}{path}")

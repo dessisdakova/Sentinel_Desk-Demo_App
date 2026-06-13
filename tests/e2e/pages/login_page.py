@@ -1,28 +1,25 @@
 from playwright.sync_api import Page
 
 from tests.e2e.pages.base_page import BasePage
+from tests.constants import LOGIN_PATH
 
 
 class LoginPage(BasePage):
     """Page Object for the Login Page."""
-
-    URL = "/login"
-
     def __init__(self, page: Page) -> None:
         """Declare all login-page locators."""
         super().__init__(page)
-        self.page_root = page.get_by_test_id("page-login")
-        self.email_input = page.get_by_test_id("login-email")
-        self.password_input = page.get_by_test_id("login-password")
-        self.submit_button = page.get_by_test_id("login-submit")
-        self.error_message = page.get_by_test_id("login-error")
+        self.page_root = page.locator("[data-testid='page-login']")
+        self.email_input = page.locator("[data-testid='login-email']")
+        self.password_input = page.locator("[data-testid='login-password']")
+        self.sign_in_button = page.locator("[data-testid='login-submit']")
 
-    def navigate(self, path: str = URL) -> None:
-        """Navigate to the login page.
-
-        :param path: Defaults to ``/login``.
-        """
-        super().navigate(path)
+    @classmethod
+    def open(cls, page: Page) -> LoginPage:
+        """Navigate to login page and return a LoginPage instance."""
+        instance = cls(page)
+        instance.navigate(LOGIN_PATH)
+        return instance
 
     def login(self, email: str, password: str) -> None:
         """Fill the email and password fields and click the submit button.
@@ -32,12 +29,9 @@ class LoginPage(BasePage):
         """
         self.email_input.fill(email)
         self.password_input.fill(password)
-        self.submit_button.click()
+        self.sign_in_button.click()
 
     def is_page_loaded(self) -> bool:
         """Check if the login page root element is visible."""
         return self.page_root.is_visible()
 
-    def is_error_visible(self) -> bool:
-        """Check if an inline error message is displayed."""
-        return self.error_message.is_visible()
