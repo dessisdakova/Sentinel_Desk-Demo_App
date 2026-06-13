@@ -1,21 +1,21 @@
 import re
 
 import pytest
-from playwright.sync_api import Page, expect
+from playwright.sync_api import expect
 
 from tests.constants import (
     SEED_ANALYST_USER,
     SEED_INACTIVE_USER,
     SEED_PASSWORD,
-    SPA_ORIGIN
+    SPA_ORIGIN,
 )
-from tests.e2e.constants import ( 
+from tests.e2e.constants import (
     DASHBOARD_PATH,
-    LOGIN_PATH,
+    DISABLED_ACCOUNT_MESSAGE,
     INVALID_CREDENTIALS_MESSAGE,
+    LOGIN_PATH,
     MISSING_EMAIL_MESSAGE,
     MISSING_PASSWORD_MESSAGE,
-    DISABLED_ACCOUNT_MESSAGE
 )
 from tests.e2e.pages.login_page import LoginPage
 
@@ -42,7 +42,7 @@ def test_valid_credentials_redirect_to_dashboard(login_page):
 
 
 def test_wrong_password_shows_error(login_page):
-    """QA-107-3: Wrong password displays an inline error and user stays on login page."""
+    """QA-107-3: Wrong password displays an error and user stays on login page."""
     # Login with wrong password.
     login_page.login(SEED_ANALYST_USER["email"], "WrongPassword!")
 
@@ -52,7 +52,7 @@ def test_wrong_password_shows_error(login_page):
 
 
 def test_inactive_user_shows_error(login_page):
-    """QA-107-4: Inactive account displays an inline error and user stays on login page."""
+    """QA-107-4: Inactive account displays an error and user stays on login page."""
     # Login with inactive user.
     login_page.login(SEED_INACTIVE_USER["email"], SEED_PASSWORD)
 
@@ -79,8 +79,9 @@ def test_empty_password_shows_error(login_page: LoginPage) -> None:
     expect(login_page.error_missing_creds).to_have_text(MISSING_PASSWORD_MESSAGE)
 
 
-def test_authenticated_user_redirected_from_login(page, require_frontend, analyst_token):
-    """QA-107-7: A pre-authenticated user navigating to login page is sent to the dashboard."""
+def test_authenticated_user_redirected_from_login(
+    page, require_frontend, analyst_token):
+    """QA-107-7: A pre-authenticated user is sent to the dashboard."""
     # Navigate to the base URL.
     page.goto(SPA_ORIGIN)
     # Inject the token via JS function.

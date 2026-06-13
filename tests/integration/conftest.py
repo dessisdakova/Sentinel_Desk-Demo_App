@@ -1,5 +1,6 @@
 import base64
 import json
+import subprocess
 from pathlib import Path
 
 import psycopg2
@@ -105,3 +106,26 @@ def mailhog_ui_url(require_infrastructure) -> str:
     :return: MailHog UI URL string (e.g. ``http://localhost:8025``).
     """
     return _env("MAILHOG_UI_URL", "http://localhost:8025")
+
+
+@pytest.fixture(scope="function")
+def run_seed_script(require_infrastructure) -> subprocess.CompletedProcess[str]:
+    """Run `python -m scripts.seed` inside the api Docker container.
+
+    :param require_infrastructure: Gate fixture — skips if Docker is down.
+    :return: Completed subprocess result (stdout/stderr captured for failures).
+    """
+    # Resolve repository root: tests/integration/conftest.py -> three parents up.
+    repo_root = Path(__file__).resolve().parent.parent.parent
+
+    # Run the same CLI documented in README / TEST_DATA.md §3.1.
+    # -T disables TTY allocation so pytest/CI does not hang waiting for a terminal.
+    result = subprocess.run(
+        ["docker", "compose", "exec", "-T", "api", "python", "-m", "scripts.seed"],
+        cwd=repo_root,
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=60,
+    )
+    return result

@@ -66,6 +66,18 @@ Add `@pytest.mark.smoke` only on individual tests that belong in the quick sanit
 
 Layer-specific fixtures live in the child `conftest.py` files inside each subfolder.
 
+**Integration:** `run_seed_script` (SENT-108-QA) runs `docker compose exec api python -m scripts.seed` inside tests that verify idempotent re-seeding.
+
+## Seed baseline
+
+Before integration or API tests that depend on seed users, run once per session:
+
+```powershell
+docker compose exec api python -m scripts.seed
+```
+
+See [docs/TEST_DATA.md](../docs/TEST_DATA.md) §3.1 and [docs/TESTING_STRATEGY.md](../docs/TESTING_STRATEGY.md) §9.
+
 ## Ruff (linting and formatting)
 
 ```powershell

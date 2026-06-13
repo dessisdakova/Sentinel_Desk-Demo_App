@@ -1,33 +1,29 @@
 import pytest
 
-from tests.constants import (
-    SEED_INACTIVE_USER,
-    SEED_PASSWORD,
-    SEED_USERS
-)
-
 from tests.api.constants import TOKEN_EXPIRES_IN
-
+from tests.constants import SEED_INACTIVE_USER, SEED_PASSWORD, SEED_USERS
 
 pytestmark = [pytest.mark.api, pytest.mark.reg]
 
 
 @pytest.mark.smoke
-def test_valid_login_returns_auth_token(api_client):
+@pytest.mark.parametrize("user", [
+    pytest.param(SEED_USERS[0], id="analyst"),
+    pytest.param(SEED_USERS[1], id="lead"),
+    pytest.param(SEED_USERS[2], id="admin"),
+])
+def test_valid_login_returns_auth_token(api_client, user):
     """QA-104-1: Successful login returns auth token."""
-    active_users = [user for user in SEED_USERS if user["status"] == "active"]
+    response = api_client.post(
+        "/api/v1/auth/login",
+        json={"email": user["email"], "password": user["password"]}
+    )
 
-    for user in active_users:
-        response = api_client.post(
-            "/api/v1/auth/login",
-            json={"email": user["email"], "password": user["password"]}
-        )
-
-        assert response.status_code == 200
-        body = response.json()
-        assert body["access_token"] is not None
-        assert body["token_type"] == "bearer"
-        assert body["expires_in"] == TOKEN_EXPIRES_IN
+    assert response.status_code == 200
+    body = response.json()
+    assert body["access_token"] is not None
+    assert body["token_type"] == "bearer"
+    assert body["expires_in"] == TOKEN_EXPIRES_IN
 
 
 @pytest.mark.parametrize("email,password", [
