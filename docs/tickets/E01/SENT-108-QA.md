@@ -48,8 +48,8 @@ Design and implement automated tests for **SENT-108** — Seed script for users.
 | ID | Layer | Scenario | Expected |
 |----|-------|----------|----------|
 | QA-108-1 | integration | Re-run of scripts.seed should not create duplicate users | Still exactly **4** rows for the seed emails; no duplicate email rows |
-| QA-108-2 | integration | `SELECT active FROM users WHERE email = 'inactive@demo.local'` | `active` is `false` (AC1 inactive persona) |
-| QA-108-3 | integration | `SELECT password_hash FROM users` for any seed email | Value starts with `$2b$` (bcrypt — not plaintext; AC1) |
+| QA-108-2 | integration | `SELECT active FROM users WHERE email = 'inactive@demo.local'` | `active` is `false` |
+| QA-108-3 | integration | `SELECT password_hash FROM users` for any seed email | Value starts with `$2b$` (bcrypt — not plaintext) |
 | QA-108-4 | integration | `COUNT(*)` where `email` is one of the four seed emails | Exactly **4** |
 | QA-108-5 | integration | Compare user row count for seed emails immediately before and after a second seed run | Count unchanged (0 inserts on re-run) |
 
