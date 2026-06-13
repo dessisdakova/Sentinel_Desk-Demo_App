@@ -4,7 +4,7 @@ import httpx
 import psycopg2
 import pytest
 
-from tests.conftest import API_TIMEOUT_SEC, CLIENT_TIMEOUT_SEC, PORT_CHECK_TIMEOUT
+from tests.constants import API_TIMEOUT_SEC, CLIENT_TIMEOUT_SEC, PORT_CHECK_TIMEOUT
 
 pytestmark = [pytest.mark.integ, pytest.mark.reg]
 

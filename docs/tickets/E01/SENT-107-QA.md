@@ -54,9 +54,13 @@ playwright install chromium
 
 | ID | Layer | Scenario | Expected |
 |----|-------|----------|----------|
-| QA-107-1 | e2e | Login analyst with valid password | Dashboard or post-login route visible |
-| QA-107-2 | e2e | Login invalid password | Error shown; stay on login |
-| QA-107-3 | e2e | `page-login` root `data-testid` present | `expect(login_page.page_root).to_be_visible()` passes |
+| QA-107-1 | e2e | Login page loads | Pass |
+| QA-107-2 | e2e | Login valid credentials | Dashboard visible |
+| QA-107-3 | e2e | Login invalid credentials | Error shown; stay on login |
+| QA-107-4 | e2e | Login inactive user | Error shown; stay on login |
+| QA-107-5 | e2e | Empty email field | Error shown; stay on login |
+| QA-107-6 | e2e | Empty password field | Error shown; stay on login |
+| QA-107-7 | e2e | Autthenticated user redirected to dashboard | Pass |
 
 ---
 

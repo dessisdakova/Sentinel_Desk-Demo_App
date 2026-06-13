@@ -1,6 +1,6 @@
 import pytest
 
-from tests.api.constants import SEED_ADMIN_USER, SEED_ANALYST_USER, SEED_LEAD_USER
+from tests.constants import SEED_ADMIN_USER, SEED_ANALYST_USER, SEED_LEAD_USER
 from tests.integration.conftest import _decode_jwt_payload
 
 pytestmark = [pytest.mark.integ, pytest.mark.reg]

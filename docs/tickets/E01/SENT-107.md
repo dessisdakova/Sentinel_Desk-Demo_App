@@ -22,7 +22,7 @@ Login page with data-testid.
 
 **As a** SOC analyst  
 **I want** a login form with stable `data-testid` attributes on every interactive element  
-**So that** I can sign in to SentinelDesk and Selenium tests can reliably locate and interact with the form without depending on CSS classes or text content
+**So that** I can sign in to SentinelDesk and Playwright tests can reliably locate and interact with the form without depending on CSS classes or text content
 
 ---
 

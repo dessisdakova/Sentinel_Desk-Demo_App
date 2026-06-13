@@ -1,6 +1,6 @@
 import pytest
 
-from tests.api.constants import SPA_ORIGIN
+from tests.constants import SPA_ORIGIN
 
 pytestmark = [pytest.mark.api, pytest.mark.reg]
 

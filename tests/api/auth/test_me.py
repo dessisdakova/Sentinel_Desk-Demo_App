@@ -1,6 +1,6 @@
 import pytest
 
-from tests.api.constants import SEED_USERS
+from tests.constants import SEED_USERS
 
 pytestmark = [pytest.mark.api, pytest.mark.reg]
 
