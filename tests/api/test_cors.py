@@ -2,14 +2,14 @@ import pytest
 
 from tests.api.constants import SPA_ORIGIN
 
-
 pytestmark = [pytest.mark.api, pytest.mark.reg]
 
 
-def test_cors_options_preflight_from_localhost_5173_on_auth_me(api_client):
-    """QA-106-2: CORS OPTIONS preflight from Origin: http://localhost:5173 on /api/v1/auth/me"""
+@pytest.mark.parametrize("path", ["/api/v1/auth/me", "/api/v1/admin/ping"])
+def test_cors_options_preflight_from_UI_on_auth_me(api_client, path):
+    """QA-106-2: CORS OPTIONS preflight from UI on /api/v1/auth/me."""
     response = api_client.options(
-        "/api/v1/auth/me",
+        path,
         headers={
             "Origin": SPA_ORIGIN,
             "Access-Control-Request-Method": "GET",
@@ -19,4 +19,5 @@ def test_cors_options_preflight_from_localhost_5173_on_auth_me(api_client):
 
     assert response.status_code == 200
     assert response.headers["Access-Control-Allow-Origin"] == SPA_ORIGIN
+    assert "GET" in response.headers["Access-Control-Allow-Methods"]
     assert response.headers["Access-Control-Allow-Credentials"] == "true"

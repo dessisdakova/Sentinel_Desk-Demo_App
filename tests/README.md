@@ -59,6 +59,8 @@ Add `@pytest.mark.smoke` only on individual tests that belong in the quick sanit
 - `require_infrastructure` — skips if the Docker stack is down
 - `api_base_url` — FastAPI root URL (shared by API and E2E layers)
 - `require_api` — skips if the API is not reachable or unhealthy
+- `analyst_token` / `lead_token` / `admin_token` — session-scoped JWTs from seed login
+- `expired_token` — function-scoped synthetically expired JWT (SENT-106-QA; uses `JWT_SECRET` from `.env`)
 
 Layer-specific fixtures live in the child `conftest.py` files inside each subfolder.
 
