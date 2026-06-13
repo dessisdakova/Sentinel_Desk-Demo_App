@@ -20,14 +20,23 @@ New pages are added here as the React frontend is built, one file per route.
 
 ## Usage in a test
 
+Use the `login_page` fixture from `tests/e2e/conftest.py` — it handles navigation and the `require_frontend` gate automatically:
+
 ```python
-from tests.e2e.pages.login_page import LoginPage
+from playwright.sync_api import expect
+import pytest
 
 @pytest.mark.e2e
-def test_analyst_can_login(page, require_frontend):
-    login_page = LoginPage(page)
-    login_page.navigate()
-    login_page.assert_page_loaded()
+def test_analyst_can_login(login_page):
     login_page.login("analyst@demo.local", "DemoPass123!")
-    # assert post-login state here
+    expect(login_page.page).to_have_url("/dashboard")
+```
+
+When a test needs the raw `page` object directly (e.g. to inject sessionStorage), declare `require_frontend` explicitly:
+
+```python
+@pytest.mark.e2e
+def test_something(page, require_frontend):
+    page.goto("http://localhost:5173/login")
+    ...
 ```

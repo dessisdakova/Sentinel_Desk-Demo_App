@@ -26,6 +26,8 @@
 | E01 SENT-103-QA | ✅ Integration tests for `users` schema, Alembic, enum constraints |
 | E01 SENT-104-QA | ✅ API + integration auth tests (21 tests) |
 | E01 SENT-105-QA | ✅ API + integration RBAC tests (5 tests) |
+| E01 SENT-106-QA | ✅ API tests (3 tests) |
+| E01 SENT-107-QA | ✅ E2E bootstrap — Playwright scaffold + 7 login tests |
 
 **Implementation agents:** read [docs/IMPLEMENTATION_AGENT.md](docs/IMPLEMENTATION_AGENT.md) — do not modify `tests/` or implement `-QA` tickets.
 

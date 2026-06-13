@@ -31,7 +31,7 @@ def require_frontend(base_url) -> None:
     if not _port_is_open(host, port):
         pytest.skip(
             f"Frontend not available at {base_url}. "
-            "Run: docker compose up -d."
+            "Run: docker compose up -d  OR  cd frontend && npm run dev"
         )
 
 
@@ -39,7 +39,8 @@ def require_frontend(base_url) -> None:
 def login_page(page: Page, require_frontend) -> LoginPage:
     """Navigate to the login page and return a ready LoginPage instance.
 
-    :param page: Playwright built-in fixture.
-    :return: LoginPage instance.
+    :param page: Playwright built-in fixture — one browser tab per test.
+    :param require_frontend: Gate fixture — skips if the Vite dev server is not running.
+    :return: LoginPage instance already navigated to /login.
     """
     return LoginPage.open(page)

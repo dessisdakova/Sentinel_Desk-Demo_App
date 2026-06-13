@@ -79,7 +79,7 @@ def test_empty_password_shows_error(login_page: LoginPage) -> None:
     expect(login_page.error_missing_creds).to_have_text(MISSING_PASSWORD_MESSAGE)
 
 
-def test_authenticated_user_redirected_from_login(page, analyst_token):
+def test_authenticated_user_redirected_from_login(page, require_frontend, analyst_token):
     """QA-107-7: A pre-authenticated user navigating to login page is sent to the dashboard."""
     # Navigate to the base URL.
     page.goto(SPA_ORIGIN)
