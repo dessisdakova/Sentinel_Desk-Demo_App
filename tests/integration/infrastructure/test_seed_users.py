@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.constants import SEED_USERS, SEED_INACTIVE_USER
+from tests.constants import SEED_INACTIVE_USER, SEED_USERS
 
 pytestmark = [pytest.mark.integ, pytest.mark.reg]
 
@@ -139,9 +139,7 @@ def test_seed_users_count_is_four(postgres_connection):
 
 
 def test_seed_rerun_does_not_change_row_count(
-    postgres_connection,
-    require_infrastructure,
-):
+    postgres_connection, require_infrastructure):
     """QA-108-5: Second seed run inserts zero additional seed user rows.
 
     Prerequisite: baseline seed applied at least once before test.

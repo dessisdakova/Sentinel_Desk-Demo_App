@@ -6,7 +6,6 @@ from playwright.sync_api import Page
 
 from tests.conftest import _port_is_open
 from tests.constants import SPA_ORIGIN
-from tests.e2e.constants import LOGIN_PATH
 from tests.e2e.pages.login_page import LoginPage
 
 

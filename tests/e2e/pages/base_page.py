@@ -2,6 +2,7 @@ from playwright.sync_api import Page
 
 from tests.constants import SPA_ORIGIN
 
+
 class BasePage:
     """Shared base for all Page Object Models."""
 

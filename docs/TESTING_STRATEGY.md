@@ -182,13 +182,14 @@ tests/
 │   └── health/              # Health endpoint tests
 │       └── test_health.py
 ├── integration/             # Cross-layer tests: API + DB, async jobs, email
-│   ├── conftest.py          # postgres_connection, postgres_write_connection, redis_client, mailhog_ui_url
+│   ├── conftest.py          # postgres_connection, postgres_write_connection, redis_client, mailhog_ui_url, run_seed_script
 │   ├── auth/                # Auth cross-layer tests
 │   │   └── test_login_token.py
-│   └── infrastructure/      # DB schema, migration, service connectivity
+│   └── infrastructure/      # DB schema, migration, service connectivity, seed script
 │       ├── test_service_connectivity.py
 │       ├── test_users_schema.py
-│       └── test_db_migration.py
+│       ├── test_db_migration.py
+│       └── test_seed_users.py   # SENT-108-QA — idempotency, bcrypt, active flag, row count
 ├── e2e/                     # Playwright — bootstrap SENT-107-QA; feature tests E03+; POM polish SENT-1003-QA
 │   ├── conftest.py
 │   ├── pages/               # Page Object Model classes

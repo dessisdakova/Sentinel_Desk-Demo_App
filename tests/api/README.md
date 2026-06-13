@@ -18,6 +18,8 @@ Tests skip automatically if the API is not reachable.
 pytest -m api -v
 ```
 
+Seed persona HTTP checks (login + `/auth/me` for `tests/constants.py` users) live in `auth/test_login.py` and `auth/test_me.py` (SENT-104-QA). DB seed contract tests are in `tests/integration/infrastructure/test_seed_users.py` (SENT-108-QA).
+
 ## Fixtures (conftest.py)
 
 | Fixture | Scope | Description |

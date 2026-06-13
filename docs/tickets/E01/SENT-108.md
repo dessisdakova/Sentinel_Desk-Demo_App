@@ -8,7 +8,7 @@
 | **Story Points** | 3 |
 | **Status** | Done |
 | **Labels** | `backend`, `implementation` |
-| **Paired QA ticket** | [SENT-108-QA](./SENT-108-QA.md) |
+| **Paired QA ticket** | [SENT-108-QA](./SENT-108-QA.md) ✅ Done |
 
 ---
 
