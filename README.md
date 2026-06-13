@@ -13,7 +13,8 @@
 | E01 SENT-103 | ✅ User model + Alembic (`users` table, `user_role` enum) |
 | E01 SENT-104 | ✅ JWT auth API (`/api/v1/auth/login`, `/me`, `/logout`) |
 | E01 SENT-105 | ✅ RBAC `require_roles` dependency + `GET /api/v1/admin/ping` |
-| E01 SENT-106+ | Next — frontend |
+| E01 SENT-106 | ✅ React SPA shell, router, auth context, role nav (port 5173) |
+| E01 SENT-107+ | Next — login page |
 
 ### QA automation (QA engineer — separate workflow)
 
@@ -31,7 +32,7 @@
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows, macOS, or Linux)
 - Python 3.12+ and IDE of your choice
-- **Later epics:** Node.js 20+ (frontend)
+- Node.js 20+ (frontend local dev without Docker)
 
 ## Local infrastructure (SENT-101)
 
@@ -69,6 +70,7 @@ docker compose down -v
 | **API (FastAPI)** | **8000** | `curl http://localhost:8000/health` → `{"status":"ok"}` |
 | MailHog SMTP | 1025 | Used by app later |
 | MailHog UI | 8025 | Open http://localhost:8025 in a browser |
+| **Frontend (React SPA)** | **5173** | Open http://localhost:5173 in a browser |
 
 ## API (SENT-102)
 
@@ -141,6 +143,29 @@ curl -s -X POST http://localhost:8000/api/v1/auth/login `
 
 Use the returned `access_token` as `Authorization: Bearer <token>` on `GET /api/v1/auth/me` and `POST /api/v1/auth/logout` (204). Token lifetime: `JWT_EXPIRE_HOURS` × 3600 seconds (default 28800).
 
+## Frontend (SENT-106)
+
+### Run with Docker (recommended)
+
+```powershell
+docker compose up -d --build
+```
+
+Open the SPA: http://localhost:5173
+
+Unauthenticated visitors are redirected to `/login`. The login form ships in **SENT-107**; until then use the auth API directly or seed users (SENT-108).
+
+### Run locally (without frontend container)
+
+```powershell
+cd frontend
+npm install
+# Ensure repo root .env defines VITE_API_URL=http://localhost:8000
+npm run dev
+```
+
+The Vite dev server listens on http://localhost:5173. JWT is stored in `sessionStorage` under `sentinel_access_token`.
+
 ### Connection defaults
 
 Aligned with [.env.example](.env.example):
@@ -168,8 +193,8 @@ Aligned with [.env.example](.env.example):
 - **Database:** PostgreSQL 16 (Docker)
 - **Queue:** Redis 7 (Docker)
 - **Email (dev):** MailHog (Docker)
-- **Frontend:** React + Vite — coming in SENT-106+
+- **Frontend:** React 19 + Vite + TypeScript + Tailwind (SENT-106+)
 
 ## Next implementation ticket
 
-**SENT-106** — Frontend scaffold.
+**SENT-107** — Login page with data-testid.

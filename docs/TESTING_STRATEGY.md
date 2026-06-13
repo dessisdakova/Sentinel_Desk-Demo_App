@@ -164,18 +164,21 @@ assert audit.action == "ALERT_ASSIGNED"
 
 ```text
 tests/
-├── conftest.py              # Shared gate fixtures, HTTP client, DB/Redis probes
+├── conftest.py              # Shared gate fixtures, HTTP client, DB/Redis probes, expired_token
 ├── constants.py             # Shared constants (timeouts, etc.)
 ├── data/                    # Static test data files (never credentials from .env)
 │   └── invalid_postgres.json
 ├── api/                     # HTTP contract tests — no direct DB queries
 │   ├── conftest.py          # api_client, analyst_token, lead_token, admin_token, token (indirect)
-│   ├── constants.py         # SEED_USERS, SEED_INACTIVE_USER, SEED_PASSWORD, TOKEN_EXPIRES_IN
+│   ├── constants.py         # SEED_USERS, SEED_INACTIVE_USER, SEED_PASSWORD, TOKEN_EXPIRES_IN, SPA_ORIGIN
+│   ├── test_cors.py         # CORS preflight for SPA origin (SENT-106-QA)
 │   ├── auth/                # Auth endpoint tests
 │   │   ├── test_login.py
 │   │   ├── test_me.py
 │   │   ├── test_logout.py
 │   │   └── test_jwt_token.py
+│   ├── admin/               # Admin RBAC endpoint tests (SENT-105-QA)
+│   │   └── test_admin_ping.py
 │   └── health/              # Health endpoint tests
 │       └── test_health.py
 ├── integration/             # Cross-layer tests: API + DB, async jobs, email

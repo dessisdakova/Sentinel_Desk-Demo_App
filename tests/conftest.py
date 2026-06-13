@@ -1,9 +1,11 @@
 import os
 import socket
+import time
 from typing import Any
 from urllib.parse import urlparse
 
 import httpx
+import jwt
 import psycopg2
 import pytest
 import redis
@@ -264,3 +266,10 @@ def token(request, api_client) -> str:
     :return: JWT access token string.
     """
     return _login_as(request.param, api_client)
+
+
+@pytest.fixture(scope="function")
+def expired_token() -> str:
+    """Mints a synthetically expired JWT token and returns it."""
+    jwt_secret = _env("JWT_SECRET")
+    return jwt.encode({"exp": time.time() - 10}, jwt_secret, algorithm="HS256")

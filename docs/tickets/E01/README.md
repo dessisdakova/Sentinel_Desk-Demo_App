@@ -9,7 +9,7 @@
 | [SENT-103](./SENT-103.md) ✅ | [SENT-103-QA](./SENT-103-QA.md) ✅ Done |
 | [SENT-104](./SENT-104.md) | [SENT-104-QA](./SENT-104-QA.md) |
 | [SENT-105](./SENT-105.md) | [SENT-105-QA](./SENT-105-QA.md) |
-| [SENT-106](./SENT-106.md) | [SENT-106-QA](./SENT-106-QA.md) |
+| [SENT-106](./SENT-106.md) ✅ | [SENT-106-QA](./SENT-106-QA.md) ✅ Done |
 | [SENT-107](./SENT-107.md) | [SENT-107-QA](./SENT-107-QA.md) |
 | [SENT-108](./SENT-108.md) | [SENT-108-QA](./SENT-108-QA.md) |
 

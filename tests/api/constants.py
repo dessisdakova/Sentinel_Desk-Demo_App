@@ -40,3 +40,5 @@ SEED_USERS = [
 ]
 
 TOKEN_EXPIRES_IN = 28800
+
+SPA_ORIGIN = "http://localhost:5173"
