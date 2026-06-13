@@ -9,6 +9,11 @@ class BasePage:
         """Store Page instance for use by subclass locators and actions."""
         self._page = page
 
+    @property
+    def page(self) -> Page:
+        """The underlying Playwright Page instance."""
+        return self._page
+
     def navigate(self, path: str = "") -> None:
         """Navigate to page URL.
 

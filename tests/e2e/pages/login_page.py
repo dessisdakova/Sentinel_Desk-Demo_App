@@ -1,7 +1,7 @@
 from playwright.sync_api import Page
 
 from tests.e2e.pages.base_page import BasePage
-from tests.constants import LOGIN_PATH
+from tests.e2e.constants import LOGIN_PATH
 
 
 class LoginPage(BasePage):
@@ -13,9 +13,11 @@ class LoginPage(BasePage):
         self.email_input = page.locator("[data-testid='login-email']")
         self.password_input = page.locator("[data-testid='login-password']")
         self.sign_in_button = page.locator("[data-testid='login-submit']")
+        self.error_message = page.locator("[data-testid='login-error']")
+        self.error_missing_creds = page.locator("p.text-red-400")
 
     @classmethod
-    def open(cls, page: Page) -> LoginPage:
+    def open(cls, page: Page) -> "LoginPage":
         """Navigate to login page and return a LoginPage instance."""
         instance = cls(page)
         instance.navigate(LOGIN_PATH)

@@ -2,22 +2,28 @@ import os
 from urllib.parse import urlparse
 
 import pytest
-from playwright.sync_api import APIRequestContext, Playwright
+from playwright.sync_api import Page
 
 from tests.conftest import _port_is_open
+from tests.constants import SPA_ORIGIN
+from tests.e2e.constants import LOGIN_PATH
+from tests.e2e.pages.login_page import LoginPage
+
+
+@pytest.fixture(scope="session")
+def base_url() -> str:
+    """Root URL of the React frontend.
+
+    :return: Frontend base URL with no trailing slash.
+    """
+    return os.getenv("FRONTEND_URL", SPA_ORIGIN).rstrip("/")
 
 
 @pytest.fixture(scope="session")
 def require_frontend(base_url) -> None:
     """Skip E2E browser tests when the React dev server is not running.
 
-    Probes the Vite port with a bare TCP check — the same pattern used by
-    ``require_api`` in the root conftest. Add this fixture to any test or
-    fixture that opens a real browser session against the frontend UI.
-
-    :param base_url: Root URL of the React frontend (resolved from the
-            ``FRONTEND_URL`` env var or defaulting to
-            ``http://localhost:5173``).
+    :param base_url: Root URL of the React frontend.
     """
     parsed = urlparse(base_url)
     host = parsed.hostname or "localhost"
@@ -29,3 +35,11 @@ def require_frontend(base_url) -> None:
         )
 
 
+@pytest.fixture(scope="function")
+def login_page(page: Page, require_frontend) -> LoginPage:
+    """Navigate to the login page and return a ready LoginPage instance.
+
+    :param page: Playwright built-in fixture.
+    :return: LoginPage instance.
+    """
+    return LoginPage.open(page)
