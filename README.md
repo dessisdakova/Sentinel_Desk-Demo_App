@@ -15,7 +15,8 @@
 | E01 SENT-105 | ✅ RBAC `require_roles` dependency + `GET /api/v1/admin/ping` |
 | E01 SENT-106 | ✅ React SPA shell, router, auth context, role nav (port 5173) |
 | E01 SENT-107 | ✅ Login page with form validation and `data-testid` hooks |
-| E01 SENT-108+ | Next — seed script |
+| E01 SENT-108 | ✅ Seed script — 4 baseline users (`backend/scripts/seed.py`) |
+| E02 SENT-201+ | Next — alert ingestion epic |
 
 ### QA automation (QA engineer — separate workflow)
 
@@ -132,11 +133,30 @@ SELECT id, email, role FROM users;  # Select id, email, role from users table
 \q                                  # Quit psql
 ```
 
-Schema: `users` table with `user_role` enum (`ANALYST`, `LEAD`, `ADMIN`). Seed users arrive in **SENT-108**.
+Schema: `users` table with `user_role` enum (`ANALYST`, `LEAD`, `ADMIN`).
+
+## Seed data (SENT-108)
+
+Load the four baseline users from [TEST_DATA.md](docs/TEST_DATA.md) (password `DemoPass123!` for all):
+
+```powershell
+# Docker (recommended — api container WORKDIR is backend/)
+docker compose exec api python -m scripts.seed
+
+# Local (Postgres reachable on localhost:5432)
+cd backend
+python -m scripts.seed
+```
+
+Re-running the seed is safe: existing users are skipped by email. Verify with:
+
+```powershell
+docker compose exec postgres psql -U sentinel -d sentineldesk -c "SELECT email, role, active FROM users ORDER BY email;"
+```
 
 ## Auth API (SENT-104)
 
-Requires seeded users (SENT-108) or manual rows in `users`. Example login:
+Requires seeded users — run the seed command above first. Example login:
 
 ```powershell
 curl -s -X POST http://localhost:8000/api/v1/auth/login `
@@ -156,7 +176,7 @@ docker compose up -d --build
 
 Open the SPA: http://localhost:5173
 
-Unauthenticated visitors are redirected to `/login`. Sign in with seed users (**SENT-108**) or rows you insert manually. Invalid credentials show an inline error (`data-testid="login-error"`); success redirects to `/dashboard`.
+Unauthenticated visitors are redirected to `/login`. Sign in with seed users (run seed first). Invalid credentials show an inline error (`data-testid="login-error"`); success redirects to `/dashboard`.
 
 ### Run locally (without frontend container)
 
@@ -200,4 +220,4 @@ Aligned with [.env.example](.env.example):
 
 ## Next implementation ticket
 
-**SENT-108** — Seed script for users.
+**SENT-201** — E02 Alert ingestion (first story in epic E02).

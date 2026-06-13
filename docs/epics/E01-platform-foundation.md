@@ -31,10 +31,10 @@ These criteria describe **epic completion after SENT-108**, not what any single 
 
 **Epic checklist** (verify after SENT-108, not mid-epic):
 
-- [ ] Full stack from table above runs with one `docker compose up`
-- [ ] Schema migrated; seed users loaded
-- [ ] Auth + RBAC behave as specified
-- [ ] README prerequisites documented
+- [x] Full stack from table above runs with one `docker compose up`
+- [x] Schema migrated; seed users loaded
+- [x] Auth + RBAC behave as specified
+- [x] README prerequisites documented
 
 ---
 
