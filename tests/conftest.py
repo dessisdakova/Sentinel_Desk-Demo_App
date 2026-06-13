@@ -269,7 +269,7 @@ def token(request, api_client) -> str:
 
 
 @pytest.fixture(scope="function")
-def expired_token(api_client) -> str:
-    """Return an expired JWT token."""
+def expired_token() -> str:
+    """Mints a synthetically expired JWT token and returns it."""
     jwt_secret = _env("JWT_SECRET")
     return jwt.encode({"exp": time.time() - 10}, jwt_secret, algorithm="HS256")

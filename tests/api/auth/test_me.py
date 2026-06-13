@@ -56,8 +56,7 @@ def test_me_returns_correct_role(api_client, token, expected_role):
     assert response.json()["role"] == expected_role
 
 
-
-def test_login_with_expired_token_returns_401(api_client, expired_token):
+def test_auth_with_expired_token_returns_401(api_client, expired_token):
     """QA-106-1: Request with expired JWT returns 401."""
     response = api_client.get(
         "/api/v1/auth/me",
