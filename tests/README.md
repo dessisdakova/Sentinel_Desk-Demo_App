@@ -25,13 +25,15 @@ playwright install chromium             # first time only
 ## Running tests
 
 ```powershell
-pytest -m api -v                # API tests only
-pytest -m integ -v              # integration tests only
-pytest -m e2e -v                # Playwright tests only
-pytest -m smoke -v              # quick sanity (infra + health + core schema)
-pytest -m reg -v                # full regression suite
-pytest -m "api or integ" -v     # everything except browser
-pytest -v                       # all tests
+pytest -m api -v                        # API tests only
+pytest -m integ -v                      # integration tests only
+pytest -m e2e -v                        # Playwright browser tests only
+pytest -m e2e --headed -v               # open a visible Chromium window
+pytest -m e2e --headed --slowmo 500 -v  # slow each action by 500 ms
+pytest -m smoke -v                      # quick sanity (infra + health + core schema)
+pytest -m reg -v                        # full regression suite
+pytest -m "api or integ" -v             # everything except browser
+pytest -v                               # all tests
 ```
 
 Tests skip automatically with a clear message if the required service is not running — no configuration needed to run a subset.

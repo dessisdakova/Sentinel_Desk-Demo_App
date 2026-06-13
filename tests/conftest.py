@@ -13,14 +13,12 @@ from dotenv import load_dotenv
 from redis.backoff import NoBackoff
 from redis.retry import Retry
 
-from tests.api.constants import (
-    SEED_PASSWORD,
-    SEED_USERS,
-)
 from tests.constants import (
     API_TIMEOUT_SEC,
     CLIENT_TIMEOUT_SEC,
     PORT_CHECK_TIMEOUT,
+    SEED_PASSWORD,
+    SEED_USERS,
 )
 
 load_dotenv()

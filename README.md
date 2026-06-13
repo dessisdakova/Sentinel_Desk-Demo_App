@@ -14,7 +14,8 @@
 | E01 SENT-104 | ✅ JWT auth API (`/api/v1/auth/login`, `/me`, `/logout`) |
 | E01 SENT-105 | ✅ RBAC `require_roles` dependency + `GET /api/v1/admin/ping` |
 | E01 SENT-106 | ✅ React SPA shell, router, auth context, role nav (port 5173) |
-| E01 SENT-107+ | Next — login page |
+| E01 SENT-107 | ✅ Login page with form validation and `data-testid` hooks |
+| E01 SENT-108+ | Next — seed script |
 
 ### QA automation (QA engineer — separate workflow)
 
@@ -25,6 +26,8 @@
 | E01 SENT-103-QA | ✅ Integration tests for `users` schema, Alembic, enum constraints |
 | E01 SENT-104-QA | ✅ API + integration auth tests (21 tests) |
 | E01 SENT-105-QA | ✅ API + integration RBAC tests (5 tests) |
+| E01 SENT-106-QA | ✅ API tests (3 tests) |
+| E01 SENT-107-QA | ✅ E2E bootstrap — Playwright scaffold + 7 login tests |
 
 **Implementation agents:** read [docs/IMPLEMENTATION_AGENT.md](docs/IMPLEMENTATION_AGENT.md) — do not modify `tests/` or implement `-QA` tickets.
 
@@ -143,7 +146,7 @@ curl -s -X POST http://localhost:8000/api/v1/auth/login `
 
 Use the returned `access_token` as `Authorization: Bearer <token>` on `GET /api/v1/auth/me` and `POST /api/v1/auth/logout` (204). Token lifetime: `JWT_EXPIRE_HOURS` × 3600 seconds (default 28800).
 
-## Frontend (SENT-106)
+## Frontend (SENT-106 / SENT-107)
 
 ### Run with Docker (recommended)
 
@@ -153,7 +156,7 @@ docker compose up -d --build
 
 Open the SPA: http://localhost:5173
 
-Unauthenticated visitors are redirected to `/login`. The login form ships in **SENT-107**; until then use the auth API directly or seed users (SENT-108).
+Unauthenticated visitors are redirected to `/login`. Sign in with seed users (**SENT-108**) or rows you insert manually. Invalid credentials show an inline error (`data-testid="login-error"`); success redirects to `/dashboard`.
 
 ### Run locally (without frontend container)
 
@@ -197,4 +200,4 @@ Aligned with [.env.example](.env.example):
 
 ## Next implementation ticket
 
-**SENT-107** — Login page with data-testid.
+**SENT-108** — Seed script for users.

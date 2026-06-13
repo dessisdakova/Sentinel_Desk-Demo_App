@@ -1,6 +1,6 @@
 import pytest
 
-from tests.api.constants import SEED_ADMIN_USER
+from tests.constants import SEED_ADMIN_USER
 
 pytestmark = [pytest.mark.integ, pytest.mark.reg]
 

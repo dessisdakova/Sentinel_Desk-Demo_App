@@ -8,6 +8,7 @@
 | **Labels** | `qa`, `automation`, `e2e-bootstrap` |
 | **Implements after** | [SENT-107](./SENT-107.md) |
 | **Test location** | Repository root `tests/` **only** |
+| **Status** | Done |
 
 ---
 
@@ -31,10 +32,11 @@ Bootstrap the E2E test layer and cover the login page — **first Playwright wor
 
 | File | Content |
 |------|---------|
-| `tests/e2e/conftest.py` | `playwright_api_context`, `base_url`, `require_frontend` gate fixture |
-| `tests/e2e/pages/base_page.py` | `BasePage` with `navigate()` helper |
-| `tests/e2e/pages/login_page.py` | `LoginPage` using `data-testid` selectors from SENT-107 |
-| `tests/e2e/test_login_page.py` | Login happy path, invalid password, role smoke as applicable |
+| `tests/e2e/conftest.py` | `base_url`, `require_frontend` gate fixture, `login_page` fixture |
+| `tests/e2e/constants.py` | E2E path and expected-message constants |
+| `tests/e2e/pages/base_page.py` | `BasePage` with `navigate()` helper and `page` property |
+| `tests/e2e/pages/login_page.py` | `LoginPage` — `data-testid` locators, `open()` factory, `login()` action |
+| `tests/e2e/test_login_page.py` | 7 login tests (QA-107-1 → QA-107-7) |
 
 `pytest-playwright` is already in `requirements-test.txt`. After installing, run:
 
@@ -50,13 +52,17 @@ playwright install chromium
 
 ---
 
-## Test cases (minimum)
+## Test cases
 
-| ID | Layer | Scenario | Expected |
-|----|-------|----------|----------|
-| QA-107-1 | e2e | Login analyst with valid password | Dashboard or post-login route visible |
-| QA-107-2 | e2e | Login invalid password | Error shown; stay on login |
-| QA-107-3 | e2e | `page-login` root `data-testid` present | `expect(login_page.page_root).to_be_visible()` passes |
+| ID | Layer | Scenario | Test function |
+|----|-------|----------|---------------|
+| QA-107-1 | e2e | Login page loads — all key elements visible | `test_login_page_is_visible` |
+| QA-107-2 | e2e | Valid credentials redirect to `/dashboard` | `test_valid_credentials_redirect_to_dashboard` |
+| QA-107-3 | e2e | Wrong password — inline error; stay on `/login` | `test_wrong_password_shows_error` |
+| QA-107-4 | e2e | Inactive account — inline error; stay on `/login` | `test_inactive_user_shows_error` |
+| QA-107-5 | e2e | Empty email — client-side validation error | `test_empty_email_shows_error` |
+| QA-107-6 | e2e | Empty password — client-side validation error | `test_empty_password_shows_error` |
+| QA-107-7 | e2e | Already-authenticated user at `/login` → redirect to `/dashboard` | `test_authenticated_user_redirected_from_login` |
 
 ---
 
@@ -75,6 +81,6 @@ playwright install chromium
 
 ## Definition of Done
 
-- [ ] `pytest tests/e2e -m e2e` runs login tests
-- [ ] Uses Playwright `expect()` and auto-wait — no `time.sleep()`
-- [ ] Test file paths documented in this ticket (edit when created)
+- [x] `pytest tests/e2e -m e2e` runs login tests
+- [x] Uses Playwright `expect()` and auto-wait — no `time.sleep()`
+- [x] Test file paths documented in this ticket (edit when created)
