@@ -32,7 +32,7 @@
 | E01 SENT-107-QA | ✅ E2E bootstrap — Playwright scaffold + 7 login tests |
 | E02 SENT-201-QA | ✅ Integration tests for `alerts` / `alert_events` schema (10 tests) |
 
-**Implementation agents:** read [docs/IMPLEMENTATION_AGENT.md](docs/IMPLEMENTATION_AGENT.md) — do not modify `tests/` or implement `-QA` tickets.
+**Implementation agents:** read [.cursor/skills/sentinel-impl/SKILL.md](.cursor/skills/sentinel-impl/SKILL.md) — do not modify `tests/` or implement `-QA` tickets.
 
 ## Prerequisites
 
@@ -203,7 +203,7 @@ Aligned with [.env.example](.env.example):
 
 | Document | Purpose |
 |----------|---------|
-| [docs/IMPLEMENTATION_AGENT.md](docs/IMPLEMENTATION_AGENT.md) | **Implementation agent charter** — scope, boundaries, what to ignore |
+| [.cursor/skills/sentinel-impl/SKILL.md](.cursor/skills/sentinel-impl/SKILL.md) | **Implementation agent skill** — role, scope, workflow, coding standards |
 | [docs/CONSTITUTION.md](docs/CONSTITUTION.md) | Product vision, modules, pages, roles, NFRs |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Technical design, Docker, APIs, async |
 | [docs/TEST_DATA.md](docs/TEST_DATA.md) | Seed users, stable IDs, reset guide (QA) |

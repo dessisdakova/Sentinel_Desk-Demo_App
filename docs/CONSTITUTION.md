@@ -3,7 +3,7 @@
 **Codename:** `SentinelDesk`  
 **Version:** 1.0  
 **Status:** Specification only (implementation follows epics in order)  
-**Audience — implementation agent:** Product rules, domain model, testability hooks. Start with [IMPLEMENTATION_AGENT.md](./IMPLEMENTATION_AGENT.md).  
+**Audience — implementation agent:** Product rules, domain model, testability hooks. Start with the [sentinel-impl skill](../.cursor/skills/sentinel-impl/SKILL.md).  
 **Audience — QA engineer:** Test automation workflow in [TESTING_STRATEGY.md](./TESTING_STRATEGY.md) and `SENT-###-QA` tickets (implementation agent: ignore).
 
 ---
@@ -194,7 +194,7 @@ The pytest harness is **never** built by the implementation agent. Do not create
 | **E10 app hooks** | Implementation agent | SENT-1001, SENT-1004 | Reset API; plant bug-garden defects in **app code** |
 | **E10 harness extensions** | QA engineer | SENT-1001-QA, SENT-1002-QA, SENT-1003-QA, SENT-1004-QA | `admin_api_client`, `clean_db`; **SENT-1003-QA** standardizes Playwright POM (does not first-create `tests/e2e/`) |
 
-**Rule for implementation agents:** If `tests/` exists, treat it as read-only. E10 does **not** mean “bootstrap pytest” — see [IMPLEMENTATION_AGENT.md](./IMPLEMENTATION_AGENT.md).
+**Rule for implementation agents:** If `tests/` exists, treat it as read-only. E10 does **not** mean “bootstrap pytest” — see [sentinel-impl skill](../.cursor/skills/sentinel-impl/SKILL.md).
 
 ---
 
@@ -433,7 +433,7 @@ Epic details: `docs/epics/`. Implementation and QA tickets: `docs/tickets/E01/` 
 
 ### Implementation agent — always follow
 
-1. Read [IMPLEMENTATION_AGENT.md](./IMPLEMENTATION_AGENT.md) and [ARCHITECTURE.md](./ARCHITECTURE.md) before starting any ticket.
+1. Read [sentinel-impl skill](../.cursor/skills/sentinel-impl/SKILL.md) and [ARCHITECTURE.md](./ARCHITECTURE.md) before starting any ticket.
 2. Implement `SENT-###` tickets in epic order — **skip all `-QA` tickets**.
 3. Never create or modify files under `tests/`, `pytest.ini`, or `requirements-test.txt`.
 4. When prompted **"Implement SENT-101"** or **"Implement SENT-104"** — deliver app code only; do not add test scaffolding.

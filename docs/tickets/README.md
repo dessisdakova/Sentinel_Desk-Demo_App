@@ -1,8 +1,8 @@
-# SentinelDesk — Ticket index
+﻿# SentinelDesk — Ticket index
 
 Jira-style tickets for **implementation** (app code only) and **QA** (human QA engineer + separate QA workflow).
 
-**Implementation agents:** start with [IMPLEMENTATION_AGENT.md](../IMPLEMENTATION_AGENT.md). Implement `SENT-###` only — never `-QA` tickets.
+**Implementation agents:** start with [sentinel-impl skill](../../.cursor/skills/sentinel-impl/SKILL.md). Implement `SENT-###` only — never `-QA` tickets.
 
 ## Workflow
 

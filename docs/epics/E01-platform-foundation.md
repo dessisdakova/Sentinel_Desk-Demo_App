@@ -1,4 +1,4 @@
-# Epic E01 — Platform Foundation
+﻿# Epic E01 — Platform Foundation
 
 **Epic key:** `SENT-E01`  
 **Summary:** Bootstrapping SentinelDesk: Docker, PostgreSQL, FastAPI skeleton, React SPA, auth, RBAC.  
@@ -16,7 +16,7 @@
 
 ## Acceptance criteria (epic level — cumulative)
 
-These criteria describe **epic completion after SENT-108**, not what any single story must deliver on its own. When implementing one ticket, follow **only that ticket’s acceptance criteria** ([IMPLEMENTATION_AGENT.md](../IMPLEMENTATION_AGENT.md): ticket beats epic summary).
+These criteria describe **epic completion after SENT-108**, not what any single story must deliver on its own. When implementing one ticket, follow **only that ticket’s acceptance criteria** ([sentinel-impl skill](../../.cursor/skills/sentinel-impl/SKILL.md): ticket beats epic summary).
 
 | Epic criterion (done when epic is complete) | Delivered by |
 |---------------------------------------------|--------------|

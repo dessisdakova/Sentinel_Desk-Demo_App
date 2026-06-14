@@ -1,10 +1,10 @@
-# Epic E10 — Test Harness & Bug Garden
+﻿# Epic E10 — Test Harness & Bug Garden
 
 **Epic key:** `SENT-E10`  
 **Summary:** App test hooks (reset API, planted bugs) + QA harness extensions (fixtures, Selenium POM, xfail tests).  
 **Business value:** Repeatable automation practice environment.
 
-**Audience split:** Implementation agent → SENT-1001, SENT-1004 only ([IMPLEMENTATION_AGENT.md](../IMPLEMENTATION_AGENT.md)). QA engineer → all `-QA` tickets including SENT-1002-QA (no implement ticket).
+**Audience split:** Implementation agent → SENT-1001, SENT-1004 only ([sentinel-impl skill](../../.cursor/skills/sentinel-impl/SKILL.md)). QA engineer → all `-QA` tickets including SENT-1002-QA (no implement ticket).
 
 **Prerequisite (QA):** E01 `-QA` foundation — `tests/`, `pytest.ini`, core `conftest.py` from SENT-101-QA / SENT-102-QA (CONSTITUTION §3.6).
 

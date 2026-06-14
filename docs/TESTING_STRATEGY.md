@@ -1,6 +1,6 @@
-# SentinelDesk — QA Testing Strategy
+﻿# SentinelDesk — QA Testing Strategy
 
-**Audience — QA engineer only.** The implementation agent must **not** follow this document or create files under `tests/`. See [IMPLEMENTATION_AGENT.md](./IMPLEMENTATION_AGENT.md).
+**Audience — QA engineer only.** The implementation agent must **not** follow this document or create files under `tests/`. See [sentinel-impl skill](../.cursor/skills/sentinel-impl/SKILL.md).
 
 ## 1. Purpose and scope
 

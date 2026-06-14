@@ -1,0 +1,20 @@
+---
+description: Python / FastAPI coding standards for SentinelDesk backend. Auto-applied when editing backend source files.
+globs: backend/**/*.py
+alwaysApply: false
+---
+
+# Backend Python / FastAPI Standards
+
+| Rule | Detail |
+|------|--------|
+| **Full type annotations** | Every function parameter and return type annotated; no bare `dict` or `Any` |
+| **Thin route handlers** | Routes do orchestration only — call a service function; no business logic inside route handlers |
+| **Service layer** | All business rules, state transitions, and DB writes live in `backend/app/services/` |
+| **Pydantic for every boundary** | Request bodies and response payloads use dedicated Pydantic schemas (`backend/app/schemas/`); never return a raw `dict` or SQLAlchemy model directly |
+| **Async SQLAlchemy** | Use `async with AsyncSession` (or `yield`-based dependency); no sync `Session` in async routes |
+| **Canonical error shape** | Raise `HTTPException` with `detail={"error": {"code": "...", "message": "...", "details": ...}}` per CONSTITUTION §12.2 — never return a plain string error |
+| **Structured logging** | Every significant action logs at least one line with `request_id=` and relevant entity IDs; use the existing logger from `core/` |
+| **Config from env** | All secrets, URLs, and tuneable values come from `core/config.py` (pydantic-settings); no hardcoded strings that belong in `.env` |
+| **Alembic for every schema change** | Never alter tables manually; every model change gets a new migration |
+| **No dead code** | No `print()` debug statements, no commented-out blocks, no `TODO` left in shipped code |
