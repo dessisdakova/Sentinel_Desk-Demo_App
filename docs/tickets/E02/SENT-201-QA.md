@@ -33,7 +33,6 @@ Design and implement automated tests for **SENT-201** — Alert and AlertEvent m
 
 ## Test scope
 
-- **api** — add cases under `tests/api/`
 - **integration** — add cases under `tests/integration/`
 
 ---
@@ -42,9 +41,16 @@ Design and implement automated tests for **SENT-201** — Alert and AlertEvent m
 
 | ID | Layer | Scenario | Expected |
 |----|-------|----------|----------|
-| QA-201-1 | api | Happy path for primary AC | Pass |
-| QA-201-2 | integration | One negative or edge case | Correct error or UI message |
-| QA-201-3 | api | Data matches seed or TEST_DATA.md stable IDs where applicable | Consistent |
+| QA-201-1 | integration | Verify alert table exist with expected schema | Pass |
+| QA-201-2 | integration | Verify alert table's columns data type | Pass |
+| QA-201-3 | integration | alert table's primary key is 'id' | Pass |
+| QA-201-4 | integration | alert table's foreign key is 'assigned_to_id' from users table | Pass |
+| QA-201-5 | integration | Verify alert_events table exist with expected schema | Pass |
+| QA-201-6 | integration | Verify alert_events table's columns data type | Pass |
+| QA-201-7 | integration | alert_events table's primary key is id | Pass |
+| QA-201-8 | integration | alert_events table's foreign keys are 'alert_id' from alerts table and 'created_by' from users table | Pass |
+| QA-201-9 | integration | Verify composite index on (status, severity, created_at DESC) and index on (assigned_to_id) exist | Pass |
+| QA-201-10 | integration | Verify migration runs cleanly with alembic upgrade head | Pass |
 
 Extend with boundary cases from implementation acceptance criteria.
 
