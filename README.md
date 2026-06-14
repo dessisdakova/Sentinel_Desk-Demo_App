@@ -16,7 +16,8 @@
 | E01 SENT-106 | ✅ React SPA shell, router, auth context, role nav (port 5173) |
 | E01 SENT-107 | ✅ Login page with form validation and `data-testid` hooks |
 | E01 SENT-108 | ✅ Seed script — 4 baseline users (`backend/scripts/seed.py`) |
-| E02 SENT-201+ | Next — alert ingestion epic |
+| E02 SENT-201 | ✅ Alert + AlertEvent models, enums, Alembic migration |
+| E02 SENT-202+ | Next — ingest API with API key auth |
 
 ### QA automation (QA engineer — separate workflow)
 
@@ -29,6 +30,7 @@
 | E01 SENT-105-QA | ✅ API + integration RBAC tests (5 tests) |
 | E01 SENT-106-QA | ✅ API tests (3 tests) |
 | E01 SENT-107-QA | ✅ E2E bootstrap — Playwright scaffold + 7 login tests |
+| E02 SENT-201-QA | ✅ Integration tests for `alerts` / `alert_events` schema (10 tests) |
 
 **Implementation agents:** read [docs/IMPLEMENTATION_AGENT.md](docs/IMPLEMENTATION_AGENT.md) — do not modify `tests/` or implement `-QA` tickets.
 
@@ -133,7 +135,7 @@ SELECT id, email, role FROM users;  # Select id, email, role from users table
 \q                                  # Quit psql
 ```
 
-Schema: `users` table with `user_role` enum (`ANALYST`, `LEAD`, `ADMIN`).
+Schema: `users` table with `user_role` enum (`ANALYST`, `LEAD`, `ADMIN`). After **SENT-201**, migrations also create `alerts` and `alert_events` with enums `alert_source`, `alert_severity`, `alert_status`, and `enrichment_status`.
 
 ## Seed data (SENT-108)
 
@@ -220,4 +222,4 @@ Aligned with [.env.example](.env.example):
 
 ## Next implementation ticket
 
-**SENT-201** — E02 Alert ingestion (first story in epic E02).
+**SENT-202** — Ingest API with API key auth.

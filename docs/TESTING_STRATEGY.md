@@ -78,7 +78,7 @@ they are the most expensive and the most fragile.
 | Tool | pytest + httpx + psycopg2 + redis-py |
 | Gate fixture | `require_infrastructure` — skips if Docker stack is down |
 | Characteristics | Makes real DB queries to verify side effects; may poll for async completion |
-| Starts | SENT-101-QA (infrastructure); SENT-202-QA (ingest + DB row) |
+| Starts | SENT-101-QA (infrastructure); SENT-201-QA (alert schema); SENT-202-QA (ingest + DB row) |
 
 **Standard integration pattern (from ARCHITECTURE.md §4.3):**
 
@@ -187,8 +187,9 @@ tests/
 │   │   └── test_login_token.py
 │   └── infrastructure/      # DB schema, migration, service connectivity, seed script
 │       ├── test_service_connectivity.py
-│       ├── test_users_schema.py
-│       ├── test_db_migration.py
+│       ├── test_users_table_schema.py   # SENT-103-QA — users schema, enum, constraints
+│       ├── test_alerts_table_schema.py  # SENT-201-QA — alerts / alert_events schema, indexes, FKs
+│       ├── test_db_migration.py         # Alembic head revision (updated per epic)
 │       └── test_seed_users.py   # SENT-108-QA — idempotency, bcrypt, active flag, row count
 ├── e2e/                     # Playwright — bootstrap SENT-107-QA; feature tests E03+; POM polish SENT-1003-QA
 │   ├── conftest.py

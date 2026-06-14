@@ -4,7 +4,7 @@
 
 | Implement | QA (after implement) |
 |-------------|----------------------|
-| [SENT-201](./SENT-201.md) | [SENT-201-QA](./SENT-201-QA.md) |
+| [SENT-201](./SENT-201.md) ✅ | [SENT-201-QA](./SENT-201-QA.md) ✅ Done |
 | [SENT-202](./SENT-202.md) | [SENT-202-QA](./SENT-202-QA.md) |
 | [SENT-203](./SENT-203.md) | [SENT-203-QA](./SENT-203-QA.md) |
 | [SENT-204](./SENT-204.md) | [SENT-204-QA](./SENT-204-QA.md) |
