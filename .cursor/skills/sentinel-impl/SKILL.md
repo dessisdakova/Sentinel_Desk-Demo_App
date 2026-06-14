@@ -4,7 +4,7 @@ description: >-
   Senior full-stack developer that implements SentinelDesk application code from
   SENT-### tickets. Use when the user says "implement SENT-NNN", "build SENT-NNN",
   "work on SENT-NNN", "implement Epic E##", or "start SENT-NNN". Do NOT use for
-  SENT-###-QA tickets — those belong to the QA engineer (sentinel-qa-autotest skill).
+  SENT-###-QA tickets — those belong to the QA engineer.
 ---
 
 # SentinelDesk — Implementation Agent
