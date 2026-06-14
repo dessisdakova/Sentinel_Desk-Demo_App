@@ -28,7 +28,7 @@ def test_alerts_table_has_expected_columns(postgres_connection):
             ORDER BY ordinal_position
         """)
         columns = [row[0] for row in cur.fetchall()]
-    
+
     assert columns == expected_columns, "Alerts table columns mismatch."
 
 
@@ -57,8 +57,9 @@ def test_alerts_table_columns_have_correct_data_type(postgres_connection):
             ORDER BY ordinal_position
         """)
         data_types = [(row[0], row[1]) for row in cur.fetchall()]
-    
-    assert data_types == expected_data_types, "Alerts table column data type or nullability mismatch."
+
+    assert data_types == expected_data_types, (
+        "Alerts table column data type or nullability mismatch.")
 
 
 def test_alerts_table_primary_key_is_correct(postgres_connection):
@@ -102,7 +103,8 @@ def test_alerts_table_foreign_key_is_correct(postgres_connection):
         """)
         foreign_key = [(row[0], row[1], row[2]) for row in cur.fetchall()]
 
-    assert foreign_key == expected_fk, "Foreign key of alerts table is incorrect."
+    assert foreign_key == expected_fk, (
+        "Foreign key of alerts table is incorrect.")
 
 
 def test_alert_events_table_has_expected_columns(postgres_connection):
@@ -124,7 +126,7 @@ def test_alert_events_table_has_expected_columns(postgres_connection):
             ORDER BY ordinal_position
         """)
         columns = [row[0] for row in cur.fetchall()]
-    
+
     assert columns == expected_columns, "Alert_events table columns mismatch."
 
 
@@ -147,8 +149,9 @@ def test_alert_events_table_columns_have_correct_data_type(postgres_connection):
             ORDER BY ordinal_position
         """)
         data_types = [(row[0], row[1]) for row in cur.fetchall()]
-    
-    assert data_types == expected_data_types, "Alert_events table column data type or nullability mismatch."
+
+    assert data_types == expected_data_types, (
+        "Alert_events table column data type or nullability mismatch.")
 
 
 def test_alert_events_table_primary_key_is_correct(postgres_connection):
@@ -171,8 +174,7 @@ def test_alert_events_table_primary_key_is_correct(postgres_connection):
 
 
 def test_alert_events_table_foreign_keys_are_correct(postgres_connection):
-    """QA-201-8: Alert_events table foreign keys are 'alert_id' from alerts table
-    and 'created_by' from users table and are nullable."""
+    """QA-201-8: Alert_events table foreign keys are present."""
     expected_fk = [
         ("alert_id", "alerts", "id"),
         ("created_by", "users", "id"),
@@ -196,4 +198,45 @@ def test_alert_events_table_foreign_keys_are_correct(postgres_connection):
         """)
         foreign_keys = [(row[0], row[1], row[2]) for row in cur.fetchall()]
 
-    assert foreign_keys == expected_fk, "Foreign keys of alert_events table are incorrect."
+    assert foreign_keys == expected_fk, (
+        "Foreign keys of alert_events table are incorrect.")
+
+
+def test_alerts_table_has_expected_indexes(postgres_connection):
+    """QA-201-9: Composite and assigned_to_id indexes exist on alerts."""
+    expected_indexes = {
+        "ix_alerts_status_severity_created_at": ["status", "severity", "created_at"],
+        "ix_alerts_assigned_to_id": ["assigned_to_id"],
+    }
+
+    with postgres_connection.cursor() as cur:
+        cur.execute(
+            """
+            SELECT indexname, indexdef
+            FROM pg_indexes
+            WHERE schemaname = 'public' AND tablename = 'alerts'
+            """
+        )
+        indexes = {row[0]: row[1] for row in cur.fetchall()}
+
+    for index_name, expected_columns in expected_indexes.items():
+        assert index_name in indexes, f"Index {index_name} is missing."
+        index_def = indexes[index_name].lower()
+        for column in expected_columns:
+            assert column in index_def, (
+                f"Column {column!r} missing from index {index_name!r}"
+            )
+
+
+def test_alembic_migration_is_at_head(postgres_connection):
+    """QA-201-10: Alembic ran and the DB is on the latest revision."""
+    expected_migration_revision = "20260613_0002"
+
+    with postgres_connection.cursor() as cur:
+        cur.execute("SELECT version_num FROM alembic_version")
+        row = cur.fetchone()
+
+    assert row is not None, "alembic_version table is empty — migrations not applied."
+    assert row[0] == expected_migration_revision, (
+        f"Expected alembic head {expected_migration_revision}, got {row[0]!r}"
+    )
