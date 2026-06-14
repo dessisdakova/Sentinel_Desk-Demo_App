@@ -30,6 +30,7 @@
 | E01 SENT-105-QA | ✅ API + integration RBAC tests (5 tests) |
 | E01 SENT-106-QA | ✅ API tests (3 tests) |
 | E01 SENT-107-QA | ✅ E2E bootstrap — Playwright scaffold + 7 login tests |
+| E02 SENT-201-QA | ✅ Integration tests for `alerts` / `alert_events` schema (10 tests) |
 
 **Implementation agents:** read [docs/IMPLEMENTATION_AGENT.md](docs/IMPLEMENTATION_AGENT.md) — do not modify `tests/` or implement `-QA` tickets.
 

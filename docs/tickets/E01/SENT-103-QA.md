@@ -25,7 +25,7 @@ Automated integration coverage for **SENT-103** — `users` table schema, Alembi
 | QA-103-1 | Columns, types, NOT NULL | `test_users_table_has_expected_columns` | `postgres_connection` |
 | QA-103-1 | Primary key on `id` | `test_users_table_has_primary_key_on_id` | `postgres_connection` |
 | QA-103-1 | Unique index on `email` | `test_users_email_has_unique_index` | `postgres_connection` |
-| QA-103-2 | Alembic at head (`20260523_0001`) | `test_alembic_migration_is_at_head` | `postgres_connection` |
+| QA-103-2 | Alembic at head (see `test_db_migration.py`; currently `20260613_0002` after SENT-201) | `test_alembic_migration_is_at_head` | `postgres_connection` |
 | QA-103-3 | Column type is `user_role` enum | `test_users_table_has_expected_columns` (role column assert) | `postgres_connection` |
 | QA-103-3 | Enum labels `ANALYST`, `LEAD`, `ADMIN` | `test_user_role_enum_has_expected_values` | `postgres_connection` |
 | QA-103-4 | Invalid role insert → `InvalidTextRepresentation` | `test_invalid_role_insert_fails` | `postgres_write_connection` |
@@ -46,8 +46,8 @@ Automated integration coverage for **SENT-103** — `users` table schema, Alembi
 
 | Path | Purpose |
 |------|---------|
-| `tests/integration/test_db_users_table.py` | **9** integration tests (schema, enum, inserts) |
-| `tests/integration/test_db_migration_applied.py` | **1** integration test (Alembic revision) |
+| `tests/integration/infrastructure/test_users_table_schema.py` | **9** integration tests (schema, enum, inserts) |
+| `tests/integration/infrastructure/test_db_migration.py` | **1** integration test (Alembic revision at head) |
 | `tests/integration/conftest.py` | `postgres_write_connection` fixture (auto-rollback) |
 
 ---
@@ -58,7 +58,7 @@ Automated integration coverage for **SENT-103** — `users` table schema, Alembi
 docker compose up -d
 docker compose exec api alembic upgrade head
 
-pytest tests/integration/test_db_users_table.py tests/integration/test_db_migration_applied.py -v
+pytest tests/integration/infrastructure/test_users_table_schema.py tests/integration/infrastructure/test_db_migration.py -v
 # or
 pytest -m integ -v
 ```
