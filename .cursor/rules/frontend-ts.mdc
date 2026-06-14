@@ -1,0 +1,17 @@
+---
+description: TypeScript / React coding standards for SentinelDesk frontend. Auto-applied when editing frontend source files.
+globs: frontend/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Frontend TypeScript / React Standards
+
+| Rule | Detail |
+|------|--------|
+| **Strict TypeScript** | No `any`; define an `interface` or `type` for every API response shape |
+| **TanStack Query for server state** | All API fetches go through `useQuery` / `useMutation`; no bare `useEffect` + `fetch` patterns |
+| **Loading and error states** | Every data-fetching component renders a loading skeleton and an error message — never silently blank |
+| **Consistent `data-testid`** | Follow CONSTITUTION §12.1 exactly: `data-testid="<area>-<action>"` kebab-case on every interactive element and page root |
+| **No inline styles** | Use Tailwind utility classes (or CSS modules if Tailwind is not set up); no `style={{ ... }}` props |
+| **React Hook Form + Zod** | All forms validated with Zod schema; errors shown inline next to the field |
+| **No hardcoded API URLs** | Use `VITE_API_URL` from `.env`; never write `http://localhost:8000` directly in component code |

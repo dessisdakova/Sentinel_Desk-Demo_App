@@ -1,6 +1,6 @@
 # SentinelDesk — Technical Architecture
 
-**Audience — implementation agent:** Primary technical reference for `SENT-###` tickets. Read with [IMPLEMENTATION_AGENT.md](./IMPLEMENTATION_AGENT.md).  
+**Audience — implementation agent:** Primary technical reference for `SENT-###` tickets. Read with the [sentinel-impl skill](../.cursor/skills/sentinel-impl/SKILL.md).  
 **Audience — QA engineer:** Use integration-test patterns in §4.3 when writing `-QA` tickets.
 
 Companion to [CONSTITUTION.md](./CONSTITUTION.md).

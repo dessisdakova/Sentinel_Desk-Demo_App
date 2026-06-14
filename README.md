@@ -21,7 +21,7 @@
 | E01 SENT-102-QA | ✅ API tests for health + `X-Request-ID` |
 | E01 SENT-103-QA+ | After matching app ticket is complete |
 
-**Implementation agents:** read [docs/IMPLEMENTATION_AGENT.md](docs/IMPLEMENTATION_AGENT.md) — do not modify `tests/` or implement `-QA` tickets.
+**Implementation agents:** read [.cursor/skills/sentinel-impl/SKILL.md](.cursor/skills/sentinel-impl/SKILL.md) — do not modify `tests/` or implement `-QA` tickets.
 
 ## Prerequisites
 
@@ -121,7 +121,7 @@ Aligned with [.env.example](.env.example):
 
 | Document | Purpose |
 |----------|---------|
-| [docs/IMPLEMENTATION_AGENT.md](docs/IMPLEMENTATION_AGENT.md) | **Implementation agent charter** — scope, boundaries, what to ignore |
+| [.cursor/skills/sentinel-impl/SKILL.md](.cursor/skills/sentinel-impl/SKILL.md) | **Implementation agent skill** — role, scope, workflow, coding standards |
 | [docs/CONSTITUTION.md](docs/CONSTITUTION.md) | Product vision, modules, pages, roles, NFRs |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Technical design, Docker, APIs, async |
 | [docs/TEST_DATA.md](docs/TEST_DATA.md) | Seed users, stable IDs, reset guide (QA) |
