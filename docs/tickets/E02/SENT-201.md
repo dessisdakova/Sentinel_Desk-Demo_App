@@ -1,7 +1,7 @@
 ﻿# SENT-201 — Alert and AlertEvent models and migration
 
 | Field | Value |
-|-------|-------|
+|-------|-------|git add .
 | **Type** | Story |
 | **Epic** | SENT-E02 Alert Ingestion and Async Enrichment |
 | **Priority** | High |
