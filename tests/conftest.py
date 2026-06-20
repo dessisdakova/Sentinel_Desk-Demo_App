@@ -1,5 +1,6 @@
 import os
 import socket
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
@@ -11,8 +12,6 @@ from dotenv import load_dotenv
 from redis.backoff import NoBackoff
 from redis.retry import Retry
 
-load_dotenv()
-
 # Seconds to wait for a TCP port check before treating a service as down.
 PORT_CHECK_TIMEOUT = 0.5
 
@@ -23,9 +22,36 @@ CLIENT_TIMEOUT_SEC = 2
 API_TIMEOUT_SEC = 5
 
 
+def pytest_addoption(parser):
+    """Add command-line option to select environment."""
+    parser.addoption(
+        "--env",
+        action="store",
+        default="local",
+        choices=["local", "qa", "staging"],
+        help="Target environment (default: local)"
+    )
+
+
+@pytest.fixture(scope="session", autouse=True)
+def load_environment(request):
+    """Load environment file based on command-line option."""
+    env = request.config.getoption("--env")
+    env_file = Path(__file__).parent / "environments" / f"{env}.env"
+    if not env_file.exists():
+        pytest.fail(f"Environment file {env_file} not found")
+    load_dotenv(dotenv_path=env_file, override=True)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def announce_environment(request):
+    env_name = request.config.getoption("--env")
+    print(f"\n>>> Running tests against environment: {env_name.upper()} <<<\n")
+
+
 def _env(name: str, default: str | None = None) -> str:
     """Read an environment variable or fail the test run with a clear message.
-    
+
     :param name: Variable name as it appears in '.env' (e.g. 'POSTGRES_HOST').
     :param default: Value to use when the variable is unset.
     :return: Non-empty string value.

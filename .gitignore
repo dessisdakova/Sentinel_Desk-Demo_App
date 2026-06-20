@@ -1,3 +1,5 @@
+qa.env
+staging.env
 .env
 .venv/
 venv/
