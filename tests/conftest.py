@@ -5,6 +5,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 import httpx
+import jwt
 import psycopg2
 import pytest
 import redis
@@ -52,6 +53,7 @@ def announce_environment(request):
 def _env(name: str, default: str | None = None) -> str:
     """Read an environment variable or fail the test run with a clear message.
 
+
     :param name: Variable name as it appears in '.env' (e.g. 'POSTGRES_HOST').
     :param default: Value to use when the variable is unset.
     :return: Non-empty string value.
@@ -82,6 +84,7 @@ def _postgres_connect_kwargs(**overrides: Any) -> dict[str, Any]:
 
 def _redis_connect_kwargs(**overrides: Any) -> dict[str, Any]:
     """Build keyword arguments for redis client with safe timeouts and no retries.
+
     Disabling retries avoids long hangs when Docker is stopped (redis-py 6+).
 
     :param **overrides: Any key to replace in the base dict.
@@ -106,7 +109,7 @@ def _port_is_open(host: str, port: int, timeout: float = PORT_CHECK_TIMEOUT) -> 
     :param host: Hostname or IP (e.g. localhost). Must not be a full URL.
     :param port: Port number (e.g. 5432, 8000).
     :param timeout: Maximum seconds to wait for a connection attempt.
-    :return: True if the port accepted a connection; False on timeout or connection refused.
+    :return: True if port accepted a connection; False on timeout or connection refused.
     """
     try:
         with socket.create_connection((host, port), timeout=timeout):
@@ -165,7 +168,7 @@ def _can_ping_redis() -> bool:
 def _can_reach_mailhog_ui() -> bool:
     """Probe MailHog web UI with an HTTP GET.
 
-    :return: True if MailHog UI returns HTTP 200; False on network errors or other statuses.
+    :return: True if MailHog UI returns 200; False on network errors or other statuses.
     """
     url = _env("MAILHOG_UI_URL", "http://localhost:8025")
     try:
@@ -175,10 +178,23 @@ def _can_reach_mailhog_ui() -> bool:
         return False
 
 
+def _login_as(role: str, api_client) -> str:
+    """Logs in as the specified role and returns the token."""
+    user = next(u for u in SEED_USERS if u["role"] == role.upper())
+    response = api_client.post(
+        "/api/v1/auth/login",
+        json={"email": user["email"], "password": SEED_PASSWORD},
+    )
+    if response.status_code != 200:
+        raise ValueError(f"Failed to login as {role}: {response.json()}")
+    return response.json()["access_token"]
+
+
 @pytest.fixture(scope="session")
 def require_infrastructure():
     """Skip integration tests when the Docker infrastructure stack is not running.
-    Runs once per pytest session the first time a test needs this fixture. 
+
+    Runs once per pytest session the first time a test needs this fixture.
     Checks Postgres, Redis, and MailHog using short timeouts.
 
     :return: None
@@ -201,6 +217,7 @@ def require_infrastructure():
 @pytest.fixture(scope="session")
 def api_base_url() -> str:
     """Root URL of the FastAPI service.
+
     Shared between API tests (via ``api_client``) and E2E tests (via
     ``playwright_api_context``).
 
@@ -210,12 +227,13 @@ def api_base_url() -> str:
 
 
 @pytest.fixture(scope="session")
-def require_api(api_base_url: str) -> None:
+def require_api(api_base_url):
     """Skip tests when the FastAPI application is not running or unhealthy.
+
     Used by both ``tests/api/`` and ``tests/e2e/``. Performs a TCP probe
     first (fast), then an HTTP health check (confirms the app is up and
     responding correctly).
-    
+
     :param api_base_url: Root URL of the FastAPI service.
     :return: None
     """
@@ -233,3 +251,51 @@ def require_api(api_base_url: str) -> None:
         pytest.skip(
             f"API health check failed at {api_base_url}. Run: docker compose up -d"
         )
+
+
+@pytest.fixture(scope="session")
+def api_client(api_base_url, require_api) -> httpx.Client:
+    """Synchronous HTTP client pointed at the SentinelDesk API.
+
+    :param api_base_url: Root URL of the FastAPI service (from root conftest).
+    :param require_api: Gate fixture — skips if the API is down or unhealthy.
+    :yield: Configured ``httpx.Client`` with ``base_url`` and timeout set.
+    """
+    client = httpx.Client(base_url=api_base_url, timeout=API_TIMEOUT_SEC)
+    yield client
+    client.close()
+
+
+@pytest.fixture(scope="session")
+def analyst_token(api_client) -> str:
+    """Session-scoped JWT for the seeded ANALYST user."""
+    return _login_as("ANALYST", api_client)
+
+
+@pytest.fixture(scope="session")
+def lead_token(api_client) -> str:
+    """Session-scoped JWT for the seeded LEAD user."""
+    return _login_as("LEAD", api_client)
+
+
+@pytest.fixture(scope="session")
+def admin_token(api_client) -> str:
+    """Session-scoped JWT for the seeded ADMIN user."""
+    return _login_as("ADMIN", api_client)
+
+
+@pytest.fixture(scope="session")
+def token(request, api_client) -> str:
+    """Log in as the requested role and return the access token.
+
+    :param request: pytest request object; request.param is the role string.
+    :return: JWT access token string.
+    """
+    return _login_as(request.param, api_client)
+
+
+@pytest.fixture(scope="function")
+def expired_token() -> str:
+    """Mints a synthetically expired JWT token and returns it."""
+    jwt_secret = _env("JWT_SECRET")
+    return jwt.encode({"exp": time.time() - 10}, jwt_secret, algorithm="HS256")

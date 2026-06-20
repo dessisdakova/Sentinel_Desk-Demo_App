@@ -11,11 +11,14 @@ Automation needs the database to return to the **same starting picture** every r
 
 ## 2. Seed personas (fixed — do not change without updating tests)
 
-| Email | Password | Role | Display name |
-|-------|----------|------|--------------|
-| `analyst@demo.local` | `DemoPass123!` | ANALYST | Alex Analyst |
-| `lead@demo.local` | `DemoPass123!` | LEAD | Jordan Lead |
-| `admin@demo.local` | `DemoPass123!` | ADMIN | Sam Admin |
+| Email | Password | Role | Display name | Active |
+|-------|----------|------|--------------|--------|
+| `analyst@demo.local` | `DemoPass123!` | ANALYST | Alex Analyst | ✓ |
+| `lead@demo.local` | `DemoPass123!` | LEAD | Jordan Lead | ✓ |
+| `admin@demo.local` | `DemoPass123!` | ADMIN | Sam Admin | ✓ |
+| `inactive@demo.local` | `DemoPass123!` | ANALYST | Dana Inactive | ✗ |
+
+`inactive@demo.local` is used by QA-104-9 to verify that login returns `403 ACCOUNT_DISABLED`.
 
 **Service account (ingest only):**
 
@@ -66,7 +69,7 @@ Automation needs the database to return to the **same starting picture** every r
 
 | Entity | Count | Notes |
 |--------|-------|-------|
-| Users | 3 | +1 service account |
+| Users | 4 | 3 active + 1 inactive (`inactive@demo.local`); +1 service account |
 | Alerts | 12 | Mix of statuses/severities |
 | Cases | 2 | One linked to 3 alerts |
 | Playbooks | 3 | Isolate host, Notify owner, Escalate to lead |
@@ -78,7 +81,7 @@ Automation needs the database to return to the **same starting picture** every r
 
 | After ticket | `seed.py` loads |
 |--------------|-----------------|
-| SENT-108 (E01) | 3 users only |
+| SENT-108 (E01) | 4 users (3 active + 1 inactive) |
 | SENT-206 (E02) | users + 12 alerts |
 | Later epics | extend per ticket AC — do not skip ahead to full §4 counts |
 

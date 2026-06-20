@@ -1,4 +1,4 @@
-# SentinelDesk — local stack (SENT-101 infra, SENT-102 API)
+# SentinelDesk — local stack (SENT-101 infra, SENT-102 API, SENT-106 frontend)
 
 services:
   postgres:
@@ -71,6 +71,24 @@ services:
       timeout: 5s
       retries: 5
       start_period: 15s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: sentineldesk-frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000}
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.ts:/app/vite.config.ts
+    depends_on:
+      api:
+        condition: service_healthy
 
 volumes:
   postgres_data:

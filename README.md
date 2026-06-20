@@ -11,7 +11,13 @@
 | E01 SENT-101 | ✅ Docker infrastructure (Postgres, Redis, MailHog) |
 | E01 SENT-102 | ✅ FastAPI API + `/health` on port 8000 |
 | E01 SENT-103 | ✅ User model + Alembic (`users` table, `user_role` enum) |
-| E01 SENT-104+ | Next — auth API, RBAC, frontend |
+| E01 SENT-104 | ✅ JWT auth API (`/api/v1/auth/login`, `/me`, `/logout`) |
+| E01 SENT-105 | ✅ RBAC `require_roles` dependency + `GET /api/v1/admin/ping` |
+| E01 SENT-106 | ✅ React SPA shell, router, auth context, role nav (port 5173) |
+| E01 SENT-107 | ✅ Login page with form validation and `data-testid` hooks |
+| E01 SENT-108 | ✅ Seed script — 4 baseline users (`backend/scripts/seed.py`) |
+| E02 SENT-201 | ✅ Alert + AlertEvent models, enums, Alembic migration |
+| E02 SENT-202+ | Next — ingest API with API key auth |
 
 ### QA automation (QA engineer — separate workflow)
 
@@ -19,7 +25,12 @@
 |------|--------|
 | E01 SENT-101-QA | ✅ Integration tests for infra |
 | E01 SENT-102-QA | ✅ API tests for health + `X-Request-ID` |
-| E01 SENT-103-QA+ | After matching app ticket is complete |
+| E01 SENT-103-QA | ✅ Integration tests for `users` schema, Alembic, enum constraints |
+| E01 SENT-104-QA | ✅ API + integration auth tests (21 tests) |
+| E01 SENT-105-QA | ✅ API + integration RBAC tests (5 tests) |
+| E01 SENT-106-QA | ✅ API tests (3 tests) |
+| E01 SENT-107-QA | ✅ E2E bootstrap — Playwright scaffold + 7 login tests |
+| E02 SENT-201-QA | ✅ Integration tests for `alerts` / `alert_events` schema (10 tests) |
 
 **Implementation agents:** read [.cursor/skills/sentinel-impl/SKILL.md](.cursor/skills/sentinel-impl/SKILL.md) — do not modify `tests/` or implement `-QA` tickets.
 
@@ -27,7 +38,7 @@
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows, macOS, or Linux)
 - Python 3.12+ and IDE of your choice
-- **Later epics:** Node.js 20+ (frontend)
+- Node.js 20+ (frontend local dev without Docker)
 
 ## Local infrastructure (SENT-101)
 
@@ -65,6 +76,7 @@ docker compose down -v
 | **API (FastAPI)** | **8000** | `curl http://localhost:8000/health` → `{"status":"ok"}` |
 | MailHog SMTP | 1025 | Used by app later |
 | MailHog UI | 8025 | Open http://localhost:8025 in a browser |
+| **Frontend (React SPA)** | **5173** | Open http://localhost:5173 in a browser |
 
 ## API (SENT-102)
 
@@ -107,7 +119,77 @@ docker compose up -d
 docker compose exec api alembic upgrade head
 ```
 
-Schema: `users` table with `user_role` enum (`ANALYST`, `LEAD`, `ADMIN`). Seed users arrive in **SENT-108**.
+Access databade:
+
+```powershell
+docker compose exec postgres psql -U sentinel -d sentineldesk
+```
+
+Once you’re in the psql prompt, useful commands:
+
+```powershell
+\dt                                 # List tables
+\d users                            # Describe users table
+SELECT * FROM users;                # Select all users
+SELECT id, email, role FROM users;  # Select id, email, role from users table
+\q                                  # Quit psql
+```
+
+Schema: `users` table with `user_role` enum (`ANALYST`, `LEAD`, `ADMIN`). After **SENT-201**, migrations also create `alerts` and `alert_events` with enums `alert_source`, `alert_severity`, `alert_status`, and `enrichment_status`.
+
+## Seed data (SENT-108)
+
+Load the four baseline users from [TEST_DATA.md](docs/TEST_DATA.md) (password `DemoPass123!` for all):
+
+```powershell
+# Docker (recommended — api container WORKDIR is backend/)
+docker compose exec api python -m scripts.seed
+
+# Local (Postgres reachable on localhost:5432)
+cd backend
+python -m scripts.seed
+```
+
+Re-running the seed is safe: existing users are skipped by email. Verify with:
+
+```powershell
+docker compose exec postgres psql -U sentinel -d sentineldesk -c "SELECT email, role, active FROM users ORDER BY email;"
+```
+
+## Auth API (SENT-104)
+
+Requires seeded users — run the seed command above first. Example login:
+
+```powershell
+curl -s -X POST http://localhost:8000/api/v1/auth/login `
+  -H "Content-Type: application/json" `
+  -d '{\"email\":\"analyst@demo.local\",\"password\":\"DemoPass123!\"}'
+```
+
+Use the returned `access_token` as `Authorization: Bearer <token>` on `GET /api/v1/auth/me` and `POST /api/v1/auth/logout` (204). Token lifetime: `JWT_EXPIRE_HOURS` × 3600 seconds (default 28800).
+
+## Frontend (SENT-106 / SENT-107)
+
+### Run with Docker (recommended)
+
+```powershell
+docker compose up -d --build
+```
+
+Open the SPA: http://localhost:5173
+
+Unauthenticated visitors are redirected to `/login`. Sign in with seed users (run seed first). Invalid credentials show an inline error (`data-testid="login-error"`); success redirects to `/dashboard`.
+
+### Run locally (without frontend container)
+
+```powershell
+cd frontend
+npm install
+# Ensure repo root .env defines VITE_API_URL=http://localhost:8000
+npm run dev
+```
+
+The Vite dev server listens on http://localhost:5173. JWT is stored in `sessionStorage` under `sentinel_access_token`.
 
 ### Connection defaults
 
@@ -136,8 +218,8 @@ Aligned with [.env.example](.env.example):
 - **Database:** PostgreSQL 16 (Docker)
 - **Queue:** Redis 7 (Docker)
 - **Email (dev):** MailHog (Docker)
-- **Frontend:** React + Vite — coming in SENT-106+
+- **Frontend:** React 19 + Vite + TypeScript + Tailwind (SENT-106+)
 
 ## Next implementation ticket
 
-**SENT-104** — Auth API login/logout/me (then **SENT-104-QA**).
+**SENT-202** — Ingest API with API key auth.

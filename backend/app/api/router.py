@@ -2,9 +2,10 @@
 
 from fastapi import APIRouter
 
-from app.api.routes import health
+from app.api.routes import admin, auth, health
 
 api_router = APIRouter()
 
-# SENT-104+: include_router(auth.router, prefix="/auth", tags=["auth"])
 api_router.include_router(health.router)
+api_router.include_router(auth.router, prefix="/api/v1/auth")
+api_router.include_router(admin.router, prefix="/api/v1/admin")

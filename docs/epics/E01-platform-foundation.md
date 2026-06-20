@@ -31,10 +31,10 @@ These criteria describe **epic completion after SENT-108**, not what any single 
 
 **Epic checklist** (verify after SENT-108, not mid-epic):
 
-- [ ] Full stack from table above runs with one `docker compose up`
-- [ ] Schema migrated; seed users loaded
-- [ ] Auth + RBAC behave as specified
-- [ ] README prerequisites documented
+- [x] Full stack from table above runs with one `docker compose up`
+- [x] Schema migrated; seed users loaded
+- [x] Auth + RBAC behave as specified
+- [x] README prerequisites documented
 
 ---
 
@@ -64,11 +64,14 @@ These criteria describe **epic completion after SENT-108**, not what any single 
 
 ---
 
-## QA notes (for later tests)
+## QA notes
 
-- API: login positive/negative, me with expired token
-- E2E: login as each role, assert nav items visible/hidden
-- Integration: user row exists after seed
+| Layer | Ticket | Coverage |
+|-------|--------|----------|
+| API | SENT-104-QA | Login + `/auth/me` for seed personas (`test_login.py`, `test_me.py`) |
+| API | SENT-106-QA | Expired token, CORS |
+| Integration | SENT-108-QA | Seed DB contract + idempotency (`test_seed_users.py`) |
+| E2E | SENT-107-QA | Login page smoke (each role, inactive user) |
 
 ---
 

@@ -6,6 +6,7 @@
 | **Epic** | SENT-E01 Platform Foundation |
 | **Priority** | High |
 | **Story Points** | 5 |
+| **Status** | Done |
 | **Labels** | `frontend`, `implementation` |
 | **Paired QA ticket** | [SENT-106-QA](./SENT-106-QA.md) |
 
@@ -29,27 +30,27 @@ React app shell, router, auth context.
 
 ### AC1 — Vite + React scaffold
 
-- [ ] Vite + React + TypeScript scaffold exists in `frontend/`
+- [x] Vite + React + TypeScript scaffold exists in `frontend/`
 
 ### AC2 — Router with auth guard
 
-- [ ] Routes: `/login` (public), protected layout with outlet; unauthenticated users are redirected to `/login`
+- [x] Routes: `/login` (public), protected layout with outlet; unauthenticated users are redirected to `/login`
 
 ### AC3 — Auth context and token handling
 
-- [ ] `AuthContext` stores JWT in React state and `sessionStorage` key `sentinel_access_token`
-- [ ] API client attaches `Authorization: Bearer <token>` on every request; clears storage on logout
-- [ ] Redirects unauthenticated users to `/login`
+- [x] `AuthContext` stores JWT in React state and `sessionStorage` key `sentinel_access_token`
+- [x] API client attaches `Authorization: Bearer <token>` on every request; clears storage on logout
+- [x] Redirects unauthenticated users to `/login`
 
 ### AC4 — Role-based navigation placeholders
 
-- [ ] Nav renders role-appropriate items; Dashboard and Alerts links are present but disabled until later epics ship
+- [x] Nav renders role-appropriate items; Dashboard and Alerts links are present but disabled until later epics ship
 
 ### AC5 — Docker frontend service
 
-- [ ] `frontend` service in `docker-compose.yml` on port `5173` (Vite dev server)
-- [ ] `docker compose up -d --build` starts the frontend container
-- [ ] README documents the SPA at http://localhost:5173
+- [x] `frontend` service in `docker-compose.yml` on port `5173` (Vite dev server)
+- [x] `docker compose up -d --build` starts the frontend container
+- [x] README documents the SPA at http://localhost:5173
 
 ---
 
@@ -81,10 +82,10 @@ React app shell, router, auth context.
 
 ## Definition of Done
 
-- [ ] Acceptance criteria met
-- [ ] `data-testid` hooks on new UI controls (if frontend)
-- [ ] OpenAPI updated (if API)
-- [ ] No test modules added outside `tests/`
-- [ ] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
-- [ ] `README.md` App implementation status updated for this ticket
+- [x] Acceptance criteria met
+- [x] `data-testid` hooks on new UI controls (if frontend)
+- [x] OpenAPI updated (if API)
+- [x] No test modules added outside `tests/`
+- [x] Ticket ACs and DoD marked `[x]`, `Status: Done` added to metadata
+- [x] `README.md` App implementation status updated for this ticket
 - [ ] Epic checklist ticked only if this was the last story in the epic

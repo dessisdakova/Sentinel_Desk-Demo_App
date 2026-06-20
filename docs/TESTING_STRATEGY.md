@@ -78,7 +78,7 @@ they are the most expensive and the most fragile.
 | Tool | pytest + httpx + psycopg2 + redis-py |
 | Gate fixture | `require_infrastructure` — skips if Docker stack is down |
 | Characteristics | Makes real DB queries to verify side effects; may poll for async completion |
-| Starts | SENT-101-QA (infrastructure); SENT-202-QA (ingest + DB row) |
+| Starts | SENT-101-QA (infrastructure); SENT-201-QA (alert schema); SENT-202-QA (ingest + DB row) |
 
 **Standard integration pattern (from ARCHITECTURE.md §4.3):**
 
@@ -164,18 +164,37 @@ assert audit.action == "ALERT_ASSIGNED"
 
 ```text
 tests/
-├── conftest.py              # All shared fixtures: gate fixtures, HTTP clients, DB clients
+├── conftest.py              # Shared gate fixtures, HTTP client, DB/Redis probes, expired_token
+├── constants.py             # Shared constants (timeouts, etc.)
 ├── data/                    # Static test data files (never credentials from .env)
 │   └── invalid_postgres.json
 ├── api/                     # HTTP contract tests — no direct DB queries
-│   ├── __init__.py
-│   └── test_health_endpoint.py
+│   ├── conftest.py          # api_client, analyst_token, lead_token, admin_token, token (indirect)
+│   ├── constants.py         # SEED_USERS, SEED_INACTIVE_USER, SEED_PASSWORD, TOKEN_EXPIRES_IN, SPA_ORIGIN
+│   ├── test_cors.py         # CORS preflight for SPA origin (SENT-106-QA)
+│   ├── auth/                # Auth endpoint tests
+│   │   ├── test_login.py
+│   │   ├── test_me.py
+│   │   ├── test_logout.py
+│   │   └── test_jwt_token.py
+│   ├── admin/               # Admin RBAC endpoint tests (SENT-105-QA)
+│   │   └── test_admin_ping.py
+│   └── health/              # Health endpoint tests
+│       └── test_health.py
 ├── integration/             # Cross-layer tests: API + DB, async jobs, email
-│   ├── __init__.py
-│   └── test_infrastructure.py
+│   ├── conftest.py          # postgres_connection, postgres_write_connection, redis_client, mailhog_ui_url, run_seed_script
+│   ├── auth/                # Auth cross-layer tests
+│   │   └── test_login_token.py
+│   └── infrastructure/      # DB schema, migration, service connectivity, seed script
+│       ├── test_service_connectivity.py
+│       ├── test_users_table_schema.py   # SENT-103-QA — users schema, enum, constraints
+│       ├── test_alerts_table_schema.py  # SENT-201-QA — alerts / alert_events schema, indexes, FKs
+│       ├── test_db_migration.py         # Alembic head revision (updated per epic)
+│       └── test_seed_users.py   # SENT-108-QA — idempotency, bcrypt, active flag, row count
 ├── e2e/                     # Playwright — bootstrap SENT-107-QA; feature tests E03+; POM polish SENT-1003-QA
-│   ├── __init__.py
-│   └── pages/               # Page Object Model classes
+│   ├── conftest.py
+│   ├── pages/               # Page Object Model classes
+│   └── auth/                # Auth browser tests (after SENT-107-QA)
 └── performance/             # Locust scenarios — added in E11
 ```
 
@@ -199,7 +218,7 @@ See [CONSTITUTION.md §3.6](./CONSTITUTION.md#36-test-harness-phases-qa-owned-vs
 
 | Element | Convention | Example |
 |---------|------------|---------|
-| Test files | `test_<feature_or_module>.py` | `test_alert_ingest.py` |
+| Test files | `test_<feature_or_endpoint>.py` | `test_login.py`, `test_me.py`, `test_login_token.py` |
 | Test functions | `test_<verb>_<subject>_<condition>` | `test_ingest_alert_returns_202` |
 | Page objects | `<PageName>Page` class | `LoginPage`, `AlertQueuePage` |
 | Fixtures | `snake_case`, noun or noun phrase | `api_client`, `postgres_connection` |

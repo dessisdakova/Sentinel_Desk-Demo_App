@@ -25,14 +25,34 @@ playwright install chromium             # first time only
 ## Running tests
 
 ```powershell
-pytest -m api -v                # API tests only
-pytest -m integ -v              # integration tests only
-pytest -m e2e -v                # Playwright tests only
-pytest -m "api or integ" -v     # everything except browser
-pytest -v                       # all tests
+pytest -m api -v                        # API tests only
+pytest -m integ -v                      # integration tests only
+pytest -m e2e -v                        # Playwright browser tests only
+pytest -m e2e --headed -v               # open a visible Chromium window
+pytest -m e2e --headed --slowmo 500 -v  # slow each action by 500 ms
+pytest -m smoke -v                      # quick sanity (infra + health + core schema)
+pytest -m reg -v                        # full regression suite
+pytest -m "api or integ" -v             # everything except browser
+pytest -v                               # all tests
 ```
 
 Tests skip automatically with a clear message if the required service is not running — no configuration needed to run a subset.
+
+## Markers
+
+Each test file sets **layer + regression** at the top:
+
+```python
+pytestmark = [pytest.mark.integ, pytest.mark.reg]  # or api / e2e
+```
+
+Add `@pytest.mark.smoke` only on individual tests that belong in the quick sanity subset. Smoke tests inherit `reg` from the module — no need to repeat it.
+
+| Marker | Where to apply | Purpose |
+|--------|----------------|---------|
+| `api` / `integ` / `e2e` | Module `pytestmark` | Layer (which stack the test needs) |
+| `reg` | Module `pytestmark` | Every test in the file is regression |
+| `smoke` | Function decorator | Fast subset only |
 
 ## Shared fixtures
 
@@ -41,8 +61,22 @@ Tests skip automatically with a clear message if the required service is not run
 - `require_infrastructure` — skips if the Docker stack is down
 - `api_base_url` — FastAPI root URL (shared by API and E2E layers)
 - `require_api` — skips if the API is not reachable or unhealthy
+- `analyst_token` / `lead_token` / `admin_token` — session-scoped JWTs from seed login
+- `expired_token` — function-scoped synthetically expired JWT (SENT-106-QA; uses `JWT_SECRET` from `.env`)
 
 Layer-specific fixtures live in the child `conftest.py` files inside each subfolder.
+
+**Integration:** `run_seed_script` (SENT-108-QA) runs `docker compose exec api python -m scripts.seed` inside tests that verify idempotent re-seeding.
+
+## Seed baseline
+
+Before integration or API tests that depend on seed users, run once per session:
+
+```powershell
+docker compose exec api python -m scripts.seed
+```
+
+See [docs/TEST_DATA.md](../docs/TEST_DATA.md) §3.1 and [docs/TESTING_STRATEGY.md](../docs/TESTING_STRATEGY.md) §9.
 
 ## Ruff (linting and formatting)
 
