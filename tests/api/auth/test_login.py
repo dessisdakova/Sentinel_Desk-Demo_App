@@ -1,9 +1,13 @@
 import pytest
 
 from tests.api.constants import TOKEN_EXPIRES_IN
-from tests.constants import SEED_INACTIVE_USER, SEED_PASSWORD, SEED_USERS
+from tests.constants import SEED_INACTIVE_USER, SEED_USERS
 
 pytestmark = [pytest.mark.api, pytest.mark.reg]
+
+# Password value is irrelevant for these cases — the request is rejected
+# (401 unknown email / 422 missing field) before any password check.
+IRRELEVANT_PASSWORD = "irrelevant-password"
 
 
 @pytest.mark.smoke
@@ -12,11 +16,11 @@ pytestmark = [pytest.mark.api, pytest.mark.reg]
     pytest.param(SEED_USERS[1], id="lead"),
     pytest.param(SEED_USERS[2], id="admin"),
 ])
-def test_valid_login_returns_auth_token(api_client, user):
+def test_valid_login_returns_auth_token(api_client, user, password_for):
     """QA-104-1: Successful login returns auth token."""
     response = api_client.post(
         "/api/v1/auth/login",
-        json={"email": user["email"], "password": user["password"]}
+        json={"email": user["email"], "password": password_for(user["key"])}
     )
 
     assert response.status_code == 200
@@ -28,7 +32,7 @@ def test_valid_login_returns_auth_token(api_client, user):
 
 @pytest.mark.parametrize("email,password", [
     pytest.param(SEED_USERS[0]["email"], "wrong_password", id="wrong-password"),
-    pytest.param("unknown@demo.local", SEED_PASSWORD, id="unknown-email"),
+    pytest.param("unknown@demo.local", IRRELEVANT_PASSWORD, id="unknown-email"),
 ])
 def test_login_with_invalid_credentials_return_401(api_client, email, password):
     """QA-104-2/QA-104-11: Login with invalid password/unknown email returns 401."""
@@ -44,7 +48,7 @@ def test_login_with_invalid_credentials_return_401(api_client, email, password):
 
 def test_login_with_missing_email_field_returns_422(api_client):
     """QA-104-3: Login with missing email field returns 422."""
-    missing_email_user = {"password": SEED_PASSWORD}
+    missing_email_user = {"password": IRRELEVANT_PASSWORD}
 
     response = api_client.post("/api/v1/auth/login", json=missing_email_user)
 
@@ -54,9 +58,12 @@ def test_login_with_missing_email_field_returns_422(api_client):
     assert body["detail"][0]["type"] == "missing"
 
 
-def test_login_with_inactive_user_returns_403(api_client):
+def test_login_with_inactive_user_returns_403(api_client, password_for):
     """QA-104-9: Login with inactive user returns 403."""
-    inactive_user = {"email": SEED_INACTIVE_USER["email"], "password": SEED_PASSWORD}
+    inactive_user = {
+        "email": SEED_INACTIVE_USER["email"],
+        "password": password_for(SEED_INACTIVE_USER["key"]),
+    }
 
     response = api_client.post("/api/v1/auth/login", json=inactive_user)
 

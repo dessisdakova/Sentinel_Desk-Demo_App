@@ -6,7 +6,6 @@ from playwright.sync_api import expect
 from tests.constants import (
     SEED_ANALYST_USER,
     SEED_INACTIVE_USER,
-    SEED_PASSWORD,
     SPA_ORIGIN,
 )
 from tests.e2e.constants import (
@@ -31,10 +30,10 @@ def test_login_page_is_visible(login_page):
     expect(login_page.sign_in_button).to_be_visible()
 
 
-def test_valid_credentials_redirect_to_dashboard(login_page):
+def test_valid_credentials_redirect_to_dashboard(login_page, password_for):
     """QA-107-2: Valid credentials redirect to the dashboard."""
     # Login with valid credentials.
-    login_page.login(SEED_ANALYST_USER["email"], SEED_PASSWORD)
+    login_page.login(SEED_ANALYST_USER["email"], password_for(SEED_ANALYST_USER["key"]))
 
     # re.compile() compiles the pattern into a regex object
     # re.escape() escapes special characters in the pattern
@@ -51,10 +50,12 @@ def test_wrong_password_shows_error(login_page):
     expect(login_page.page).to_have_url(re.compile(re.escape(LOGIN_PATH)))
 
 
-def test_inactive_user_shows_error(login_page):
+def test_inactive_user_shows_error(login_page, password_for):
     """QA-107-4: Inactive account displays an error and user stays on login page."""
     # Login with inactive user.
-    login_page.login(SEED_INACTIVE_USER["email"], SEED_PASSWORD)
+    login_page.login(
+        SEED_INACTIVE_USER["email"], password_for(SEED_INACTIVE_USER["key"])
+    )
 
     expect(login_page.error_message).to_be_visible()
     expect(login_page.error_message).to_have_text(DISABLED_ACCOUNT_MESSAGE)
@@ -63,8 +64,8 @@ def test_inactive_user_shows_error(login_page):
 
 def test_empty_email_shows_error(login_page):
     """QA-107-5: Submitting with an empty email field displays an inline error."""
-    # Login with empty email.
-    login_page.login("", SEED_PASSWORD)
+    # Login with empty email; password value is irrelevant (client-side validation).
+    login_page.login("", "irrelevant-password")
 
     expect(login_page.error_missing_creds).to_be_visible()
     expect(login_page.error_missing_creds).to_have_text(MISSING_EMAIL_MESSAGE)

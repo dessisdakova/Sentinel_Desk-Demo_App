@@ -1,5 +1,6 @@
 import os
 import socket
+import time
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -13,46 +14,16 @@ from dotenv import load_dotenv
 from redis.backoff import NoBackoff
 from redis.retry import Retry
 
-# Seconds to wait for a TCP port check before treating a service as down.
-PORT_CHECK_TIMEOUT = 0.5
+from tests.secrets.provider import get_jwt_secret, get_user_secret
 
-# Default timeout (seconds) for Postgres, Redis, and MailHog probe clients.
-CLIENT_TIMEOUT_SEC = 2
-
-# Default timeout (seconds) for HTTP calls to the FastAPI application.
-API_TIMEOUT_SEC = 5
-
-
-def pytest_addoption(parser):
-    """Add command-line option to select environment."""
-    parser.addoption(
-        "--env",
-        action="store",
-        default="local",
-        choices=["local", "qa", "staging"],
-        help="Target environment (default: local)"
-    )
-
-
-@pytest.fixture(scope="session", autouse=True)
-def load_environment(request):
-    """Load environment file based on command-line option."""
-    env = request.config.getoption("--env")
-    env_file = Path(__file__).parent / "environments" / f"{env}.env"
-    if not env_file.exists():
-        pytest.fail(f"Environment file {env_file} not found")
-    load_dotenv(dotenv_path=env_file, override=True)
-
-
-@pytest.fixture(scope="session", autouse=True)
-def announce_environment(request):
-    env_name = request.config.getoption("--env")
-    print(f"\n>>> Running tests against environment: {env_name.upper()} <<<\n")
+PORT_CHECK_TIMEOUT = 0.5    # TCP port check
+CLIENT_TIMEOUT_SEC = 2      # Postgres, Redis, MailHog
+API_TIMEOUT_SEC = 5         # FastAPI
+ROLE_TO_USER_KEY = {"ANALYST": "analyst", "LEAD": "lead", "ADMIN": "admin"}
 
 
 def _env(name: str, default: str | None = None) -> str:
     """Read an environment variable or fail the test run with a clear message.
-
 
     :param name: Variable name as it appears in '.env' (e.g. 'POSTGRES_HOST').
     :param default: Value to use when the variable is unset.
@@ -178,16 +149,48 @@ def _can_reach_mailhog_ui() -> bool:
         return False
 
 
-def _login_as(role: str, api_client) -> str:
-    """Logs in as the specified role and returns the token."""
-    user = next(u for u in SEED_USERS if u["role"] == role.upper())
+def _login_as(role: str, api_client, credentials: dict[str, str]) -> str:
+    """Log in with the given user's credentials and return the token.
+
+    :param role: Role name (for the error message only).
+    :param api_client: Configured httpx client.
+    :param credentials: Dict with "email" and "password" from the secrets provider.
+    :return: JWT access token string.
+    """
     response = api_client.post(
         "/api/v1/auth/login",
-        json={"email": user["email"], "password": SEED_PASSWORD},
+        json={"email": credentials["email"], "password": credentials["password"]},
     )
     if response.status_code != 200:
         raise ValueError(f"Failed to login as {role}: {response.json()}")
     return response.json()["access_token"]
+
+
+def pytest_addoption(parser):
+    """Add command-line option to select environment."""
+    parser.addoption(
+        "--env",
+        action="store",
+        default="local",
+        choices=["local", "qa", "staging"],
+        help="Target environment (default: local)"
+    )
+
+
+@pytest.fixture(scope="session", autouse=True)
+def load_environment(request):
+    """Load environment file based on command-line option."""
+    env = request.config.getoption("--env")
+    env_file = Path(__file__).parent / "environments" / f"{env}.env"
+    if not env_file.exists():
+        pytest.fail(f"Environment file {env_file} not found")
+    load_dotenv(dotenv_path=env_file, override=True)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def announce_environment(request):
+    env_name = request.config.getoption("--env")
+    print(f"\n>>> Running tests against environment: {env_name.upper()} <<<\n")
 
 
 @pytest.fixture(scope="session")
@@ -267,35 +270,67 @@ def api_client(api_base_url, require_api) -> httpx.Client:
 
 
 @pytest.fixture(scope="session")
-def analyst_token(api_client) -> str:
-    """Session-scoped JWT for the seeded ANALYST user."""
-    return _login_as("ANALYST", api_client)
+def password_for(load_environment):
+    """Return a lookup that fetches a seed user's password by logical key.
+
+    :param load_environment: Ensures AWS_* env vars are loaded first.
+    :return: Callable mapping a user key (e.g. "analyst") to its password.
+    """
+    def _lookup(user_key: str) -> str:
+        return get_user_secret(user_key)["password"]
+
+    return _lookup
 
 
 @pytest.fixture(scope="session")
-def lead_token(api_client) -> str:
-    """Session-scoped JWT for the seeded LEAD user."""
-    return _login_as("LEAD", api_client)
+def analyst_credentials(load_environment) -> dict[str, str]:
+    """Email + password for ANALYST user from Secrets Manager."""
+    return get_user_secret("analyst")
 
 
 @pytest.fixture(scope="session")
-def admin_token(api_client) -> str:
-    """Session-scoped JWT for the seeded ADMIN user."""
-    return _login_as("ADMIN", api_client)
+def analyst_token(api_client, analyst_credentials) -> str:
+    """Session-scoped JWT for ANALYST user."""
+    return _login_as("ANALYST", api_client, analyst_credentials)
 
 
 @pytest.fixture(scope="session")
-def token(request, api_client) -> str:
+def lead_credentials(load_environment) -> dict[str, str]:
+    """Email + password for LEAD user from Secrets Manager."""
+    return get_user_secret("lead")
+
+
+@pytest.fixture(scope="session")
+def lead_token(api_client, lead_credentials) -> str:
+    """Session-scoped JWT for LEAD user."""
+    return _login_as("LEAD", api_client, lead_credentials)
+
+
+@pytest.fixture(scope="session")
+def admin_credentials(load_environment) -> dict[str, str]:
+    """Email + password for ADMIN user from Secrets Manager."""
+    return get_user_secret("admin")
+
+
+@pytest.fixture(scope="session")
+def admin_token(api_client, admin_credentials) -> str:
+    """Session-scoped JWT for ADMIN user."""
+    return _login_as("ADMIN", api_client, admin_credentials)
+
+
+@pytest.fixture(scope="session")
+def token(request, api_client, load_environment) -> str:
     """Log in as the requested role and return the access token.
 
     :param request: pytest request object; request.param is the role string.
     :return: JWT access token string.
     """
-    return _login_as(request.param, api_client)
+    user_key = ROLE_TO_USER_KEY[request.param]
+    return _login_as(request.param, api_client, get_user_secret(user_key))
 
 
 @pytest.fixture(scope="function")
-def expired_token() -> str:
+def expired_token(load_environment) -> str:
     """Mints a synthetically expired JWT token and returns it."""
-    jwt_secret = _env("JWT_SECRET")
+    jwt_secret = get_jwt_secret()
     return jwt.encode({"exp": time.time() - 10}, jwt_secret, algorithm="HS256")
