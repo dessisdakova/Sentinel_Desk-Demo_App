@@ -40,13 +40,17 @@ pytest tests/e2e/test_login_page.py::test_valid_credentials_redirect_to_dashboar
 
 ## Debugging failures
 
-When a browser test fails, Playwright saves a trace file automatically (configured in `pytest.ini`):
+When a browser test fails, Playwright saves artifacts under `test-results/` at the repo root (configured in `pytest.ini`):
 
 ```powershell
 playwright show-trace test-results/<test-name>/trace.zip
 ```
 
 The trace viewer replays the test step-by-step with screenshots, network calls, and DOM snapshots.
+
+### Allure reports
+
+When you run E2E tests with `--alluredir=allure-results`, failing tests automatically attach the Playwright **screenshot** and **trace** to the Allure report (see `conftest.py`). Use Allure for quick triage; use `playwright show-trace` for a full step-by-step replay.
 
 ## Key conventions
 

@@ -43,6 +43,25 @@ services:
       - "${MAILHOG_SMTP_PORT:-1025}:1025"
       - "${MAILHOG_UI_PORT:-8025}:8025"
 
+  localstack:
+    image: localstack/localstack:3
+    container_name: sentineldesk-localstack
+    restart: unless-stopped
+    environment:
+      SERVICES: secretsmanager
+      DEBUG: "0"
+    ports:
+      - "${LOCALSTACK_PORT:-4566}:4566"
+    volumes:
+      - localstack_data:/var/lib/localstack
+      - ./tests/secrets/init:/etc/localstack/init/ready.d:ro
+      - ./tests/secrets/seed_data.json:/etc/localstack/seed/seed_data.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:4566/_localstack/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   api:
     build:
       context: ./backend
@@ -93,3 +112,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  localstack_data:

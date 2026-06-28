@@ -84,7 +84,7 @@ def test_inactive_seed_user_has_active_false(postgres_connection):
     pytest.param(SEED_USERS[2], id="admin"),
     pytest.param(SEED_USERS[3], id="inactive"),
 ])
-def test_seed_user_password_hash_is_bcrypt(postgres_connection, user):
+def test_seed_user_password_hash_is_bcrypt(postgres_connection, user, password_for):
     """QA-108-3: Seed stores bcrypt password_hash, not plaintext (AC1).
 
     Prerequisite: baseline seed applied at least once before test.
@@ -111,7 +111,7 @@ def test_seed_user_password_hash_is_bcrypt(postgres_connection, user):
     )
 
     # Plaintext password must never appear in the hash column.
-    assert user["password"] not in password_hash, (
+    assert password_for(user["key"]) not in password_hash, (
         f"password_hash looks like plaintext for {user['email']!r}."
     )
 

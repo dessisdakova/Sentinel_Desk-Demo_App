@@ -2,6 +2,8 @@ import pytest
 
 pytestmark = [pytest.mark.integ, pytest.mark.reg]
 
+from tests.constants import EXPECTED_MIGRATION_REVISION
+
 
 def test_alerts_table_has_expected_columns(postgres_connection):
     """QA-201-1: Alert table exists with expected columns."""
@@ -230,8 +232,6 @@ def test_alerts_table_has_expected_indexes(postgres_connection):
 
 def test_alembic_migration_is_at_head(postgres_connection):
     """QA-201-10: Alembic ran and the DB is on the latest revision."""
-    expected_migration_revision = "20260613_0002"
-
     with postgres_connection.cursor() as cur:
         cur.execute("SELECT version_num FROM alembic_version")
         row = cur.fetchone()

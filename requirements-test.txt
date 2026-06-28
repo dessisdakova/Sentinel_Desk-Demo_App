@@ -7,3 +7,5 @@ ruff
 pytest-playwright
 passlib[bcrypt]
 PyJWT
+allure-pytest
+boto3

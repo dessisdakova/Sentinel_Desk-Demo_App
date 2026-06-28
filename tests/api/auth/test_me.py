@@ -6,9 +6,9 @@ pytestmark = [pytest.mark.api, pytest.mark.reg]
 
 
 @pytest.mark.parametrize("user, token", [
-    pytest.param(SEED_USERS[0], "analyst", id="analyst"),
-    pytest.param(SEED_USERS[1], "lead", id="lead"),
-    pytest.param(SEED_USERS[2], "admin", id="admin"),
+    pytest.param(SEED_USERS[0], "ANALYST", id="analyst"),
+    pytest.param(SEED_USERS[1], "LEAD", id="lead"),
+    pytest.param(SEED_USERS[2], "ADMIN", id="admin"),
 ], indirect=["token"]
 )
 def test_auth_with_valid_token_returns_correct_user_profile(api_client, user, token):
@@ -48,9 +48,9 @@ def test_auth_with_malformed_token_returns_401(api_client):
 
 
 @pytest.mark.parametrize("token,expected_role", [
-    pytest.param("analyst", "ANALYST", id="analyst"),
-    pytest.param("lead", "LEAD", id="lead"),
-    pytest.param("admin", "ADMIN", id="admin"),
+    pytest.param("ANALYST", "ANALYST", id="analyst"),
+    pytest.param("LEAD", "LEAD", id="lead"),
+    pytest.param("ADMIN", "ADMIN", id="admin"),
 ], indirect=["token"])
 def test_me_returns_correct_role(api_client, token, expected_role):
     """QA-104-13: Each role token returns the correct role from /auth/me."""

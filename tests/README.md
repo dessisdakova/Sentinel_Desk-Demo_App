@@ -38,6 +38,31 @@ pytest -v                               # all tests
 
 Tests skip automatically with a clear message if the required service is not running — no configuration needed to run a subset.
 
+## Allure reports
+
+`allure-pytest` (in `requirements-test.txt`) writes raw result files during pytest. View the HTML report with the Allure CLI in Docker — **no local Allure CLI or Java install required**.
+
+1. Run tests with an output directory:
+
+```powershell
+pytest -m smoke -v --alluredir=allure-results
+```
+
+Append `--alluredir=allure-results` to any command in [Running tests](#running-tests) above.
+
+Failing E2E tests attach Playwright screenshots and traces to Allure automatically (see `tests/e2e/conftest.py`).
+
+2. Open the report (requires Docker):
+
+```powershell
+.\scripts\allure-serve.ps1              # live server at http://localhost:5050
+.\scripts\allure-generate.ps1           # static HTML in allure-report/
+```
+
+On Linux/macOS, use `scripts/allure-serve.sh` and `scripts/allure-generate.sh` instead.
+
+The first run pulls `andgineer/allure:2.32.0`. `allure-results/` and `allure-report/` are gitignored.
+
 ## Markers
 
 Each test file sets **layer + regression** at the top:
