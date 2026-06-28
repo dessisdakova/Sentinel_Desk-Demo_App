@@ -2,8 +2,7 @@ import pytest
 
 pytestmark = [pytest.mark.integ, pytest.mark.reg]
 
-# Revision ID from backend/alembic/versions/20260613_0002_alerts_and_alert_events.py
-EXPECTED_MIGRATION_REVISION = "20260613_0002"
+from tests.constants import EXPECTED_MIGRATION_REVISION
 
 
 def test_alembic_migration_is_at_head(postgres_connection):

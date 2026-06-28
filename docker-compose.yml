@@ -54,6 +54,8 @@ services:
       - "${LOCALSTACK_PORT:-4566}:4566"
     volumes:
       - localstack_data:/var/lib/localstack
+      - ./tests/secrets/init:/etc/localstack/init/ready.d:ro
+      - ./tests/secrets/seed_data.json:/etc/localstack/seed/seed_data.json:ro
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:4566/_localstack/health || exit 1"]
       interval: 5s

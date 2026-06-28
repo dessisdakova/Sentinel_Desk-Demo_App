@@ -1,46 +1,33 @@
-"""Seed the LocalStack Secrets Manager with baseline test user secrets.
+"""Seed the LocalStack Secrets Manager from ``seed_data.json``.
 
-Run once after ``docker compose up -d`` (and again any time the LocalStack
-container is recreated):
+The LocalStack init hook (``tests/secrets/init/01-seed-secrets.sh``) seeds these
+automatically on ``docker compose up``. Run this module manually only to re-seed
+a already-running container without restarting it:
 
     python -m tests.secrets.bootstrap
 """
 
 import json
 import os
+from pathlib import Path
 
 import boto3
 
-SEED_USER_SECRETS: dict[str, dict[str, str]] = {
-    "analyst": {"email": "analyst@demo.local", "password": "DemoPass123!"},
-    "lead": {"email": "lead@demo.local", "password": "DemoPass123!"},
-    "admin": {"email": "admin@demo.local", "password": "DemoPass123!"},
-    "inactive": {"email": "inactive@demo.local", "password": "DemoPass123!"},
-}
-
-SECRET_NAME_PREFIX = "sentineldesk/users"
-
-# App-level JWT signing key. Must match the API's JWT_SECRET (root .env), or
-# tokens minted in tests will be rejected as invalid-signature instead of expired.
-JWT_SECRET_NAME = "sentineldesk/jwt"
-JWT_SECRET_VALUE = {
-    "secret": "39e559a98f4543ba17661c92fa30b75810988677ab6d684a6b5c63957dbc41e4",
-}
+SEED_DATA_FILE = Path(__file__).parent / "seed_data.json"
 
 
-def _put_secret(client, name: str, value: dict[str, str]) -> None:
+def _put_secret(client, name: str, secret_string: str) -> None:
     """Create a secret, or overwrite it if it already exists."""
-    payload = json.dumps(value)
     try:
-        client.create_secret(Name=name, SecretString=payload)
+        client.create_secret(Name=name, SecretString=secret_string)
         print(f"created secret {name}")
     except client.exceptions.ResourceExistsException:
-        client.put_secret_value(SecretId=name, SecretString=payload)
+        client.put_secret_value(SecretId=name, SecretString=secret_string)
         print(f"updated secret {name}")
 
 
 def main() -> None:
-    """Seed one secret per baseline user into Secrets Manager."""
+    """Seed every secret defined in ``seed_data.json`` into Secrets Manager."""
     client = boto3.client(
         "secretsmanager",
         endpoint_url=os.getenv("AWS_ENDPOINT_URL", "http://localhost:4566"),
@@ -48,9 +35,9 @@ def main() -> None:
         aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID", "test"),
         aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY", "test"),
     )
-    for key, value in SEED_USER_SECRETS.items():
-        _put_secret(client, f"{SECRET_NAME_PREFIX}/{key}", value)
-    _put_secret(client, JWT_SECRET_NAME, JWT_SECRET_VALUE)
+    secrets = json.loads(SEED_DATA_FILE.read_text(encoding="utf-8"))
+    for name, payload in secrets.items():
+        _put_secret(client, name, json.dumps(payload))
 
 
 if __name__ == "__main__":
