@@ -77,6 +77,7 @@ docker compose down -v
 | MailHog SMTP | 1025 | Used by app later |
 | MailHog UI | 8025 | Open http://localhost:8025 in a browser |
 | **Frontend (React SPA)** | **5173** | Open http://localhost:5173 in a browser |
+| LocalStack (test harness) | 4566 | `curl http://localhost:4566/_localstack/health` — AWS Secrets Manager for QA credentials only; not used by the app |
 
 ## API (SENT-102)
 
@@ -207,7 +208,8 @@ Aligned with [.env.example](.env.example):
 | [docs/CONSTITUTION.md](docs/CONSTITUTION.md) | Product vision, modules, pages, roles, NFRs |
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Technical design, Docker, APIs, async |
 | [docs/TEST_DATA.md](docs/TEST_DATA.md) | Seed users, stable IDs, reset guide (QA) |
-| [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) | QA automation framework (QA engineer only) |
+| [tests/README.md](tests/README.md) | **Run tests, Allure reports, LocalStack secrets** (QA engineer only) |
+| [docs/TESTING_STRATEGY.md](docs/TESTING_STRATEGY.md) | QA automation strategy and conventions (QA engineer only) |
 | [docs/BUG_GARDEN.md](docs/BUG_GARDEN.md) | Intentional defects |
 | [docs/epics/README.md](docs/epics/README.md) | Implementation epics E01–E11 |
 | [docs/tickets/](docs/tickets/) | Implementation + QA tickets per epic |
