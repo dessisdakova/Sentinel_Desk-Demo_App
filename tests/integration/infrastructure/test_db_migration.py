@@ -1,9 +1,8 @@
 import pytest
 
-pytestmark = [pytest.mark.integ, pytest.mark.reg]
-
 from tests.constants import EXPECTED_MIGRATION_REVISION
 
+pytestmark = [pytest.mark.integ, pytest.mark.reg]
 
 def test_alembic_migration_is_at_head(postgres_connection):
     """QA-103-2: Alembic ran and the DB is on the latest revision."""

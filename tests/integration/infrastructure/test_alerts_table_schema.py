@@ -1,9 +1,8 @@
 import pytest
 
-pytestmark = [pytest.mark.integ, pytest.mark.reg]
-
 from tests.constants import EXPECTED_MIGRATION_REVISION
 
+pytestmark = [pytest.mark.integ, pytest.mark.reg]
 
 def test_alerts_table_has_expected_columns(postgres_connection):
     """QA-201-1: Alert table exists with expected columns."""
@@ -207,7 +206,11 @@ def test_alert_events_table_foreign_keys_are_correct(postgres_connection):
 def test_alerts_table_has_expected_indexes(postgres_connection):
     """QA-201-9: Composite and assigned_to_id indexes exist on alerts."""
     expected_indexes = {
-        "ix_alerts_status_severity_created_at": ["status", "severity", "created_at desc"],
+        "ix_alerts_status_severity_created_at": [
+            "status",
+            "severity",
+            "created_at desc"
+            ],
         "ix_alerts_assigned_to_id": ["assigned_to_id"],
     }
 
@@ -237,6 +240,6 @@ def test_alembic_migration_is_at_head(postgres_connection):
         row = cur.fetchone()
 
     assert row is not None, "alembic_version table is empty — migrations not applied."
-    assert row[0] == expected_migration_revision, (
-        f"Expected alembic head {expected_migration_revision}, got {row[0]!r}"
+    assert row[0] == EXPECTED_MIGRATION_REVISION, (
+        f"Expected alembic head {EXPECTED_MIGRATION_REVISION}, got {row[0]!r}"
     )

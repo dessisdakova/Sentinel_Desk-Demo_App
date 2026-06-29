@@ -1,7 +1,6 @@
 import pytest
 
-from tests.constants import TOKEN_EXPIRES_IN
-from tests.constants import SEED_INACTIVE_USER, SEED_USERS
+from tests.constants import SEED_INACTIVE_USER, SEED_USERS, TOKEN_EXPIRES_IN
 
 pytestmark = [pytest.mark.api, pytest.mark.reg]
 
