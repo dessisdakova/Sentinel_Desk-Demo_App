@@ -6,19 +6,19 @@ from tests.integration.conftest import _decode_jwt_payload
 pytestmark = [pytest.mark.integ, pytest.mark.reg]
 
 
-@pytest.mark.parametrize("user", [
-    pytest.param(SEED_ANALYST_USER, id="analyst"),
-    pytest.param(SEED_LEAD_USER, id="lead"),
-    pytest.param(SEED_ADMIN_USER, id="admin"),
-])
+@pytest.mark.parametrize(
+    "user",
+    [
+        pytest.param(SEED_ANALYST_USER, id="analyst"),
+        pytest.param(SEED_LEAD_USER, id="lead"),
+        pytest.param(SEED_ADMIN_USER, id="admin"),
+    ],
+)
 def test_login_token_sub_matches_db_user_email(
-    api_client, postgres_connection, user, password_for
+    auth_client, postgres_connection, user, password_for
 ):
     """QA-104-8: JWT sub claim matches the users table email for each role."""
-    response = api_client.post(
-        "/api/v1/auth/login",
-        json={"email": user["email"], "password": password_for(user["key"])},
-    )
+    response = auth_client.login(user["email"], password_for(user["key"]))
 
     assert response.status_code == 200, f"Login must succeed for {user['email']}."
 

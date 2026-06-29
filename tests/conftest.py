@@ -7,19 +7,21 @@ import pytest
 from dotenv import load_dotenv
 
 from tests.secrets.provider import get_jwt_secret, get_user_secret
+from tests.support.api_session import ApiSession
 from tests.support.auth import _login_as
+from tests.support.clients import AdminClient, AuthClient, HealthClient
 from tests.support.connectivity import (
     _postgres_connect_kwargs,
     _redis_connect_kwargs,
-    _port_is_open,
     _api_host_and_port,
     _can_connect_postgres,
     _can_ping_redis,
     _can_reach_mailhog_ui,
+    _port_is_open,
 )
 from tests.support.env import _env
 
-API_TIMEOUT_SEC = 5         # FastAPI
+API_TIMEOUT_SEC = 5  # FastAPI
 ROLE_TO_USER_KEY = {"ANALYST": "analyst", "LEAD": "lead", "ADMIN": "admin"}
 
 
@@ -30,7 +32,7 @@ def pytest_addoption(parser):
         action="store",
         default="local",
         choices=["local", "qa", "staging"],
-        help="Target environment (default: local)"
+        help="Target environment (default: local)",
     )
 
 
@@ -79,7 +81,7 @@ def require_infrastructure():
 def api_base_url() -> str:
     """Root URL of the FastAPI service.
 
-    Shared between API tests (via ``api_client``) and E2E tests (via
+    Shared between API tests (via ``api_session``) and E2E tests (via
     ``playwright_api_context``).
 
     :return: Base URL string with no trailing slash.
@@ -115,16 +117,59 @@ def require_api(api_base_url):
 
 
 @pytest.fixture(scope="session")
-def api_client(api_base_url, require_api) -> httpx.Client:
-    """Synchronous HTTP client pointed at the SentinelDesk API.
+def api_session(api_base_url, require_api) -> ApiSession:
+    """Shared API config and HTTP client for the pytest session.
 
     :param api_base_url: Root URL of the FastAPI service (from root conftest).
     :param require_api: Gate fixture — skips if the API is down or unhealthy.
-    :yield: Configured ``httpx.Client`` with ``base_url`` and timeout set.
+    :yield: ``ApiSession`` with ``base_url`` and a single ``httpx.Client``.
     """
     client = httpx.Client(base_url=api_base_url, timeout=API_TIMEOUT_SEC)
-    yield client
-    client.close()
+    session = ApiSession(base_url=api_base_url, client=client)
+    yield session
+    session.close()
+
+
+@pytest.fixture(scope="session")
+def auth_client(api_session) -> AuthClient:
+    """Unauthenticated auth API wrapper (no default JWT)."""
+    return AuthClient(api_session)
+
+
+@pytest.fixture(scope="session")
+def admin_client(api_session) -> AdminClient:
+    """Unauthenticated admin API wrapper (no default JWT)."""
+    return AdminClient(api_session)
+
+
+@pytest.fixture(scope="session")
+def health_client(api_session) -> HealthClient:
+    """Health probe API wrapper."""
+    return HealthClient(api_session)
+
+
+@pytest.fixture(scope="session")
+def analyst_auth_client(api_session, analyst_token) -> AuthClient:
+    """Auth API wrapper with ANALYST JWT bound at construction."""
+    return AuthClient(api_session, token=analyst_token)
+
+
+@pytest.fixture(scope="session")
+def lead_auth_client(api_session, lead_token) -> AuthClient:
+    """Auth API wrapper with LEAD JWT bound at construction."""
+    return AuthClient(api_session, token=lead_token)
+
+
+@pytest.fixture(scope="session")
+def admin_auth_client(api_session, admin_token) -> AuthClient:
+    """Auth API wrapper with ADMIN JWT bound at construction."""
+    return AuthClient(api_session, token=admin_token)
+
+
+@pytest.fixture(scope="session")
+def authenticated_admin_client(api_session, admin_token) -> AdminClient:
+    """Admin API wrapper with ADMIN JWT bound at construction."""
+    return AdminClient(api_session, token=admin_token)
 
 
 @pytest.fixture(scope="session")
@@ -134,6 +179,7 @@ def password_for(load_environment):
     :param load_environment: Ensures AWS_* env vars are loaded first.
     :return: Callable mapping a user key (e.g. "analyst") to its password.
     """
+
     def _lookup(user_key: str) -> str:
         return get_user_secret(user_key)["password"]
 
@@ -147,9 +193,9 @@ def analyst_credentials(load_environment) -> dict[str, str]:
 
 
 @pytest.fixture(scope="session")
-def analyst_token(api_client, analyst_credentials) -> str:
+def analyst_token(api_session, analyst_credentials) -> str:
     """Session-scoped JWT for ANALYST user."""
-    return _login_as("ANALYST", api_client, analyst_credentials)
+    return _login_as("ANALYST", api_session, analyst_credentials)
 
 
 @pytest.fixture(scope="session")
@@ -159,9 +205,9 @@ def lead_credentials(load_environment) -> dict[str, str]:
 
 
 @pytest.fixture(scope="session")
-def lead_token(api_client, lead_credentials) -> str:
+def lead_token(api_session, lead_credentials) -> str:
     """Session-scoped JWT for LEAD user."""
-    return _login_as("LEAD", api_client, lead_credentials)
+    return _login_as("LEAD", api_session, lead_credentials)
 
 
 @pytest.fixture(scope="session")
@@ -171,20 +217,20 @@ def admin_credentials(load_environment) -> dict[str, str]:
 
 
 @pytest.fixture(scope="session")
-def admin_token(api_client, admin_credentials) -> str:
+def admin_token(api_session, admin_credentials) -> str:
     """Session-scoped JWT for ADMIN user."""
-    return _login_as("ADMIN", api_client, admin_credentials)
+    return _login_as("ADMIN", api_session, admin_credentials)
 
 
 @pytest.fixture(scope="session")
-def token(request, api_client, load_environment) -> str:
+def token(request, api_session, load_environment) -> str:
     """Log in as the requested role and return the access token.
 
     :param request: pytest request object; request.param is the role string.
     :return: JWT access token string.
     """
     user_key = ROLE_TO_USER_KEY[request.param]
-    return _login_as(request.param, api_client, get_user_secret(user_key))
+    return _login_as(request.param, api_session, get_user_secret(user_key))
 
 
 @pytest.fixture(scope="function")

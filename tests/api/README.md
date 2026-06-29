@@ -24,6 +24,10 @@ Seed persona HTTP checks (login + `/auth/me` for `tests/constants.py` users) liv
 
 | Fixture | Scope | Description |
 |---------|-------|-------------|
-| `api_client` | session | httpx `Client` pointed at the FastAPI base URL |
+| `api_session` | session | ``ApiSession`` — shared ``base_url`` + single ``httpx.Client`` |
+| `auth_client` | session | ``AuthClient`` — login, me, logout (no default JWT) |
+| `admin_client` | session | ``AdminClient`` — admin ping |
+| `health_client` | session | ``HealthClient`` — health and routing probes |
 
-`api_base_url` and `require_api` come from the root `tests/conftest.py`.
+API tests call **service client methods** (e.g. ``auth_client.login(...)``) — not raw URLs.
+`api_base_url`, `require_api`, and token fixtures come from the root `tests/conftest.py`.

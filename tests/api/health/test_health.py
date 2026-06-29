@@ -4,12 +4,11 @@ pytestmark = [pytest.mark.api, pytest.mark.reg]
 
 
 @pytest.mark.smoke
-def test_health_returns_200_and_verify_response(api_client):
+def test_health_returns_200_and_verify_response(health_client):
     """QA-102-1: Health endpoint returns 200, correct JSON, and echoes X-Request-ID."""
     request_id = "TEST0108-999999"
 
-    # Call GET /health and send a custom request ID header.
-    response = api_client.get("/health", headers={"X-Request-ID": request_id})
+    response = health_client.health(request_id=request_id)
 
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
@@ -17,9 +16,8 @@ def test_health_returns_200_and_verify_response(api_client):
     assert request_id == response.headers["X-Request-ID"]
 
 
-def test_unknown_path_returns_404(api_client):
+def test_unknown_path_returns_404(health_client):
     """QA-102-2: Unknown API path returns HTTP 404."""
-    # Request a route that does not exist in the API.
-    response = api_client.get("/unknown-path")
+    response = health_client.unknown_path()
 
     assert response.status_code == 404
