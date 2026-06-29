@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from tests.constants import SEED_INACTIVE_USER, SEED_USERS
+from tests.support.db.users import count_users_with_emails, get_user_field_by_email
 
 pytestmark = [pytest.mark.integ, pytest.mark.reg]
 
@@ -13,24 +14,16 @@ def test_rerun_seed_does_not_duplicate_users(run_seed_script, postgres_connectio
 
     Prerequisite: baseline seed applied at least once before test.
     """
-    # Build a tuple of the four canonical seed emails.
     seed_emails = tuple(user["email"] for user in SEED_USERS)
 
-    # The fixture already ran seed; confirm subprocess exited successfully.
     assert run_seed_script.returncode == 0, (
         "Seed script must exit 0 on idempotent re-run. "
         f"stderr={run_seed_script.stderr!r}"
     )
 
-    with postgres_connection.cursor() as cur:
-        # Count how many user rows match any of the four seed emails.
-        cur.execute(
-            "SELECT COUNT(*) FROM users WHERE email IN %s",
-            (seed_emails,),
-        )
-        total_rows = cur.fetchone()[0]
+    total_rows = count_users_with_emails(postgres_connection, seed_emails)
 
-        # Find emails that appear more than once — should be none.
+    with postgres_connection.cursor() as cur:
         cur.execute(
             """
             SELECT email, COUNT(*) AS row_count
@@ -43,12 +36,9 @@ def test_rerun_seed_does_not_duplicate_users(run_seed_script, postgres_connectio
         )
         duplicate_emails = cur.fetchall()
 
-    # AC2: re-run must not add extra rows — still exactly four seed users.
     assert total_rows == len(SEED_USERS), (
         f"Expected {len(SEED_USERS)} seed user rows after re-run, got {total_rows}."
     )
-
-    # Stronger check: no seed email may appear twice in the users table.
     assert duplicate_emails == [], (
         f"Duplicate seed emails found after re-run: {duplicate_emails!r}"
     )
@@ -59,22 +49,15 @@ def test_inactive_seed_user_has_active_false(postgres_connection):
 
     Prerequisite: baseline seed applied at least once before test.
     """
-    # Query the active flag for the inactive seed persona only.
-    with postgres_connection.cursor() as cur:
-        cur.execute(
-            "SELECT active FROM users WHERE email = %s",
-            (SEED_INACTIVE_USER["email"],),
-        )
-        row = cur.fetchone()
-
-    # Row must exist — seed created this user.
-    assert row is not None, (
-        f"No user row found for {SEED_INACTIVE_USER['email']!r}."
+    active = get_user_field_by_email(
+        postgres_connection, SEED_INACTIVE_USER["email"], "active"
     )
 
-    # inactive@demo.local must be stored with `active = false`.
-    assert row[0] is False, (
-        f"Expected active=False for {SEED_INACTIVE_USER['email']!r}, got {row[0]!r}."
+    assert active is not None, (
+        f"No user row found for {SEED_INACTIVE_USER['email']!r}."
+    )
+    assert active is False, (
+        f"Expected active=False for {SEED_INACTIVE_USER['email']!r}, got {active!r}."
     )
 
 
@@ -89,28 +72,15 @@ def test_seed_user_password_hash_is_bcrypt(postgres_connection, user, password_f
 
     Prerequisite: baseline seed applied at least once before test.
     """
-    # Read the stored hash for this seed email.
-    with postgres_connection.cursor() as cur:
-        cur.execute(
-            "SELECT password_hash FROM users WHERE email = %s",
-            (user["email"],),
-        )
-        row = cur.fetchone()
+    password_hash = get_user_field_by_email(
+        postgres_connection, user["email"], "password_hash"
+    )
 
-    # Row must exist — seed created this user.
-    assert row is not None, f"No user row found for {user['email']!r}."
-
-    password_hash = row[0]
-
-    # Hash must be present and non-empty.
+    assert password_hash is not None, f"No user row found for {user['email']!r}."
     assert password_hash, f"password_hash must not be empty for {user['email']!r}."
-
-    # bcrypt hashes start with $2b$ (or $2a$ / $2y$); plaintext would not.
     assert password_hash.startswith("$2b$"), (
         f"Expected bcrypt hash for {user['email']!r}, got {password_hash!r}."
     )
-
-    # Plaintext password must never appear in the hash column.
     assert password_for(user["key"]) not in password_hash, (
         f"password_hash looks like plaintext for {user['email']!r}."
     )
@@ -121,45 +91,27 @@ def test_seed_users_count_is_four(postgres_connection):
 
     Prerequisite: baseline seed applied at least once before test.
     """
-    # Collect all four canonical seed emails.
     seed_emails = tuple(user["email"] for user in SEED_USERS)
+    total_rows = count_users_with_emails(postgres_connection, seed_emails)
 
-    # Count rows matching any seed email.
-    with postgres_connection.cursor() as cur:
-        cur.execute(
-            "SELECT COUNT(*) FROM users WHERE email IN %s",
-            (seed_emails,),
-        )
-        total_rows = cur.fetchone()[0]
-
-    # Seed must create exactly four baseline users.
     assert total_rows == len(SEED_USERS), (
         f"Expected {len(SEED_USERS)} seed user rows, got {total_rows}."
     )
 
 
 def test_seed_rerun_does_not_change_row_count(
-    postgres_connection, require_infrastructure):
+    postgres_connection, require_infrastructure
+):
     """QA-108-5: Second seed run inserts zero additional seed user rows.
 
     Prerequisite: baseline seed applied at least once before test.
     Compares row count before and after a second `scripts.seed` run.
     """
-    # Same email set used across all SENT-108 integration tests.
     seed_emails = tuple(user["email"] for user in SEED_USERS)
-
-    # Repo root: tests/integration/infrastructure/test_seed_users.py -> four parents up.
     repo_root = Path(__file__).resolve().parent.parent.parent.parent
 
-    with postgres_connection.cursor() as cur:
-        # Snapshot row count before the second seed run.
-        cur.execute(
-            "SELECT COUNT(*) FROM users WHERE email IN %s",
-            (seed_emails,),
-        )
-        count_before = cur.fetchone()[0]
+    count_before = count_users_with_emails(postgres_connection, seed_emails)
 
-    # Run seed again (same command as run_seed_script fixture).
     result = subprocess.run(
         ["docker", "compose", "exec", "-T", "api", "python", "-m", "scripts.seed"],
         cwd=repo_root,
@@ -169,20 +121,12 @@ def test_seed_rerun_does_not_change_row_count(
         timeout=60,
     )
 
-    # Seed CLI must succeed on idempotent re-run.
     assert result.returncode == 0, (
         f"Seed script must exit 0. stderr={result.stderr!r}"
     )
 
-    with postgres_connection.cursor() as cur:
-        # Snapshot row count after the second seed run.
-        cur.execute(
-            "SELECT COUNT(*) FROM users WHERE email IN %s",
-            (seed_emails,),
-        )
-        count_after = cur.fetchone()[0]
+    count_after = count_users_with_emails(postgres_connection, seed_emails)
 
-    # Re-run must not insert any new seed user rows.
     assert count_after == count_before, (
         f"Seed re-run changed row count: before={count_before}, after={count_after}."
     )

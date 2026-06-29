@@ -13,6 +13,7 @@ from tests.conftest import (
     _redis_connect_kwargs,
 )
 from tests.constants import CLIENT_TIMEOUT_SEC
+from tests.support.db.inspector import PostgresInspector
 
 
 def _decode_jwt_payload(token: str) -> dict:
@@ -67,6 +68,12 @@ def postgres_connection(
     conn = psycopg2.connect(connect_timeout=CLIENT_TIMEOUT_SEC, **postgres_settings)
     yield conn
     conn.close()
+
+
+@pytest.fixture
+def db_inspector(postgres_connection) -> PostgresInspector:
+    """Schema introspection helper bound to the test's Postgres connection."""
+    return PostgresInspector(postgres_connection)
 
 
 @pytest.fixture(scope="function")
