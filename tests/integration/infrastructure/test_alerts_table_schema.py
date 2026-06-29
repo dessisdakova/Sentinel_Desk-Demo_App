@@ -237,6 +237,6 @@ def test_alembic_migration_is_at_head(postgres_connection):
         row = cur.fetchone()
 
     assert row is not None, "alembic_version table is empty — migrations not applied."
-    assert row[0] == expected_migration_revision, (
+    assert row[0] == EXPECTED_MIGRATION_REVISION, (
         f"Expected alembic head {expected_migration_revision}, got {row[0]!r}"
     )
