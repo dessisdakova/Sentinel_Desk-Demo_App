@@ -1,6 +1,7 @@
 import pytest
 
 from tests.constants import SEED_ADMIN_USER
+from tests.support.db.users import get_user_field_by_email
 
 pytestmark = [pytest.mark.integ, pytest.mark.reg]
 
@@ -13,10 +14,8 @@ def test_matches_user_id_to_admin_uuid(postgres_connection, admin_client, admin_
     assert response.status_code == 200
 
     admin_uuid_response = response.json()["user_id"]
-    with postgres_connection.cursor() as cur:
-        cur.execute(
-            "SELECT id FROM users WHERE email = %s", (SEED_ADMIN_USER["email"],)
-        )
-        admin_uuid_db = cur.fetchone()[0]
+    admin_uuid_db = get_user_field_by_email(
+        postgres_connection, SEED_ADMIN_USER["email"], "id"
+    )
 
     assert admin_uuid_response == str(admin_uuid_db)

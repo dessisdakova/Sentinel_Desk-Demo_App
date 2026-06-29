@@ -2,6 +2,7 @@ import pytest
 
 from tests.constants import SEED_ADMIN_USER, SEED_ANALYST_USER, SEED_LEAD_USER
 from tests.integration.conftest import _decode_jwt_payload
+from tests.support.db.users import get_user_email_by_id
 
 pytestmark = [pytest.mark.integ, pytest.mark.reg]
 
@@ -24,11 +25,9 @@ def test_login_token_sub_matches_db_user_email(
 
     payload = _decode_jwt_payload(response.json()["access_token"])
     user_id = payload["sub"]
-    with postgres_connection.cursor() as cur:
-        cur.execute("SELECT email FROM users WHERE id = %s", (user_id,))
-        row = cur.fetchone()
-
-    assert row is not None, f"No user row found for sub={user_id!r}."
-    assert row[0] == user["email"], (
-        f"DB email {row[0]!r} does not match login email {user['email']!r}."
+    db_email = get_user_email_by_id(postgres_connection, user_id)
+    
+    assert db_email is not None, f"No user row found for sub={user_id!r}."
+    assert db_email == user["email"], (
+        f"DB email {db_email} does not match login email {user['email']!r}."
     )
