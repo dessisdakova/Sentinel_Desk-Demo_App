@@ -4,12 +4,12 @@ End-to-end browser tests using Playwright. Full UI workflows using `page` fixtur
 
 ## Prerequisites
 
+Complete the one-time setup in [tests/README.md](../README.md#prerequisites). E2E additionally requires the React frontend on port 5173:
+
 ```powershell
-pip install -r requirements-test.txt
-playwright install chromium          # first time only — downloads Chromium
-docker compose up -d                 # API + DB + Redis
-docker compose up -d --build         # OR rebuild containers after code changes
-cd frontend && npm run dev           # Vite dev server on :5173 (browser tests)
+docker compose up -d --build         # frontend container (recommended)
+# OR
+cd frontend && npm run dev           # Vite dev server on :5173
 ```
 
 ## Running
@@ -48,9 +48,7 @@ playwright show-trace test-results/<test-name>/trace.zip
 
 The trace viewer replays the test step-by-step with screenshots, network calls, and DOM snapshots.
 
-### Allure reports
-
-When you run E2E tests with `--alluredir=allure-results`, failing tests automatically attach the Playwright **screenshot** and **trace** to the Allure report (see `conftest.py`). Use Allure for quick triage; use `playwright show-trace` for a full step-by-step replay.
+For Allure HTML reports (including auto-attached screenshot and trace on failure), see [Allure reports](../README.md#allure-reports) in `tests/README.md`.
 
 ## Key conventions
 

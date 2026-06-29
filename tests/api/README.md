@@ -4,13 +4,7 @@ HTTP contract tests — status codes, response bodies, and headers. No database 
 
 ## Prerequisites
 
-The FastAPI service must be running:
-
-```powershell
-docker compose up -d
-```
-
-Tests skip automatically if the API is not reachable.
+Requires a running API — see [tests/README.md](../README.md#prerequisites). Tests skip automatically if the API is not reachable.
 
 ## Running
 

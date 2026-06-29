@@ -4,13 +4,11 @@ Cross-layer tests that verify behaviour across the full Docker stack — databas
 
 ## Prerequisites
 
-The full Docker stack must be running. For database schema tests (SENT-103-QA), migrations must be applied. For seed tests (SENT-108-QA), baseline users must be seeded at least once:
+Requires the full Docker stack — see [tests/README.md](../README.md#prerequisites). Additionally, for schema tests (SENT-103-QA) apply migrations; for seed tests (SENT-108-QA) run the app seed script at least once:
 
 ```powershell
-docker compose up -d
 docker compose exec api alembic upgrade head
 docker compose exec api python -m scripts.seed
-docker compose ps       # confirm no "Exit" status
 ```
 
 Tests skip automatically if any required service is not reachable.

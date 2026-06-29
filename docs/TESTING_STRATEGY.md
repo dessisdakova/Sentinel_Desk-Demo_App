@@ -150,6 +150,8 @@ assert audit.action == "ALERT_ASSIGNED"
 | redis-py | Direct Redis checks in integration tests | Active |
 | python-dotenv | Load `.env` into `os.environ` before tests | Active |
 | ruff | Linting and formatting (replaces flake8 + isort + Black) | Active |
+| allure-pytest | Raw Allure result files during pytest; HTML via Docker scripts in `scripts/` | Active — see [tests/README.md](../tests/README.md#allure-reports) |
+| boto3 | Read seed credentials and JWT key from LocalStack Secrets Manager | Active |
 | Playwright + pytest-playwright | E2E browser automation; also used for API-level tests via `APIRequestContext` | From SENT-107-QA (bootstrap); POM polish in SENT-1003-QA. Install browsers: `playwright install chromium` |
 | pytest-asyncio | Async test support if async DB sessions are needed | Planned (E02+) |
 | freezegun | Freeze time for dashboard timezone bug (BUG-007) | Planned (E08-QA) |
@@ -168,6 +170,11 @@ tests/
 ├── constants.py             # Shared constants (timeouts, etc.)
 ├── data/                    # Static test data files (never credentials from .env)
 │   └── invalid_postgres.json
+├── environments/            # Per-target env files loaded by --env (default: local.env)
+├── secrets/                 # LocalStack Secrets Manager seed + provider (test harness only)
+│   ├── seed_data.json       # Seed user passwords + JWT signing key
+│   ├── provider.py          # get_user_secret(), get_jwt_secret()
+│   └── init/                # LocalStack ready.d hook — auto-seeds on compose up
 ├── api/                     # HTTP contract tests — no direct DB queries
 │   ├── conftest.py          # api_client, analyst_token, lead_token, admin_token, token (indirect)
 │   ├── constants.py         # SEED_USERS, SEED_INACTIVE_USER, SEED_PASSWORD, TOKEN_EXPIRES_IN, SPA_ORIGIN
@@ -334,8 +341,11 @@ def test_severity_filter_with_date_range_returns_only_critical(api_client):
 | MailHog UI | 8025 | Integration (email assertions) |
 | MailHog SMTP | 1025 | App only — not accessed directly by tests |
 | React frontend | 5173 | E2E only |
+| LocalStack (Secrets Manager) | 4566 | Token fixtures, login credentials — test harness only |
 | Mock SIEM | 8088 | Integration ingest tests (E02+) |
 | Threat Intel embed | 8090 | E2E iframe tests (E04-QA+) |
+
+**Operational commands** (pytest markers, Allure, LocalStack bootstrap): [tests/README.md](../tests/README.md).
 
 **Start all services:**
 
@@ -343,6 +353,8 @@ def test_severity_filter_with_date_range_returns_only_critical(api_client):
 docker compose up -d
 docker compose ps      # confirm no "Exit" status
 ```
+
+**Test credentials:** seed-user passwords and the JWT signing key for token fixtures are stored in LocalStack Secrets Manager (`tests/secrets/`), not in repo-root `.env`. Connection settings for the secrets provider live in `tests/environments/local.env`. The application itself reads `JWT_SECRET` from `.env` — keep the LocalStack JWT secret aligned with that value for `expired_token` tests to behave correctly.
 
 ---
 
